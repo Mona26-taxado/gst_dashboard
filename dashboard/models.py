@@ -102,6 +102,7 @@ class Service(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2)
     service_charge = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
     required_documents = models.TextField(blank=True, null=True)
+    billing_date = models.DateTimeField(auto_now_add=True)  # Ensure this field exists
 
     # Add the status field if it does not exist
     STATUS_CHOICES = [
@@ -198,7 +199,7 @@ class BillingDetails(models.Model):
     ref_no = models.CharField(max_length=255, unique=True)
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)  # Foreign Key to Customer
     service = models.ForeignKey(Service, on_delete=models.CASCADE)  # Automatically delete related records
-    billing_date = models.DateField(auto_now_add=True)
+    billing_date = models.DateTimeField(auto_now_add=True)  # Ensure this field is defined
     payment_mode = models.CharField(max_length=50, choices=[('Cash', 'Cash'), ('Online', 'Online')])
     payment_status = models.CharField(max_length=50, choices=[('Paid', 'Paid'), ('Unpaid', 'Unpaid')], default='Unpaid')
     id_proof = models.FileField(upload_to='id_proofs/', blank=True, null=True)
@@ -255,4 +256,23 @@ class Transaction(models.Model):
 
     def __str__(self):
         return f"{self.user.full_name} - {self.transaction_type} - {self.amount} - {self.balance_after}"
+
+
+
+
+
+
+User = get_user_model()
+
+class BankingPortalAccessRequest(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='access_requests')
+    is_active = models.BooleanField(default=False)
+    request_date = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {'Active' if self.is_active else 'Inactive'}"
+    
+
+
 

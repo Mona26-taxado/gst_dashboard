@@ -216,51 +216,32 @@ a.additional-ser {
                     <h4 class="card-title">Latest Services</h4>
                     <div class="table-responsive">
                       <table class="table table-striped">
-                          <thead>
-                              <tr>
-                                  <th>S. No.</th>
-                                  <th> Customer Name </th>
-                                  <th> Refrence Number </th>
-                                  <th> Service Name </th>
-                                  <th> Applied Date </th>
-                                  <th> Service Status </th>
-                              </tr>
-                          </thead>
-                          <tbody>
-                              {% for billing in billing_details %}
-                              <tr>
-                                  <td>{{ forloop.counter }}</td>
-                                  <td>{{ billing.customer.full_name }}</td>
-                                  <td>{{ billing.ref_no }}</td>
-                                  <td>{{ billing.service.service_name }}</td>
-                                  <td>{{ billing.billing_date }}</td>
-                                  <td>
-                                      <form method="POST" style="display: inline;">
-                                          {% csrf_token %}
-                                          <input type="hidden" name="billing_id" value="{{ billing.id }}">
-                                          <select name="service_status"
-                                                  class="status-dropdown {% if billing.service_status == 'Pending' %}pending{% elif billing.service_status == 'In Progress' %}in-progress{% elif billing.service_status == 'Complete' %}complete{% endif %}"
-                                                  onchange="this.form.submit()">
-                                              <option value="Pending" {% if billing.service_status == 'Pending' %}selected{% endif %}>
-                                                  Pending
-                                              </option>
-                                              <option value="In Progress" {% if billing.service_status == 'In Progress' %}selected{% endif %}>
-                                                  In Progress
-                                              </option>
-                                              <option value="Complete" {% if billing.service_status == 'Complete' %}selected{% endif %}>
-                                                  Complete
-                                              </option>
-                                          </select>
-                                      </form>
-                                  </td>
-                                  
-                              </tr>
-                              {% empty %}
-                              <tr>
-                                  <td colspan="7" class="text-center">No Billing Records Found</td>
-                              </tr>
-                              {% endfor %}
-                          </tbody>
+                        <thead>
+                          <tr>
+                            <th>S. No.</th>
+                            <th>Customer Name</th>
+                            <th>Reference Number</th>
+                            <th>Service Name</th>
+                            <th>Billing Date</th>
+                            <th>Service Status</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {% for billing in latest_service_billings %}
+                          <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ billing.customer_full_name }}</td> <!-- Replace 'customer_name' with your field -->
+                            <td>{{ billing.reference_number }}</td> <!-- Replace 'reference_number' with your field -->
+                            <td>{{ billing.service_name }}</td> <!-- Replace 'service_name' with your field -->
+                            <td>{{ billing.billing_date }}</td> <!-- Replace 'billing_date' with your field -->
+                            <td>{{ billing.status }}</td> <!-- Replace 'status' with your field -->
+                          </tr>
+                          {% empty %}
+                          <tr>
+                            <td colspan="6">No Service Billing Records Found</td>
+                          </tr>
+                          {% endfor %}
+                        </tbody>
                       </table>
                   </div>
                   </div>
