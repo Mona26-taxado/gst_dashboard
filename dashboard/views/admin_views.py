@@ -1,11 +1,12 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.admin.views.decorators import staff_member_required
 from django.http import HttpResponseForbidden
 from django.http import JsonResponse
 from django.contrib.auth import get_user_model
 from dashboard.forms import AddGSKForm
 from dashboard.forms import ServiceForm
-from dashboard.models import Service, Notification
+from dashboard.models import Service, Notification, BankingPortalAccessRequest
 from dashboard.models import CustomUser
 from django.core.paginator import Paginator
 from dashboard.utils import role_required
@@ -36,6 +37,7 @@ def admin_dashboard(request):
 @role_required(['admin'])
 def admin_dashboard(request):
     # Count all relevant GSK entries
+    
     total_bills = BillingDetails.objects.count()
     total_centers = CustomUser.objects.filter(role__in=['retailer', 'distributor', 'master_distributor']).count()
     total_services = Service.objects.count()
@@ -577,20 +579,28 @@ def admin_view_transactions(request):
 
 
 
-@user_passes_test(lambda u: u.is_superuser)  # Only admins can access
+@staff_member_required
 def manage_access_requests(request):
-    retailers = CustomUser.objects.filter(role='retailer', has_requested_access=True)
-    return render(request, 'admin_dashboard/manage_access_requests.html', {'retailers': retailers})
+    access_requests = BankingPortalAccessRequest.objects.all()
 
-@user_passes_test(lambda u: u.is_superuser)  # Only admins can access
-def toggle_access_status(request, retailer_id):
-    retailer = get_object_or_404(CustomUser, id=retailer_id, role='retailer')
-    
-    # Toggle access and reset the request
-    retailer.is_access_enabled = not retailer.is_access_enabled
-    retailer.has_requested_access = False
-    retailer.save()
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        request_id = request.POST.get('request_id')
+        access_request = get_object_or_404(BankingPortalAccessRequest, id=request_id)
 
-    status = "granted" if retailer.is_access_enabled else "revoked"
-    messages.success(request, f"Access for {retailer.full_name} has been {status}.")
-    return redirect('manage_access_requests')
+        if action == 'activate':
+            access_request.is_active = True
+            access_request.save()
+            messages.success(request, f"Access granted to {access_request.user.username}.")
+        elif action == 'deactivate':
+            access_request.is_active = False
+            access_request.save()
+            messages.warning(request, f"Access revoked for {access_request.user.username}.")
+
+        return redirect('manage_access_requests')
+
+    return render(request, 'admin_dashboard/manage_access_requests.html', {'access_requests': access_requests})
+
+
+
+

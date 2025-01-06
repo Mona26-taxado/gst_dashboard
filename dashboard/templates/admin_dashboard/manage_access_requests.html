@@ -15,29 +15,43 @@
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-striped table-bordered">
-                  <thead>
+              <table class="table table-striped table-bordered">
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th>Status</th>
+                    <th>Request Date</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for request in access_requests %}
                     <tr>
-                      <th>Name</th>
-                      <th>Email</th>
-                      <th>Requested Access</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {% for retailer in retailers %}
-                    <tr>
-                      <td>{{ retailer.full_name }}</td>
-                      <td>{{ retailer.email }}</td>
-                      <td>Requested</td>
+                      <td>{{ request.user.username }}</td>
                       <td>
-                        <a href="{% url 'toggle_access_status' retailer.id %}" class="btn btn-success">Approve</a>
-                        <a href="{% url 'toggle_access_status' retailer.id %}" class="btn btn-danger">Deny</a>
+                        {% if request.is_active %}
+                          Active
+                        {% else %}
+                          Inactive
+                        {% endif %}
+                      </td>
+                      <td>{{ request.request_date }}</td>
+                      <td>
+                        <form method="post">
+                          {% csrf_token %}
+                          <input type="hidden" name="request_id" value="{{ request.id }}">
+                          {% if request.is_active %}
+                            <button type="submit" name="action" value="deactivate" class="btn btn-warning">Deactivate</button>
+                          {% else %}
+                            <button type="submit" name="action" value="activate" class="btn btn-success">Activate</button>
+                          {% endif %}
+                        </form>
                       </td>
                     </tr>
-                    {% endfor %}
-                  </tbody>
-                  </table>
+                  {% endfor %}
+                </tbody>
+                
+              </table>
             </div>
         </div>
     </div>

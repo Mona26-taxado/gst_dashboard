@@ -18,6 +18,8 @@ from dashboard.models import CustomUser
 import qrcode
 from django.http import Http404
 import os
+from dashboard.models import BankingPortalAccessRequest
+
 
 
 
@@ -99,11 +101,19 @@ def add_customer(request):
     if request.method == 'POST':
         form = AddCustomerForm(request.POST)
         if form.is_valid():
-            form.save()
+            # Do not save to database yet; instead, create an object
+            customer = form.save(commit=False)
+            # Set the `created_by` field to the logged-in user
+            customer.created_by = request.user
+            # Now save the object to the database
+            customer.save()
             return redirect('view_customer')  # Redirect after successful save
     else:
         form = AddCustomerForm()
     return render(request, 'retailer_dashboard/add_customer.html', {'form': form})
+
+
+
 
 
 
@@ -393,3 +403,20 @@ def wallet_recharge_view(request):
 
 
 
+@login_required
+def banking_portal_request(request):
+    # Check if the user already has an active request
+    try:
+        access_request = BankingPortalAccessRequest.objects.get(user=request.user)
+        if access_request.is_active:
+            return redirect('https://taxado.finstore.app/')  # Redirect to banking portal if already active
+        else:
+            messages.info(request, "Your request is pending. Please wait for approval.")
+    except BankingPortalAccessRequest.DoesNotExist:
+        # Create a new request if none exists
+        if request.method == 'POST':
+            BankingPortalAccessRequest.objects.create(user=request.user)
+            messages.success(request, "Your request has been submitted successfully.")
+            return redirect('request_access')  # Redirect to the dashboard after request submission
+
+    return render(request, 'retailer_dashboard/request_access.html')

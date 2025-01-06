@@ -8,7 +8,7 @@ from django.contrib.auth import logout
 from dashboard.forms import UserUpdateForm
 
 
-def index(request):
+def login(request):
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
