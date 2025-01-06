@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% block content %}
+
+
+<style>
+    /* Card Customization */
+.card {
+    background-color: #1f1f1f; /* Dark background */
+    color: #ffffff;           /* White text */
+    border: 1px solid #333;   /* Subtle border */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
+}
+
+.card-header {
+    font-weight: bold;
+    font-size: 1.5rem;
+    background-color: #292b2c;
+    border-bottom: 1px solid #333;
+}
+
+/* Input Fields */
+.form-control {
+    background-color: #333333;
+    color: #ffffff;
+    border: 1px solid #555;
+}
+
+.form-control::placeholder {
+    color: #aaaaaa;
+}
+
+input.form-control.bg-dark.text-white {
+    width: 45%;
+}
+textarea.form-control.bg-dark.text-white {
+    width: 45%;
+}
+select.form-control.bg-dark.text-white {
+    width: 45%;
+}
+
+.form-control:focus {
+    border-color: #28a745; /* Highlight with green */
+    box-shadow: 0 0 5px rgba(40, 167, 69, 0.5);
+}
+
+/* Button Customization */
+.btn-success {
+    background-color: #28a745;
+    border: none;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+}
+
+</style>
+
+<div class="container mt-10">
+    <div class="cards">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2>{% if form.instance.pk %}Edit{% else %}Add{% endif %} Service</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Add Service</li>
+                </ol>
+            </nav>
+        </div>
+<div class="card-body">
+    <form method="POST" action="">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="serviceName">Service Name</label>
+            <input type="text" class="form-control bg-dark text-white" name="service_name" placeholder="Enter Service Name" required>
+        </div>
+
+        <div class="form-group">
+            <label for="price">Price</label>
+            <input type="number" class="form-control bg-dark text-white" name="price" placeholder="Enter Price" step="0.01" required>
+        </div>
+
+        <div class="form-group">
+            <label for="requiredDocuments">Required Documents</label>
+            <textarea class="form-control bg-dark text-white" name="required_documents" placeholder="Write required documents" rows="3"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="status">Status</label>
+            <select class="form-control bg-dark text-white" id="status" name="status" required>
+                <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+            </select>
+        </div>
+
+        <div class="text">
+            <button type="submit" class="btn btn-success px-5">Submit</button>
+        </div>
+    </form>
+</div>
+</div>
+</div>
+{% endblock %}

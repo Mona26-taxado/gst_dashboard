@@ -1,0 +1,250 @@
+{% extends 'base.html' %}
+{% load static %}
+
+<style>
+/* Enhancements for dark theme */
+.card {
+    background-color: #1e293b;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    background-color: #334155;
+    border-bottom: 1px solid #718096;
+}
+
+.card-title {
+    color: #e2e8f0;
+}
+
+.form-control {
+    background-color: #2d3748;
+    color: #e2e8f0;
+    border: 1px solid #4a5568;
+    border-radius: 6px;
+    padding: 0.75rem;
+}
+
+.form-control:focus {
+    background-color: #2d3748;
+    border-color: #63b3ed;
+    box-shadow: 0 0 0 0.2rem rgba(99, 179, 237, 0.25);
+}
+
+.btn-primary {
+    background-color: #2563eb;
+    border-color: #2563eb;
+    color: #fff;
+    padding: 0.5rem 1.25rem;
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #1d4ed8;
+}
+
+.breadcrumb-item a {
+    color: #63b3ed;
+    text-decoration: none;
+}
+
+.breadcrumb-item.active {
+    color: #a0aec0;
+}
+
+.card-header.text-white {
+    display: flex;
+    justify-content: space-between;
+}
+
+.container.mt-10 {
+    padding-top: 4rem;
+}
+</style>
+
+{% block title %}Add GSK{% endblock %}
+
+{% block content %}
+<div class="container mt-10">
+    <div class="cards">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 class="card-titles mb-2">Add GSK</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'view_gsk' %}">Manage GSK</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Add GSK</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{% url 'add_gsk' %}">
+                {% csrf_token %}
+                <div class="row">
+                    <!-- Full Name -->
+                    <div class="form-group col-md-6">
+                        <label for="full_name">Full Name</label>
+                        <input type="text" name="full_name" class="form-control" placeholder="Enter full name"  required>
+                        {% if form.full_name.errors %}
+                            <div class="text-danger">
+                                {{ form.full_name.errors|join:", " }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Gender -->
+                    <div class="form-group col-md-6">
+                        <label for="gender">Gender</label>
+                        <select class="form-control" name="gender" required>
+                            <option value="Male" {% if form.gender.value == "Male" %}selected{% endif %}>Male</option>
+                            <option value="Female" {% if form.gender.value == "Female" %}selected{% endif %}>Female</option>
+                        </select>
+                        {% if form.gender.errors %}
+                            <div class="text-danger">
+                                {{ form.gender.errors|join:", " }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Branch ID -->
+                    <div class="form-group col-md-6">
+                        <label for="branch_id">Branch ID (GSK01)</label>
+                        <input type="text" name="branch_id" class="form-control" placeholder="Enter branch ID"  required>
+                        {% if form.branch_id.errors %}
+                            <div class="text-danger">
+                                {{ form.branch_id.errors|join:", " }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+
+                    <!-- Mobile Number -->
+                    <div class="form-group col-md-6">
+                        <label for="mobile_number">Mobile</label>
+                        <input type="text" name="mobile_number" class="form-control" placeholder="Enter mobile_number number" required>
+                        {% if form.mobile_number.errors %}
+                            <div class="text-danger">
+                                {{ form.mobile_number.errors|join:", " }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- DOB -->
+                    <div class="form-group col-md-6">
+                        <label for="dob">DOB</label>
+                        <input type="date" name="dob" class="form-control" value="{{ form.dob.value }}" required>
+                        {% if form.dob.errors %}
+                            <div class="text-danger">
+                                {{ form.dob.errors|join:", " }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Address -->
+                    <div class="form-group col-md-6">
+                        <label for="address">Address</label>
+                        <input type="text" name="address" class="form-control" placeholder="Enter address" >
+                        {% if form.address.errors %}
+                            <div class="text-danger">
+                                {{ form.address.errors|join:", " }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- State -->
+                    <div class="form-group col-md-6">
+                        <label for="state">State</label>
+                        <input type="text" name="state" class="form-control" placeholder="Enter state" >
+                        {% if form.state.errors %}
+                            <div class="text-danger">
+                                {{ form.state.errors|join:", " }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- City -->
+                    <div class="form-group col-md-6">
+                        <label for="city">City</label>
+                        <input type="text" name="city" class="form-control" placeholder="Enter city" value="{{ form.city.value }}">
+                        {% if form.city.errors %}
+                            <div class="text-danger">
+                                {{ form.city.errors|join:", " }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Start Date -->
+                    <div class="form-group col-md-6">
+                        <label for="start_date">Start Date</label>
+                        <input type="date" name="start_date" class="form-control" value="{{ form.start_date.value }}" required>
+                        {% if form.start_date.errors %}
+                            <div class="text-danger">
+                                {{ form.start_date.errors|join:", " }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Email -->
+                    <div class="form-group col-md-6">
+                        <label for="email">Email</label>
+                        <input type="email" name="email" class="form-control" placeholder="Enter email"  required>
+                        {% if form.email.errors %}
+                            <div class="text-danger">
+                                {{ form.email.errors|join:", " }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Password -->
+                    <div class="form-group col-md-6">
+                        <label for="plain_text_password">Password</label>
+                        <input type="text" name="plain_text_password" class="form-control" placeholder="Enter password" required>
+                        {% if form.plain_text_password.errors %}
+                            <div class="text-danger">
+                                {{ form.plain_text_password.errors|join:", " }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Role -->
+                    <div class="form-group col-md-6">
+                        <label for="role">Branch Type</label>
+                        <select class="form-control" name="role" required>
+                            <option value="">-- Select Role --</option>
+                            <option value="retailer" {% if form.role.value == "retailer" %}selected{% endif %}>Retailer</option>
+                            <option value="distributor" {% if form.role.value == "distributor" %}selected{% endif %}>Distributor</option>
+                            <option value="master_distributor" {% if form.role.value == "master_distributor" %}selected{% endif %}>Master Distributor</option>
+                        </select>
+                        {% if form.role.errors %}
+                            <div class="text-danger">
+                                {{ form.role.errors|join:", " }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Referred By -->
+                    <div class="form-group col-md-6">
+                        <label for="referred_by">Referred By</label>
+                        <select class="form-control" name="referred_by">
+                            <option value="">Self</option>
+                            {% for distributor in distributors %}
+                                <option value="{{ distributor.id }}" {% if form.referred_by.value == distributor.id %}selected{% endif %}>
+                                    {{ distributor.username }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        {% if form.referred_by.errors %}
+                            <div class="text-danger">
+                                {{ form.referred_by.errors|join:", " }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary mt-3">Submit</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

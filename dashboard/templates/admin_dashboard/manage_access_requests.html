@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container mt-10">
+    <div class="cards">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 class="card-titles mb-2">View Billing</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">View Billing</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Requested Access</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for retailer in retailers %}
+                    <tr>
+                      <td>{{ retailer.full_name }}</td>
+                      <td>{{ retailer.email }}</td>
+                      <td>Requested</td>
+                      <td>
+                        <a href="{% url 'toggle_access_status' retailer.id %}" class="btn btn-success">Approve</a>
+                        <a href="{% url 'toggle_access_status' retailer.id %}" class="btn btn-danger">Deny</a>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                  </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

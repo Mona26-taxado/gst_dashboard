@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% block content %}
+
+
+<style>
+    
+    .breadcrumb-item a {
+        color: #63b3ed;
+        text-decoration: none;
+    }
+    
+    .breadcrumb-item.active {
+        color: #a0aec0;
+    }
+    .card-header.text-white {
+        display: flex;
+        justify-content: space-between;
+    }
+    
+    .mt-7, .my-5 {
+        margin-top: 5rem !important;
+    }
+    
+    button.btn.btn-primary {
+    margin-left: 15px;
+}
+.form-inline {
+  display: flex;
+  align-items: center;
+} 
+
+.pagination {
+    display: flex;
+    justify-content: end;
+    list-style: none;
+    margin-top: 20px;
+}
+
+.pagination .page-item {
+    margin: 0 5px;
+}
+
+    </style>
+
+
+<div class="container mt-7">
+    <div class="d-flex justify-content-between align-items-center">
+        <h2>View Services</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'add_service' %}">Add Service</a></li>
+                <li class="breadcrumb-item active" aria-current="page">View Service</li>
+            </ol>
+        </nav>
+    </div>
+    <form method="get" class="form-inline mb-3">
+        <input type="text" name="search" value="{{ search_query }}" class="form-control" placeholder="Search Services">
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+    {% if user.role == 'admin' %}
+<div class="d-flex justify-content-end mb-3">
+    <a href="{% url 'add_service' %}" class="btn btn-primary">Add Service</a>
+</div>
+{% endif %}
+<div class="table-responsive">
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>S No</th>
+                <th>Service Name</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for service in service_list %}
+                <tr>
+                    <td>{{ forloop.counter0|add:start_index }}</td>
+                    <td>{{ service.service_name }}</td>
+                    <td>{{ service.price }}</td>
+                    <td>{{ service.status }}</td>
+                    <td>
+                        {% if user.role == 'admin' %}
+                            <!-- Add edit/delete links -->
+                            <a href="{% url 'edit_service' service.id %}" class="btn btn-warning btn-sm" >Edit</a>
+                            <a href="{% url 'delete_service' service.id %}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this Service?');" >Delete</a>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5">No services found.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<nav>
+    <ul class="pagination">
+        <!-- Previous Page -->
+        {% if service_list.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ service_list.previous_page_number }}">Previous</a>
+        </li>
+        {% endif %}
+
+        <!-- Always Show First Page -->
+        <li class="page-item {% if service_list.number == 1 %}active{% endif %}">
+            <a class="page-link" href="?page=1">1</a>
+        </li>
+
+        <!-- Ellipsis Before Nearby Pages -->
+        {% if service_list.number > 3 %}
+        <li class="page-item disabled"><span class="page-link">...</span></li>
+        {% endif %}
+
+        <!-- Nearby Pages -->
+        {% for page_num in service_list.paginator.page_range %}
+            {% if page_num >= service_list.number|add:-1 and page_num <= service_list.number|add:1 %}
+                <li class="page-item {% if page_num == service_list.number %}active{% endif %}">
+                    <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+
+        <!-- Ellipsis After Nearby Pages -->
+        {% if service_list.number < service_list.paginator.num_pages|add:-2 %}
+        <li class="page-item disabled"><span class="page-link">...</span></li>
+        {% endif %}
+
+        <!-- Always Show Last Page -->
+        {% if service_list.number != service_list.paginator.num_pages %}
+        <li class="page-item {% if service_list.number == service_list.paginator.num_pages %}active{% endif %}">
+            <a class="page-link" href="?page={{ service_list.paginator.num_pages }}">{{ service_list.paginator.num_pages }}</a>
+        </li>
+        {% endif %}
+
+        <!-- Next Page -->
+        {% if service_list.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ service_list.next_page_number }}">Next</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+
+
+
+</div>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% if user.is_access_enabled %}
+<a href="{{ user.redirect_url }}" class="btn btn-success">
+    Go to Banking Portal
+</a>
+{% else %}
+<a href="{% url 'request_access' %}" class="btn btn-primary">
+    Request Access to Banking Portal
+</a>
+{% endif %}
+

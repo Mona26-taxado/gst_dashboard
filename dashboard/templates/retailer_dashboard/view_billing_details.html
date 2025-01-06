@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% block content %}
+
+
+
+<div class="container mt-10">
+    <div class="cards">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 class="card-titles mb-2">View Customer</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'retailer_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'add_customer' %}">Add Customer</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">View Customer</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <!-- To Details (Retailer Details) -->
+                <div class="col-md-4">
+                    <h5 class="text-primary"><strong>To</strong></h5>
+                    <p>Name: {{ retailer.full_name }}</p>
+                    <p>Email: {{ retailer.email }}</p>
+                    <p>Mobile: {{ retailer.profile.mobile_number }}</p> <!-- Assuming retailer has a profile model -->
+                </div>
+
+                <!-- For Details (Add Customer Details) -->
+                <div class="col-md-4">
+                    <h5 class="text-primary"><strong>For</strong></h5>
+                    <p>Name: {{ customer.full_name }}</p>
+                    <p>Email: {{ customer.email }}</p>
+                    <p>Mobile: {{ customer.mobile }}</p>
+                </div>
+
+                    <div class="col-md-4">
+                        <h5 class="text-primary">Service</h5>
+                        <p><strong>Service Name:</strong> {{ billing_details.service.service_name }}</p>
+                        <p><strong>Ref No:</strong> {{ billing_details.ref_no }}</p>
+                    </div>
+            </div>
+
+            <hr />
+
+            <!-- Service Details -->
+
+            <hr />
+
+            <!-- Documents Section -->
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header bg-info text-white">
+                            Aadhar Card
+                        </div>
+                        <div class="card-body text-center">
+                            {% if billing_details.id_proof %}
+    <a href="{{ billing_details.id_proof.url }}" class="btn btn-primary" download>Download</a>
+{% else %}
+    <span>No ID proof uploaded</span>
+{% endif %}
+
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header bg-info text-white">
+                            Address Proof
+                        </div>
+                        <div class="card-body text-center">
+                            {% if billing_details.address_proof %}
+    <a href="{{ billing_details.address_proof.url }}" class="btn btn-primary" download>Download</a>
+{% else %}
+    <span>No Address proof uploaded</span>
+{% endif %}
+
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header bg-info text-white">
+                            Photo
+                        </div>
+                        <div class="card-body text-center">
+                            {% if billing_details.photo %}
+                            <a href="{{ billing_details.photo.url }}" class="btn btn-primary" download>Download</a>
+                            {% else %}
+        <p>No photo available</p>
+    {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <hr />
+
+            <!-- Notes Section -->
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="text-primary">Service Note</h5>
+                    <textarea class="form-control" readonly>{{ billing_details.service_notes }}</textarea>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="text-primary">Staff Notes</h5>
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <textarea name="staff_notes" class="form-control" rows="3">{{ billing_details.staff_notes }}</textarea>
+                        <input type="file" name="additional_documents" class="form-control mt-2" />
+                        <button type="submit" class="btn btn-success mt-2">Update Staff Note</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+{% endblock %}

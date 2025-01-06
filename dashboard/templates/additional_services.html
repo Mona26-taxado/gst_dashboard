@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% block content %}
+
+<style>
+    
+    .breadcrumb-item a {
+        color: #63b3ed;
+        text-decoration: none;
+    }
+    
+    .breadcrumb-item.active {
+        color: #a0aec0;
+    }
+    .card-header.text-white {
+        display: flex;
+        justify-content: space-between;
+    }
+    
+    .mt-7, .my-5 {
+        margin-top: 5rem !important;
+    }
+    
+    </style>
+
+<div class="container mt-7">
+    <div class="d-flex justify-content-between align-items-center">
+        <h2 class="card-titles mb-2">Additional Services</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Additional Service</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="card-body">
+        <div class="row text-center">
+            <!-- Service 1 -->
+             
+            <div class="col-md-3 mb-4">
+                <a href="https://www.sarkariresult.com/">
+                <img src="{%static 'assets/images/online-pan-service-center.png'%}"  alt="GST Registration" class="img-fluid mb-2" style="height: 100px;">
+                </a>
+                <h5>PAN Card</h5>
+                
+            </div>
+            <!-- Service 2 -->
+            <div class="col-md-3 mb-4">
+                <a href="https://myaadhaar.uidai.gov.in/">
+                <img src="{%static 'assets/images/png-transparent-aadhaar-hd-logo-removebg-preview.png'%}" alt="Aadhaar Correction" class="img-fluid mb-2" style="height: 100px;">
+                </a>
+                <h5>Aadhar Correction</h5>
+            </div>
+            <!-- Service 3 -->
+            <div class="col-md-3 mb-4">
+                <a href="https://www.sarkariresult.com/">
+                <img src="{%static 'assets/images/810pBawV7xL.png'%}" alt="PAN Card" class="img-fluid mb-2" style="height: 100px;">
+                </a>
+                <h5>Sarkari Result</h5>
+            </div>
+            <!-- Service 4 -->
+            <div class="col-md-3 mb-4">
+                <a href="https://www.passportindia.gov.in/AppOnlineProject/welcomeLink">
+                <img src="{%static 'assets/images/cb0ecd7028b3497784160f2f764a0e47-removebg-preview.png'%}" alt="Ration Card" class="img-fluid mb-2" style="height: 100px;">
+                </a>
+                <h5>Passport</h5>
+            </div>
+        </div>
+    </div>
+    <div class="container mt-4">
+        <div class="row text-center">
+            <!-- Service 1 -->
+            <div class="col-md-3 mb-4">
+                <a href="https://voters.eci.gov.in/">
+                <img src="{%static 'assets/images/vh.png'%}" alt="GST Registration" class="img-fluid mb-2" style="height: 100px;">
+                </a>
+                <h5>Voter ID</h5>
+            </div>
+            <!-- Service 2 -->
+            <div class="col-md-3 mb-4">
+                <a href="https://parivahan.gov.in/parivahan/">
+                <img src="{%static 'assets/images/istockphoto-691286862-612x612-removebg-preview.png'%}" alt="Aadhaar Correction" class="img-fluid mb-2" style="height: 100px;">
+                </a>
+                <h5>Driving License</h5>
+            </div>
+            <!-- Service 3 -->
+            <div class="col-md-3 mb-4">
+                <a href="https://beneficiary.nha.gov.in/">
+                <img src="{%static 'assets/images/Ayushman_Bharat_logo.png'%}" alt="PAN Card" class="img-fluid mb-2" style="height: 100px;">
+                </a>
+                <h5>Ayuhsman Card</h5>
+            </div>
+            <!-- Service 4 -->
+            <div class="col-md-3 mb-4">
+                <a href="https://www.confirmtkt.com/">
+                <img src="{%static 'assets/images/unnamed-removebg-preview.png'%}" alt="Ration Card" class="img-fluid mb-2" style="height: 100px;">
+                </a>
+                <h5>IRCTC</h5>
+            </div>
+        </div>
+    </div>
+    
+</div>
+
+{% endblock %}

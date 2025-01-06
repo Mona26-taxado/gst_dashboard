@@ -1,0 +1,12 @@
+<div class="card p-3">
+    <h4>Notifications</h4>
+    {% for notification in notifications %}
+        <div class="alert alert-info">
+            <strong>{{ notification.title }}</strong>
+            <p>{{ notification.message }}</p>
+            <small>{{ notification.created_at }}</small>
+        </div>
+    {% empty %}
+        <p>No new notifications.</p>
+    {% endfor %}
+</div>

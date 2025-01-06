@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% block title %}Add Billing{% endblock %}
+{% block content %}
+
+<div class="container mt-10">
+
+    <div class="cards">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 class="card-titles mb-2">Add Billing</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'retailer_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Add Billing</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="card-body">
+            <!-- Messages -->
+{% if messages %}
+{% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">
+        {{ message }}
+    </div>
+{% endfor %}
+{% endif %}
+            <form action="{% url 'add_billing' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="row">
+                <!-- Date of Billing -->
+                <div class="form-group col-md-6">
+                    <label for="billing_date">Date of Billing</label>
+                    <input type="text" id="billing_date" name="billing_date" class="form-control" value="{{ today_date }}" readonly>
+                </div>
+
+                <!-- Reference Number -->
+                <div class="form-group col-md-6">
+                    <label for="ref_no">Ref No.</label>
+                    <input type="text" id="ref_no" name="ref_no" class="form-control" value="{{ ref_no }}" readonly>
+
+                </div>
+
+                <!-- Customer Dropdown -->
+                <div class="form-group col-md-6">
+                    <label for="customer">Customer *</label>
+    <select id="customer" name="customer" class="form-select form-control bg-dark text-white border-secondary" required>
+        <option value="" disabled selected>Select Customer</option>
+        {% for customer in customers %}
+        <option value="{{ customer.id }}">{{ customer.full_name }}</option>
+        {% endfor %}
+    </select>
+                </div>
+
+                <!-- Service Dropdown -->
+                <div class="form-group col-md-6">
+                    <label for="service">Service *</label>
+    <select id="service" name="service" class="form-select form-control bg-dark text-white border-secondary" required>
+        <option value="" disabled selected>Select Service</option>
+        {% for service in services %}
+        <option value="{{ service.id }}">{{ service.service_name }} - ₹{{ service.price }}</option>
+        {% endfor %}
+    </select>
+                </div>
+
+                <!-- Payment Mode -->
+                <div class="form-group col-md-6">
+                    <label for="payment_mode">Payment Mode *</label>
+                    <select id="payment_mode" name="payment_mode" class="form-control" required>
+                        <option value="Cash">Cash</option>
+                        <option value="Online">Online</option>
+                    </select>
+                </div>
+
+                <!-- Payment Status -->
+                <div class="form-group col-md-6">
+                    <label for="payment_status">Payment Status</label>
+                    <select id="payment_status" name="payment_status" class="form-control">
+                        <option value="Paid">Paid</option>
+                        <option value="Unpaid">Unpaid</option>
+                    </select>
+                </div>
+
+                <!-- File Upload Fields -->
+                <div class="form-group col-md-6">
+                    <label for="id_proof">ID Proof *</label>
+                    <input type="file" id="id_proof" name="id_proof" class="form-control" required>
+                </div>
+
+                <div class="form-group col-md-6">
+                    <label for="address_proof">Address Proof *</label>
+                    <input type="file" id="address_proof" name="address_proof" class="form-control" required>
+                </div>
+
+                <div class="form-group col-md-6">
+                    <label for="pan_card">PAN Card</label>
+                    <input type="text" id="pan_card" name="pan_card" class="form-control">
+                </div>
+
+                <div class="form-group col-md-6">
+                    <label for="banking">Banking</label>
+                    <input type="file" id="banking" name="banking" class="form-control">
+                </div>
+
+                <div class="form-group col-md-6">
+                    <label for="photo">Photo (Passport Size)</label>
+                    <input type="file" id="photo" name="photo" class="form-control">
+                </div>
+
+                <div class="form-group col-md-6">
+                    <label for="others">Other Documents</label>
+                    <input type="file" id="others" name="others" class="form-control">
+                </div>
+
+                <!-- Service Status -->
+                <div class="form-group col-md-6">
+                    <label for="service_status">Service Status</label>
+                    <input type="text" id="service_status" name="service_status" class="form-control" value="Pending" readonly>
+                </div>
+
+                <!-- Service Notes -->
+                <div class="form-group col-md-6">
+                    <label for="service_notes">Service Notes</label>
+                    <textarea id="service_notes" name="service_notes" class="form-control"></textarea>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="form-group mt-3">
+                <button type="submit"  class="btn btn-primary btn-block">Add Service Billing</button>
+                </div>
+            </div>
+            </form>
+        
+
+        </div>
+    </div>
+</div>
+
+
+
+{% endblock %}

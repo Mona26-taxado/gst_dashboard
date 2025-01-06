@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+
+<style>
+    /* Container Styles */
+    .qr-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background-color: #01050a; /* Blue background */
+        border-radius: 15px;
+        padding: 20px;
+        max-width: 400px;
+        margin: 20px auto;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        color: #ffffff;
+    }
+
+    .qr-title {
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        text-align: center;
+    }
+
+    /* QR Code Styles */
+    .qr-image img {
+        width: 100%;
+        max-width: 300px;
+        border-radius: 10px;
+        background-color: #ffffff;
+        padding: 10px;
+    }
+
+    /* Instructions and Logos */
+    .instructions {
+        margin-top: 15px;
+        font-size: 14px;
+        text-align: center;
+    }
+
+    .upi-logos {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .upi-logos img {
+        width: 40px;
+        height: 40px;
+    }
+
+    /* Button Styles */
+    .generate-btn {
+        margin-top: 20px;
+        padding: 10px 15px;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+        text-align: center;
+        transition: background-color 0.3s ease;
+    }
+
+    .generate-btn:hover {
+        background-color: #218838;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .qr-container {
+            width: 100%;
+            padding: 15px;
+        }
+
+        .qr-title {
+            font-size: 18px;
+        }
+
+        .upi-logos img {
+            width: 30px;
+            height: 30px;
+        }
+    }
+</style>
+
+<div class="container mt-10">
+    <div class="cards">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 class="card-titles mb-2">Recharge Your Wallet</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'retailer_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Wallet Recharge</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="qr-container">
+            <h2>{{ user_name }}</h2>
+    
+            <div class="qr-image">
+                <img src="/static/{{ qr_code }}" alt="QR Code" style="width: 300px; height: 300px;">
+            </div>
+    
+    
+            <!-- Add UPI logos -->
+            <div class="upi-logos">
+                <a href="#">
+                    <img src="{% static 'assets/images/google (1).svg' %}" alt="Google Pay">
+                </a>
+                <a href="#">
+                    <img src="{% static 'assets/images/paytm.svg' %}"  alt="Paytm">
+                </a>
+                <a href="#">
+                    <img src="{% static 'assets/images/phonepe.svg' %}" alt="PhonePe">
+                </a>
+                <a href="#">
+                    <img src="{% static 'assets/images/bhim.svg' %}"  alt="BHIM">
+                </a>
+            </div>
+    
+            <!-- Add a button to generate a new QR Code -->
+            <form method="GET" action="{% url 'qr_payment' user_id=user_id %}">
+                <button class="generate-btn">Generate New QR Code</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

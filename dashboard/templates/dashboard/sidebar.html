@@ -1,0 +1,375 @@
+{% load static %}
+
+
+<style>
+  a.logo.d-flex.align-items-center {
+    text-decoration: none;
+}
+</style>
+
+<!-- Retailer Menu -->
+<nav class="sidebar sidebar-offcanvas" id="sidebar">
+    <div class="sidebar-brand-wrapper d-none d-lg-flex align-items-center justify-content-center fixed-top">
+      <a href="#" class="logo d-flex align-items-center">
+        <img src="{% static 'assets/images/Sahaayata-pay-logo.png'%}" alt="logo-1" width="20%">
+        <span class="d-none d-lg-block"><span style="color:green;">GRAHAK</span> <br/>SAHAAYATA <br/><span style="color:orange;">KENDRA</span></span>
+      </a>
+    </div>
+    {% if user.role == 'admin' %}
+    <ul class="nav">
+      <li class="nav-item profile">
+        <div class="profile-desc">
+          <div class="profile-pic">
+            <div class="count-indicator">
+              <img class="img-xs rounded-circle " src="{% static 'assets/images/faces/9815472.png'%}" alt=" IMAGE-6">
+              <span class="count bg-success"></span>
+            </div>
+            <div class="profile-name">
+              <h5 class="mb-0 font-weight-normal">{{ user.full_name }}</h5>
+              <span>{{ user.role|default:"User" }}</span>
+            </div>
+          </div>
+          <a href="#" id="profile-dropdown" data-toggle="dropdown"><i class="mdi mdi-dots-vertical"></i>
+          <div class="dropdown-menu dropdown-menu-right sidebar-dropdown preview-list" aria-labelledby="profile-dropdown">
+            <a href="{% url 'account_settings' %}" class="dropdown-item preview-item">
+              <div class="preview-thumbnail">
+                <div class="preview-icon bg-dark rounded-circle">
+                  <i class="mdi mdi-settings text-primary"></i>
+                </div>
+              </div>
+              <div class="preview-item-content">
+                <p class="preview-subject ellipsis mb-1 text-small">Account settings</p>
+              </div>
+            </a>
+            <div class="dropdown-divider"></div>
+            <a href="{% url 'password_change' %}" class="dropdown-item preview-item">
+              <div class="preview-thumbnail">
+                <div class="preview-icon bg-dark rounded-circle">
+                  <i class="mdi mdi-onepassword  text-info"></i>
+                </div>
+              </div>
+              <div class="preview-item-content">
+                <p class="preview-subject ellipsis mb-1 text-small">Change Password</p>
+              </div>
+            </a>
+        <!-- Admin Menu -->
+
+            <div class="dropdown-divider"></div>
+            <a href="{% url 'update_pin' user.id %}" class="dropdown-item preview-item">
+              <div class="preview-thumbnail">
+                <div class="preview-icon bg-dark rounded-circle">
+                  <i class="mdi mdi-calendar-today text-success"></i>
+                </div>
+              </div>
+              <div class="preview-item-content">
+                <p class="preview-subject ellipsis mb-1 text-small">Update Pin</p>
+              </div>
+            </a>
+          </div>
+        </div>
+      </li>
+      <li class="nav-item nav-category">
+        <span class="nav-link">Navigation</span>
+      </li>
+      <li class="nav-item menu-items">
+        <a class="nav-link" href="{% url 'admin_dashboard' %}">
+          <span class="menu-icon">
+            <i class="mdi mdi-speedometer"></i>
+          </span>
+          <span class="menu-title">Dashboard</span>
+        </a>
+      </li>
+      <li class="nav-item menu-items">
+        <a class="nav-link" data-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
+          <span class="menu-icon">
+            <i class="mdi mdi-laptop"></i>
+          </span>
+          <span class="menu-title">Manage GSK</span>
+          <i class="menu-arrow"></i>
+        </a>
+        <div class="collapse" id="ui-basic">
+          <ul class="nav flex-column sub-menu">
+            <li class="nav-item"> <a class="nav-link" href="{% url 'add_gsk' %}">Add GSK</a></li>
+            <li class="nav-item"> <a class="nav-link" href="{% url 'view_gsk' %}">View GSK's</a></li>
+           
+          </ul>
+        </div>
+      </li>
+      <li class="nav-item menu-items">
+        <a class="nav-link" data-toggle="collapse" href="#ui-servi" aria-expanded="false" aria-controls="ui-servi">
+          <span class="menu-icon">
+            <i class="mdi mdi-chart-bar"></i>
+          </span>
+          <span class="menu-title">Manage Services</span>
+          <i class="menu-arrow"></i>
+        </a>
+        <div class="collapse" id="ui-servi">
+          <ul class="nav flex-column sub-menu">
+            <li class="nav-item"> <a class="nav-link" href="{% url 'add_service' %}">Add Service</a></li>
+            <li class="nav-item"> <a class="nav-link" href="{% url 'view_services' %}">View Services</a></li>
+          </ul>
+        </div>
+      </li>
+      <li class="nav-item menu-items">
+        <a class="nav-link" data-toggle="collapse" href="#ui-amoun" aria-expanded="false" aria-controls="ui-amoun">
+          <span class="menu-icon">
+            <i class="mdi mdi-table-large"></i>
+          </span>
+          <span class="menu-title">Manage Amount</span>
+          <i class="menu-arrow"></i>
+        </a>
+        <div class="collapse" id="ui-amoun">
+          <ul class="nav flex-column sub-menu">
+            
+            <li class="nav-item"> <a class="nav-link" href="{% url 'add_or_deduct_money' %}">Send Amount</a></li>
+        <li class="nav-item"> <a class="nav-link" href="{% url 'view_transactions' %}">View Transaction</a></li>
+          </ul>
+        </div>
+      </li>
+      <li class="nav-item menu-items">
+        <a class="nav-link" data-toggle="collapse" href="#ui-city" aria-expanded="false" aria-controls="ui-city">
+          <span class="menu-icon">
+            <i class="mdi mdi-contacts"></i>
+          </span>
+          <span class="menu-title">Manage State & City</span>
+          <i class="menu-arrow"></i>
+        </a>
+        <div class="collapse" id="ui-city">
+          <ul class="nav flex-column sub-menu">
+            <li class="nav-item"> <a class="nav-link" href="pages/forms/add_gsk.html">Add State</a></li>
+        <li class="nav-item"> <a class="nav-link" href="pages/forms/add_gsk.html">View State</a></li>
+        <li class="nav-item"> <a class="nav-link" href="pages/forms/add_gsk.html">Add City</a></li>
+        <li class="nav-item"> <a class="nav-link" href="pages/forms/add_gsk.html">View State</a></li>
+            
+          </ul>
+        </div>
+      </li>
+      <li class="nav-item menu-items">
+        <a class="nav-link" data-toggle="collapse" href="#auth" aria-expanded="false" aria-controls="auth">
+          <span class="menu-icon">
+            <i class="mdi mdi-security"></i>
+          </span>
+          <span class="menu-title">View Billing</span>
+          <i class="menu-arrow"></i>
+        </a>
+        <div class="collapse" id="auth">
+          <ul class="nav flex-column sub-menu">
+            <li class="nav-item"> <a class="nav-link" href="{% url 'service_billing' %}"> Service Billing </a></li>
+          </ul>
+        </div>
+      </li>
+      <li class="nav-item menu-items">
+        <a class="nav-link" href="#noti"  data-toggle="collapse" aria-expanded="false" aria-controls="noti">
+          <span class="menu-icon">
+            <i class="mdi mdi-bell"></i>
+          </span>
+          <span class="menu-title">Notification</span>
+          <i class="menu-arrow"></i>
+        </a>
+        <div class="collapse" id="noti">
+          <ul class="nav flex-column sub-menu">
+            <li class="nav-item"> <a class="nav-link" href="{% url 'send_notifications' %}"> Send Notifications </a></li>
+            <li class="nav-item"> <a class="nav-link" href="{% url 'manage_notifications' %}"> Manage Notifications </a></li>
+          </ul>
+        </div>
+      </li>
+      <li class="nav-item menu-items">
+        <a class="nav-link" data-toggle="collapse" href="#ui-kit" aria-expanded="false" aria-controls="ui-kit">
+          <span class="menu-icon">
+            <i class="mdi mdi-file-document-box"></i>
+          </span>
+          <span class="menu-title">Marketing Kit</span>
+          <i class="menu-arrow"></i>
+        </a>
+        <div class="collapse" id="ui-kit">
+          <ul class="nav flex-column sub-menu">
+            <li class="nav-item"> <a class="nav-link" href="pages/forms/add_gsk.html">Add RM</a></li>
+            
+          </ul>
+        </div>
+     
+  {% endif %}
+
+
+
+
+
+  {% if user.role == 'retailer' %}
+  <!-- Retailer Menu -->
+  <ul class="nav">
+    <li class="nav-item profile">
+      <div class="profile-desc">
+        <div class="profile-pic">
+          <div class="count-indicator">
+            <img class="img-xs rounded-circle " src="{% static 'assets/images/faces/9815472.png'%}" alt="">
+            <span class="count bg-success"></span>
+          </div>
+          <div class="profile-name">
+            <h5 class="mb-0 font-weight-normal">{{ user.full_name }}</h5>
+            <span>{{ user.role|default:"User" }}</span>
+          </div>
+        </div>
+        <a href="#" id="profile-dropdown" data-toggle="dropdown"><i class="mdi mdi-dots-vertical"></i></a>
+        <div class="dropdown-menu dropdown-menu-right sidebar-dropdown preview-list" aria-labelledby="profile-dropdown">
+          <a href="{% url 'account_settings' %}" class="dropdown-item preview-item">
+            <div class="preview-thumbnail">
+              <div class="preview-icon bg-dark rounded-circle">
+                <i class="mdi mdi-settings text-primary"></i>
+              </div>
+            </div>
+            <div class="preview-item-content">
+              <p class="preview-subject ellipsis mb-1 text-small">Account settings</p>
+            </div>
+          </a>
+          <div class="dropdown-divider"></div>
+          <a href="{% url 'password_change' %}" class="dropdown-item preview-item">
+            <div class="preview-thumbnail">
+              <div class="preview-icon bg-dark rounded-circle">
+                <i class="mdi mdi-onepassword  text-info"></i>
+              </div>
+            </div>
+            <div class="preview-item-content">
+              <p class="preview-subject ellipsis mb-1 text-small">Change Password</p>
+            </div>
+          </a>
+      <!-- Admin Menu -->
+
+        </div>
+      </div>
+    </li>
+    <li class="nav-item nav-category">
+      <span class="nav-link">Navigation</span>
+    </li>
+    <li class="nav-item menu-items">
+      <a class="nav-link" href="{% url 'retailer_dashboard' %}">
+        <span class="menu-icon">
+          <i class="mdi mdi-speedometer"></i>
+        </span>
+        <span class="menu-title">Dashboard</span>
+      </a>
+    </li>
+    <li class="nav-item menu-items">
+      <a class="nav-link" data-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
+        <span class="menu-icon">
+          <i class="mdi mdi-laptop"></i>
+        </span>
+        <span class="menu-title">Manage Customer</span>
+        <i class="menu-arrow"></i>
+      </a>
+      <div class="collapse" id="ui-basic">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item"> <a class="nav-link" href="{% url 'add_customer' %}">Add Customer</a></li>
+          <li class="nav-item"> <a class="nav-link" href="{% url 'view_customer' %}">View Customer</a></li>
+         
+        </ul>
+      </div>
+    </li>
+    <li class="nav-item menu-items">
+      <a class="nav-link" data-toggle="collapse" href="#ui-servi" aria-expanded="false" aria-controls="ui-servi">
+        <span class="menu-icon">
+          <i class="mdi mdi-chart-bar"></i>
+        </span>
+        <span class="menu-title">Manage Billing</span>
+        <i class="menu-arrow"></i>
+      </a>
+      <div class="collapse" id="ui-servi">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item"> <a class="nav-link" href="{% url 'add_billing' %}">Add Billing</a></li>
+          <li class="nav-item"> <a class="nav-link" href="{% url 'view_billing' %}">View Billing</a></li>
+        </ul>
+      </div>
+    </li>
+    <li class="nav-item menu-items">
+      <a class="nav-link" data-toggle="collapse" href="#ui-amoun" aria-expanded="false" aria-controls="ui-amoun">
+        <span class="menu-icon">
+          <i class="mdi mdi-table-large"></i>
+        </span>
+        <span class="menu-title">Manage Amount</span>
+        <i class="menu-arrow"></i>
+      </a>
+      <div class="collapse" id="ui-amoun">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item"> <a class="nav-link" href="{% url 'qr_payment' user_id=request.user.id %}">Recharge Wallet</a></li>
+      <li class="nav-item"> <a class="nav-link" href="{% url 'retailer_view_transactions' %}">View Transaction</a></li>
+        </ul>
+      </div>
+    </li>
+    <li class="nav-item menu-items">
+      <a class="nav-link" data-toggle="collapse" href="#ui-kit" aria-expanded="false" aria-controls="ui-kit">
+        <span class="menu-icon">
+          <i class="mdi mdi-file-document-box"></i>
+        </span>
+        <span class="menu-title">Marketing Kit</span>
+        <i class="menu-arrow"></i>
+      </a>
+      <div class="collapse" id="ui-kit">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item"> <a class="nav-link" href="pages/forms/add_gsk.html">Check Out</a></li>
+          
+        </ul>
+      </div>
+    <li class="nav-item menu-items">
+      <a class="nav-link" data-toggle="collapse" href="{% url 'pin_entry' %}" aria-expanded="false" aria-controls="auth">
+        <span class="menu-icon">
+          <i class="mdi mdi-security"></i>
+        </span>
+        <span class="menu-title">Additional Services</span>
+      </a>
+    </li>
+    <li class="nav-item menu-items">
+      <a class="nav-link" href="#noti"  data-toggle="collapse" aria-expanded="false" aria-controls="noti">
+        <span class="menu-icon">
+          <i class="mdi mdi-bell"></i>
+        </span>
+        <span class="menu-title">Equipment Store</span>
+      </a>
+    </li>
+  </ul>
+  {% endif %}
+
+
+
+
+
+
+
+  {% if user.role == 'distributor' %}
+  <!-- Distributor Menu -->
+  <li class="nav-item menu-items">
+      <a class="nav-link" href="{% url 'distributor_dashboard' %}">
+          <span class="menu-icon"><i class="mdi mdi-cube"></i></span>
+          <span class="menu-title">Distributor Dashboard</span>
+      </a>
+  </li>
+  <li class="nav-item menu-items">
+      <a class="nav-link" href="{% url 'send_notification' %}">
+          <span class="menu-icon"><i class="mdi mdi-bell"></i></span>
+          <span class="menu-title">Send Notifications</span>
+      </a>
+  </li>
+  {% endif %}
+
+
+
+
+
+
+  {% if user.role == 'master_distributor' %}
+  <!-- Master Distributor Menu -->
+  <li class="nav-item menu-items">
+      <a class="nav-link" href="{% url 'master_distributor_dashboard' %}">
+          <span class="menu-icon"><i class="mdi mdi-trophy"></i></span>
+          <span class="menu-title">Master Distributor Dashboard</span>
+      </a>
+  </li>
+  <li class="nav-item menu-items">
+      <a class="nav-link" href="{% url 'view_service' %}">
+          <span class="menu-icon"><i class="mdi mdi-chart-bar"></i></span>
+          <span class="menu-title">View All Services</span>
+      </a>
+  </li>
+  {% endif %}
+
+
+</ul>
+</nav>

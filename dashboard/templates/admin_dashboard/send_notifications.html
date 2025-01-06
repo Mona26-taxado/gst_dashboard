@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+    
+    .breadcrumb-item a {
+        color: #63b3ed;
+        text-decoration: none;
+    }
+    
+    .breadcrumb-item.active {
+        color: #a0aec0;
+    }
+    .card-header.text-white {
+        display: flex;
+        justify-content: space-between;
+    }
+    
+    .mt-7, .my-5 {
+        margin-top: 5rem !important;
+    }
+    
+    </style>
+
+<div class="container mt-7">
+    <div class="d-flex justify-content-between align-items-center">
+        <h2 class="card-titles mb-2">Send Notification</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Send Notification</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="card" style="background-color: #1e1e2d; border-radius: 10px; padding: 20px; color: white;">
+        <form method="POST">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="title">Title</label>
+                <input type="text" class="form-control" id="title" name="title" required>
+            </div>
+            <div class="mb-3">
+                <label for="message">Message</label>
+                <textarea class="form-control" id="message" name="message" rows="3" required></textarea>
+            </div>
+            <div class="mb-3">
+                <label for="target_type">Target Type</label>
+                <select class="form-control" id="target_type" name="target_type" required>
+                    <option value="">-- Select Target Type --</option>
+                    <option value="individual">Individual</option>
+                    <option value="group">Group</option>
+                </select>
+            </div>
+            <div class="mb-3" id="individual_user">
+                <label for="target_user">Select User</label>
+                <select class="form-control" id="target_user" name="target_user">
+                    <option value="">-- Select User --</option>
+                    {% for user in users %}
+                    <option value="{{ user.id }}">{{ user.username }} ({{ user.role }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3" id="group_user">
+                <label for="target_group">Select Group</label>
+                <select class="form-control" id="target_group" name="target_group">
+                    <option value="">-- Select Group --</option>
+                    <option value="retailer">Retailer</option>
+                    <option value="distributor">Distributor</option>
+                    <option value="master_distributor">Master Distributor</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Send Notification</button>
+        </form>
+    </div>
+    
+    
+</div>
+
+<script>
+    const targetType = document.getElementById('target_type');
+    const individualUser = document.getElementById('individual_user');
+    const groupUser = document.getElementById('group_user');
+
+    targetType.addEventListener('change', function () {
+        if (this.value === 'individual') {
+            individualUser.style.display = 'block';
+            groupUser.style.display = 'none';
+        } else if (this.value === 'group') {
+            individualUser.style.display = 'none';
+            groupUser.style.display = 'block';
+        } else {
+            individualUser.style.display = 'none';
+            groupUser.style.display = 'none';
+        }
+    });
+
+    targetType.dispatchEvent(new Event('change'));
+</script>
+{% endblock %}

@@ -1,0 +1,25 @@
+/* Ensure main panel takes full viewport height */
+.main-panel {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* Full viewport height */
+  }
+  
+  /* Content wrapper grows to fill available space */
+  .content-wrapper {
+    flex: 1; /* Occupy remaining space */
+    padding: 20px; /* Add padding to avoid edge stickiness */
+    background-color: #212730; /* Background matching theme */
+  }
+  
+  /* Footer alignment */
+  .footer {
+    background-color: #1e293b; /* Footer background */
+    color: #e5e7eb; /* Text color */
+    text-align: center; /* Center-align text */
+    padding: 15px;
+    border-top: 1px solid #4a5568;
+    flex-shrink: 0; /* Prevent footer from collapsing */
+  }
+  
+  

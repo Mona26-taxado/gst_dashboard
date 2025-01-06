@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% block content %}
+
+
+<div class="container mt-10">
+    <div class="cards">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 class="card-titles mb-2">View Billing</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">View Billing</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <!-- To Details (Retailer Details) -->
+                <div class="col-md-4">
+                    <h5 class="text-primary"><strong>To</strong></h5>
+                    <p>Name: {{ billing_details.retailer.full_name}}</p>
+                    <p>Email: {{ billing_details.retailer.email }}</p>
+                    <p>Mobile: {{ billing_details.retailer.mobile }}</p> <!-- Assuming retailer has a profile model -->
+                </div>
+
+                <!-- For Details (Add Customer Details) -->
+                <div class="col-md-4">
+                    <h5 class="text-primary"><strong>For</strong></h5>
+                    <p>Name: {{ billing_details.customer.full_name }}</p>
+                    <p>Email: {{ billing_details.customer.email }}</p>
+                    <p>Mobile: {{ billing_details.customer.mobile }}</p>
+                </div>
+
+                    <div class="col-md-4">
+                        <h5 class="text-primary">Service</h5>
+                        <p><strong>Service Name:</strong> {{ billing_details.service }}</p>
+                        <p><strong>Ref No:</strong> {{ billing_details.ref_no }}</p>
+                        <p><strong>Billing Date:</strong> {{ billing_details.billing_date }}</p>
+                    </div>
+            </div>
+
+            <hr />
+
+            <!-- Service Details -->
+
+            <hr />
+
+            <!-- Documents Section -->
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header bg-info text-white">
+                            Aadhar Card
+                        </div>
+                        <div class="card-body text-center">
+                            {% if billing_details.id_proof %}
+                            <a href="{{ billing_details.id_proof.url }}" class="btn btn-primary" download>Download</a>
+                            {% else %}
+                            <p>No document available</p>
+                        {% endif %}                      
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header bg-info text-white">
+                            Address Proof
+                        </div>
+                        <div class="card-body text-center">
+                            {% if billing_details.address_proof %}
+                            <a href="{{ billing_details.address_proof.url }}" class="btn btn-primary" download>Download</a>
+                            {% else %}
+                            <p>No address proof available</p>
+                        {% endif %}                        
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header bg-info text-white">
+                            Photo
+                        </div>
+                        <div class="card-body text-center">
+                            {% if billing_details.photo %}
+                            <a href="{{ billing_details.photo.url }}" class="btn btn-primary" download>Download</a>
+                            {% else %}
+                            <p>No photo available</p>
+                        {% endif %} 
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <hr />
+
+            <!-- Notes Section -->
+            <div class="text-center mt-4">
+                <a href="{% url 'service_billing' %}" class="btn btn-secondary">Back</a>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+{% endblock %}
