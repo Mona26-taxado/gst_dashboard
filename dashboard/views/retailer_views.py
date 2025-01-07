@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from dashboard.utils import role_required, generate_qr
 from django.contrib.auth.decorators import login_required
 from dashboard.models import Notification
-from dashboard.models import Customer
+from dashboard.models import Customer, CustomUser
 from django.contrib import messages
 from dashboard.models import Service, BillingDetails,Transaction, Wallet, Transaction
 from dashboard.forms import AddCustomerForm, BillingDetailsForm
@@ -17,6 +17,7 @@ from django.http import HttpResponseForbidden, HttpResponse
 from dashboard.models import CustomUser
 import qrcode
 from django.http import Http404
+import logging
 import os
 from dashboard.models import BankingPortalAccessRequest
 
@@ -36,6 +37,11 @@ def pin_entry(request):
     View for managing PIN entry.
     """
     return render(request, 'pin_entry.html')
+
+
+
+
+
 
 
 
@@ -107,6 +113,7 @@ def add_customer(request):
             customer.created_by = request.user
             # Now save the object to the database
             customer.save()
+            messages.success(request, "Customer added successfully!")
             return redirect('view_customer')  # Redirect after successful save
     else:
         form = AddCustomerForm()
@@ -118,19 +125,26 @@ def add_customer(request):
 
 
 @role_required(['retailer'])
+@login_required
 def view_customer(request):
-    customers = Customer.objects.all().order_by('id')  # Adjust query based on your logic
-    paginator = Paginator(customers, 7)  # Show 7 customers per page
-    
+    # Ensure the logged-in user is a retailer
+    if request.user.role != 'retailer':
+        return HttpResponseForbidden("You are not authorized to view this page.")
+
+    # Fetch only the customers created by the logged-in retailer
+    customers = Customer.objects.filter(created_by=request.user).order_by('id')
+
+    # Pagination (7 customers per page)
+    paginator = Paginator(customers, 7)
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
-    
+
     # Calculate the global serial number for the current page
     start_index = page_obj.start_index()
-    
+
     return render(request, 'retailer_dashboard/view_customer.html', {
         'page_obj': page_obj,
-        'start_index': start_index,  # Send the starting index to the template
+        'start_index': start_index,
     })
 
 
@@ -263,19 +277,22 @@ def add_billing(request):
 
 # View Billing Details
 @role_required(['retailer'])
+@login_required
 def view_billing(request):
-    billings = BillingDetails.objects.all().order_by('id')  # Adjust query as needed
-    paginator = Paginator(billings, 7)  # Show 7 billings per page
-    
+    # Ensure the logged-in user is a retailer
+    if request.user.role != 'retailer':
+        return HttpResponseForbidden("You are not authorized to view this page.")
+
+    # Fetch only the billing records created by the logged-in retailer
+    billing_details = BillingDetails.objects.filter(user=request.user).order_by('-billing_date')
+
+    # Pagination (e.g., 10 billing records per page)
+    paginator = Paginator(billing_details, 10)
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
-    
-    # Calculate the global serial number for the current page
-    start_index = page_obj.start_index()
-    
+
     return render(request, 'retailer_dashboard/view_billing.html', {
         'page_obj': page_obj,
-        'start_index': start_index,  # Send the starting index to the template
     })
 
 

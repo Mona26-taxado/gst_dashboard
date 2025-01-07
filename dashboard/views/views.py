@@ -8,20 +8,31 @@ from django.contrib.auth import logout
 from dashboard.forms import UserUpdateForm
 
 
-def login(request):
+
+
+def login_view(request):
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)
-            return redirect('dashboard')  # Redirect to dashboard after login
-        else:
-            messages.error(request, 'Invalid username or password')
-    return render(request, 'login.html')  # Render the login.html template
 
-def dashboard(request):
-    return render(request, 'dashboard.html')  # Render your dashboard view
+        # Debugging: Log the inputs
+        print(f"Attempting login: Username={username}, Password={password}")
+
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            if user.is_active:
+                login(request, user)
+                print(f"User {username} logged in successfully.")
+                return redirect('dashboard')  # Adjust this redirect as per your app
+            else:
+                print(f"User {username} is inactive.")
+                messages.error(request, "Your account is inactive.")
+        else:
+            print(f"Invalid login for Username={username}")
+            messages.error(request, "Invalid username or password.")
+
+    return render(request, 'login.html')
 
 
 

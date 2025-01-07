@@ -21,6 +21,11 @@ from django.dispatch import receiver
 from decimal import Decimal
 from django.db.models import F, Q
 from django.db.models.signals import pre_delete
+from django.db import IntegrityError
+from django.contrib.auth.hashers import make_password
+
+
+
 
 
 @role_required(['admin'])
@@ -42,6 +47,14 @@ def admin_dashboard(request):
     total_centers = CustomUser.objects.filter(role__in=['retailer', 'distributor', 'master_distributor']).count()
     total_services = Service.objects.count()
     # Add more stats as needed
+
+# Data for the graph
+    doughnut_data = {
+        'total_centers': total_centers,
+        'total_bills': total_bills,
+        'total_services': total_services,
+    }
+
     context = {
         'total_bills': total_bills,
         'total_centers': total_centers,
@@ -57,7 +70,7 @@ def admin_dashboard(request):
 @login_required
 @role_required(['admin'])
 def add_gsk(request):
-    distributors = CustomUser.objects.filter(role__in=['distributor', 'master_distributor'])
+    distributors = CustomUser.objects.filter(role__in=['distributor', 'master_distributor'], is_active=True)
 
     if request.method == 'POST':
         form = AddGSKForm(request.POST)
@@ -68,6 +81,15 @@ def add_gsk(request):
                     referred_by = CustomUser.objects.get(id=referred_by_id)
                     form.instance.referred_by = referred_by
 
+
+                form.instance.is_active = True
+
+                # Ensure password is hashed and user is active
+                raw_password = form.cleaned_data.get('password')
+                form.instance.password = make_password(raw_password)
+                form.instance.is_active = True  # Set user as active
+
+                # Save the user
                 form.save()
                 messages.success(request, "GSK user added successfully.")
                 return redirect('view_gsk')
@@ -81,7 +103,6 @@ def add_gsk(request):
         form = AddGSKForm()
 
     return render(request, 'admin_dashboard/add_gsk.html', {'form': form, 'distributors': distributors})
-
 
 
 #Pagination helps split large datasets into smaller, manageable chunks. Django’s Paginator makes this easy.
