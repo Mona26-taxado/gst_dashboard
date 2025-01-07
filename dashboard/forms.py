@@ -17,17 +17,17 @@ class AddGSKForm(forms.ModelForm):
 
     class Meta:
         model = CustomUser
-        fields = ['full_name', 'email', 'plain_text_password', 'role', 'branch_id', 'gender', 'dob',
+        fields = ['full_name', 'email', 'role', 'branch_id', 'gender', 'dob',
                   'address', 'state', 'city', 'start_date', 'referred_by', 'mobile_number']
 
     def save(self, commit=True):
         user = super().save(commit=False)
-        # Only update the password if a new one is provided
         if self.cleaned_data['password']:
-            user.set_password(self.cleaned_data['password'])
+            user.set_password(self.cleaned_data['password'])  # Hash the password here
         if commit:
             user.save()
         return user
+
 
 
 

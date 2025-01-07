@@ -32,7 +32,6 @@ class CustomUser(AbstractUser):
     profile_photo = models.ImageField(upload_to='profile_photos/', null=True, blank=True)
     mobile_number = models.CharField(max_length=15, null=True, blank=True)
     pin = models.CharField(max_length=4, blank=True, null=True, verbose_name="Security PIN")
-    plain_text_password = models.CharField(max_length=128, blank=True, null=True)  # Temporary field
     full_name = models.CharField(max_length=255, blank=False, null=False)
     address = models.TextField(null=True, blank=True)
     state = models.CharField(max_length=100, null=True, blank=True)
@@ -61,13 +60,21 @@ class CustomUser(AbstractUser):
     wallet_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ['username']
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)  # Save the user first
     # Ensure the user has a wallet
         if not hasattr(self, 'wallet'):
            Wallet.objects.create(user=self)
+
+    def save(self, *args, **kwargs):
+    # Only hash the password if it's not already hashed
+       if self.pk is None or not self.password.startswith('pbkdf2_'):  # Check if the password is hashed
+          self.set_password(self.password)
+       super().save(*args, **kwargs)
+
+
 
 
     def __str__(self):
@@ -155,7 +162,7 @@ class Notification(models.Model):
 
 
 
-
+User = get_user_model()
 class Customer(models.Model):
 
     full_name = models.CharField(max_length=255, default="Unknown")
@@ -168,7 +175,8 @@ class Customer(models.Model):
     city = models.CharField(max_length=100)
     gender = models.CharField(max_length=10, choices=[('Male', 'Male'), ('Female', 'Female'), ('Other', 'Other')])
     pin_code = models.CharField(max_length=6, null=True, blank=True)
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="customers")  # Fix here
+    created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="customers")
+
 
 
 

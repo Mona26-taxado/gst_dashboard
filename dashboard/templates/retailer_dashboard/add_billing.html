@@ -53,8 +53,8 @@
                 <!-- Service Dropdown -->
                 <div class="form-group col-md-6">
                     <label for="service">Service *</label>
-    <select id="service" name="service" class="form-select form-control bg-dark text-white border-secondary" required>
-        <option value="" disabled selected>Select Service</option>
+    <select id="service" name="service" class="form-select form-control bg-dark text-white border-secondary select2" required>
+        <option value="">Select Service</option>
         {% for service in services %}
         <option value="{{ service.id }}">{{ service.service_name }} - ₹{{ service.price }}</option>
         {% endfor %}

@@ -52,6 +52,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'dashboard.middleware.AdminOnlyMiddleware',
     
+    
 ]
 
 
