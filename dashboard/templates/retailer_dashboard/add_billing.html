@@ -1,6 +1,17 @@
 {% extends 'base.html' %}
-{% block title %}Add Billing{% endblock %}
 {% block content %}
+
+
+
+<style>
+    .alert {
+    position: relative;
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 1rem;
+    border: 3px solid #a80a0a;
+    border-radius: 0.25rem;
+}
+</style>
 
 <div class="container mt-10">
 
@@ -16,13 +27,14 @@
         </div>
         <div class="card-body">
             <!-- Messages -->
-{% if messages %}
-{% for message in messages %}
-    <div class="alert alert-{{ message.tags }}">
-        {{ message }}
-    </div>
-{% endfor %}
-{% endif %}
+            {% if messages %}
+            <div>
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
             <form action="{% url 'add_billing' %}" method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="row">

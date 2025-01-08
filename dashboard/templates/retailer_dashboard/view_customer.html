@@ -60,7 +60,7 @@
                 <tbody>
                     {% for customer in page_obj %}
                     <tr>
-                        <td>{{ start_index|add:forloop.counter0 }}</td>
+                        <td>{{ forloop.counter }}</td>
                         <td>{{ customer.full_name }}</td>
                         <td>{{ customer.email }}</td>
                         <td>{{ customer.mobile }}</td>

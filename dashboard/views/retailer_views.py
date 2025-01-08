@@ -76,25 +76,31 @@ def retailer_dashboard(request):
 
 @role_required(['retailer', 'distributor', 'master_distributor'])
 def view_services(request):
-    # Fetch only active services
-    services = Service.objects.filter(status='active').values('service_name', 'price', 'status')
-    paginator = Paginator(services, 10)  # Show 7 services per page
+    # Get the search query from the request
+    search_query = request.GET.get('search', '')
 
+    # Filter services based on the search query and active status, and sort alphabetically (A to Z)
+    if search_query:
+        services = Service.objects.filter(service_name__icontains=search_query, status='active').order_by('service_name')
+    else:
+        services = Service.objects.filter(status='active').order_by('service_name')
+
+    # Pagination
+    paginator = Paginator(services, 10)  # Show 10 services per page
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
 
     # Calculate the global serial number for the current page
     start_index = page_obj.start_index()
 
-    # Debugging
-    print("DEBUG: Retailer Services ->", list(services))
-
     context = {
-        'services': services,
+        'services': page_obj,  # Pass only the paginated services
         'page_obj': page_obj,
         'start_index': start_index,
+        'search_query': search_query,  # Pass the search query to retain it in the search bar
     }
     return render(request, 'retailer_dashboard/view_services.html', context)
+
 
 
 
@@ -132,7 +138,7 @@ def view_customer(request):
         return HttpResponseForbidden("You are not authorized to view this page.")
 
     # Fetch only the customers created by the logged-in retailer
-    customers = Customer.objects.filter(created_by=request.user).order_by('id')
+    customers = Customer.objects.filter(created_by=request.user).order_by('-created_at')  # Sort by newest first
 
     # Pagination (7 customers per page)
     paginator = Paginator(customers, 10)
@@ -208,7 +214,7 @@ def delete_customer(request, customer_id):
 
 
 
-
+@role_required(['retailer'])
 def add_billing(request):
     if request.method == 'POST':
         # Fetch the logged-in user's wallet
@@ -222,9 +228,19 @@ def add_billing(request):
         service_price = service.price
 
         # Check if the wallet has sufficient balance
+        # Check if the wallet has sufficient balance for this service
         if wallet.balance < service_price:
-            # Show an error message if balance is insufficient
-            return JsonResponse({"error": "Insufficient balance to add billing for this service"}, status=400)
+            messages.error(request, "Insufficient balance to add billing for this service. Please recharge your wallet.")
+            customers = Customer.objects.all()  # Adjust filter for retailers
+            services = Service.objects.filter(status='active')
+            return render(request, 'retailer_dashboard/add_billing.html', {
+                'customers': customers,
+                'services': services,
+            })
+
+        if wallet.balance <= 0:  # Or set a minimum balance threshold if needed
+            messages.error(request, "You do not have sufficient balance to add billing. Please recharge your wallet.")
+            return redirect('retailer_dashboard')  # Redirect to the retailer's dashboard or relevant page
 
         # Deduct the service price from the wallet
         wallet.balance -= service_price
@@ -292,7 +308,7 @@ def view_billing(request):
         return HttpResponseForbidden("You are not authorized to view this page.")
 
     # Fetch only the billing records created by the logged-in retailer
-    billing_details = BillingDetails.objects.filter(user=request.user).order_by('-billing_date')
+    billing_details = BillingDetails.objects.filter(user=request.user).order_by('-billing_date')  # Sort by newest first
 
     # Pagination (e.g., 10 billing records per page)
     paginator = Paginator(billing_details, 10)

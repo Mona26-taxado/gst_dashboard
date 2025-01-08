@@ -126,7 +126,7 @@
         }
       }
       var transactionhistoryChartCanvas = $("#transaction-history").get(0).getContext("2d");
-      var transactionhistoryChart = new Chart(transactionhistoryChartCanvas, {
+      var transactionhistoryChartCanvas = new Chart(transactionhistoryChartCanvas, {
         type: 'doughnut',
         data: areaData,
         options: areaOptions,
@@ -196,7 +196,7 @@
         }
       }
       var transactionhistoryChartCanvas = $("#transaction-history-arabic").get(0).getContext("2d");
-      var transactionhistoryChart = new Chart(transactionhistoryChartCanvas, {
+      var transactionhistoryChartCanvas = new Chart(transactionhistoryChartCanvas, {
         type: 'doughnut',
         data: areaData,
         options: areaOptions,
@@ -296,6 +296,67 @@ function drawStuff() {
 
   var chart = new google.charts.Bar(document.getElementById('Bar-chart'));
   chart.draw(data, options);
+
+
+// Doughnut Chart Configuration
+if (document.getElementById("doughnutChart")) {
+  try {
+      // Ensure variables are available
+      if (typeof total_centers !== 'undefined' && typeof total_bills !== 'undefined' && typeof total_services !== 'undefined') {
+          console.log("Doughnut Chart Data:", total_centers, total_bills, total_services);
+
+          var doughnutChartCanvas = document.getElementById("doughnutChart").getContext("2d");
+          var areaData = {
+              labels: ["Total GSK", "Total Billing", "Total Services"],
+              datasets: [{
+                  data: [total_centers, total_bills, total_services], // Use variables from Django
+                  backgroundColor: ["#111111", "#00d25b", "#ffab00"]
+              }]
+          };
+
+          var doughnutChartOptions = {
+              responsive: true,
+              animation: {
+                  animateScale: true,
+                  animateRotate: true
+              }
+          };
+
+          new Chart(doughnutChartCanvas, {
+              type: 'doughnut',
+              data: areaData,
+              options: doughnutChartOptions
+          });
+
+      } else {
+          console.error("Doughnut Chart: Missing data variables (total_centers, total_bills, total_services). Ensure these are defined in the template.");
+      }
+  } catch (error) {
+      console.error("Doughnut Chart Error:", error);
+  }
+} else {
+  console.warn("Doughnut Chart: Canvas element with ID 'doughnutChart' not found.");
+}
+
+// Other existing chart configurations and logic (if any) should remain here.
+
+// Ensure existing functionality for progress bars and carousel remains intact.
+
+// Progress bar animation logic
+$(document).ready(function () {
+  $('.progress-bar').each(function () {
+      var width = $(this).attr('aria-valuenow');
+      $(this).css('width', width + '%');
+  });
+});
+
+// Carousel functionality
+if ($("#carouselExampleIndicators").length) {
+  var carouselElement = $("#carouselExampleIndicators");
+  carouselElement.carousel();
+}
+
+
 };
 
 
