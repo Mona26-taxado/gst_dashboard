@@ -150,39 +150,47 @@ def view_customer(request):
 
 
 
+
 @role_required(['retailer'])  # Restrict access to specific roles
 def edit_customer(request, customer_id):
     customer = get_object_or_404(Customer, id=customer_id)
 
     if request.method == 'POST':
-        # Fetch updated data from the form
+        print("POST Data Received:", request.POST)  # Debug POST data
+
+        # Fetch and update fields
         customer.full_name = request.POST.get('full_name', customer.full_name)
         customer.gender = request.POST.get('gender', customer.gender)
-        customer.dob = request.POST.get('dob', customer.dob)  # Ensure the date format is correct
         customer.address = request.POST.get('address', customer.address)
         customer.state = request.POST.get('state', customer.state)
         customer.city = request.POST.get('city', customer.city)
         customer.email = request.POST.get('email', customer.email)
         customer.mobile = request.POST.get('mobile', customer.mobile)
-        
-        # Save the changes
+
+        # Handle DOB validation
         dob = request.POST.get('dob')
-        if dob:  # If dob is provided, validate it
+        if dob:
             try:
                 customer.dob = datetime.strptime(dob, '%Y-%m-%d').date()
             except ValueError:
                 messages.error(request, "Invalid date format. Please use YYYY-MM-DD.")
                 return render(request, 'retailer_dashboard/edit_customer.html', {'customer': customer})
         else:
-            messages.error(request, "Date of birth cannot be empty.")
-            return render(request, 'retailer_dashboard/edit_customer.html', {'customer': customer})
+            customer.dob = None  # Allow clearing DOB if not provided
+
+        # Save the updated customer
+        print("Before Save:", customer)  # Debug before save
         customer.save()
-        customer.save()
+        print("After Save:", customer)  # Debug after save
 
         messages.success(request, "Customer updated successfully!")
         return redirect('view_customer')  # Redirect after successful update
 
+    # Render the edit form
     return render(request, 'retailer_dashboard/edit_customer.html', {'customer': customer})
+
+
+
 
 
 
