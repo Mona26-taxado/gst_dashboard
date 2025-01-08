@@ -27,7 +27,7 @@
                 <tbody>
                   {% for request in access_requests %}
                     <tr>
-                      <td>{{ request.user.username }}</td>
+                      <td>{{ request.user.full_name }}</td>
                       <td>
                         {% if request.is_active %}
                           Active
