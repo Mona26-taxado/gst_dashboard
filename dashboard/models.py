@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from django.utils.text import slugify
 import uuid
 import random
+from django.utils import timezone
 
 
 
@@ -40,6 +41,7 @@ class CustomUser(AbstractUser):
     postcode = models.CharField(max_length=20, null=True, blank=True)
     dob = models.DateField(null=True, blank=True)
     start_date = models.DateField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)  # Automatically set at creation time
     gender = models.CharField(
         max_length=10, choices=[("Male", "Male"), ("Female", "Female")], null=True, blank=True
     )

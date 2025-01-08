@@ -11,18 +11,28 @@ from .models import BillingDetails
 
 class AddGSKForm(forms.ModelForm):
     plain_text_password = forms.CharField(
-        widget=forms.TextInput(attrs={'placeholder': 'Enter password'}),  # Use TextInput for plain text
-        required=True,
-        label="Password"
+        widget=forms.TextInput(attrs={'placeholder': 'Enter password'}),
+        required=False,  # Allow this field to be empty during edits
+        label="Password",
+        help_text="The password will be shown in plain text for editing purposes.",
     )
 
     class Meta:
         model = CustomUser
         fields = ['full_name', 'email', 'role', 'branch_id', 'mobile_number', 'dob', 'address', 'state', 'city', 'start_date']
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Pre-fill the plain-text password if an instance exists
+        if self.instance and self.instance.pk:
+            self.fields['plain_text_password'].initial = self.instance.password
+
     def save(self, commit=True):
         user = super().save(commit=False)
-        user.set_password(self.cleaned_data['plain_text_password'])  # Hash and save the password
+        # Check if the password has been updated
+        plain_password = self.cleaned_data.get('plain_text_password')
+        if plain_password:
+            user.set_password(plain_password)  # Hash the new password
         if commit:
             user.save()
         return user
@@ -34,7 +44,7 @@ class AddGSKForm(forms.ModelForm):
         return role
 
 
-
+    
 
 
 

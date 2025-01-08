@@ -106,8 +106,7 @@ def view_gsk(request):
     search_query = request.GET.get('search', '')
     
     # Fetch all relevant GSK users
-    gsk_list = CustomUser.objects.filter(role__in=['retailer', 'distributor', 'master_distributor']).order_by('id')
-
+    gsk_list = CustomUser.objects.filter(role__in=['retailer', 'distributor', 'master_distributor']).order_by('-created_at')
     if search_query:
         # Apply search filters
         gsk_list = gsk_list.filter(
@@ -136,25 +135,20 @@ def view_gsk(request):
 
 @login_required
 @role_required(['admin'])
-def edit_gsk(request, user_id):
-    gsk = get_object_or_404(CustomUser, id=user_id)
-    users = CustomUser.objects.filter(role__in=['distributor', 'master_distributor'])
-
+def edit_gsk(request, gsk_id):
+    user = get_object_or_404(CustomUser, id=gsk_id)
     if request.method == 'POST':
-        form = AddGSKForm(request.POST, instance=gsk)
+        form = AddGSKForm(request.POST, instance=user)
         if form.is_valid():
-            try:
-                form.save()
-                messages.success(request, "GSK user updated successfully!")
-                return redirect('view_gsk')
-            except IntegrityError as e:
-                messages.error(request, f"Database error: {str(e)}")
-        else:
-            messages.error(request, "Please fix the highlighted errors below.")
+            form.save()
+            messages.success(request, "GSK user details updated successfully.")
+            return redirect('view_gsk')
     else:
-        form = AddGSKForm(instance=gsk)
+        form = AddGSKForm(instance=user)
 
-    return render(request, 'admin_dashboard/edit_gsk.html', {'form': form, 'gsk': gsk})
+    # Pass the user instance (gsk) to the template
+    return render(request, 'admin_dashboard/edit_gsk.html', {'form': form, 'gsk': user})
+
 
 
 
