@@ -184,8 +184,7 @@ class Customer(models.Model):
     gender = models.CharField(max_length=10, choices=[('Male', 'Male'), ('Female', 'Female'), ('Other', 'Other')])
     pin_code = models.CharField(max_length=6, null=True, blank=True)
     created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="customers")
-
-
+    created_at = models.DateTimeField(auto_now_add=True)  # Automatically set on creation
 
 
     def __str__(self):
@@ -215,7 +214,7 @@ class BillingDetails(models.Model):
     ref_no = models.CharField(max_length=255, unique=True)
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)  # Foreign Key to Customer
     service = models.ForeignKey(Service, on_delete=models.CASCADE)  # Automatically delete related records
-    billing_date = models.DateTimeField(auto_now_add=True)  # Ensure this field is defined
+    billing_date = models.DateTimeField(auto_now_add=True, null=True)  # Ensure this field is defined
     payment_mode = models.CharField(max_length=50, choices=[('Cash', 'Cash'), ('Online', 'Online')])
     payment_status = models.CharField(max_length=50, choices=[('Paid', 'Paid'), ('Unpaid', 'Unpaid')], default='Unpaid')
     id_proof = models.FileField(upload_to='id_proofs/', blank=True, null=True)

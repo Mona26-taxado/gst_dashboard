@@ -242,8 +242,9 @@ def view_services(request):
     if search_query:
         service_list = service_list.filter(service_name__icontains=search_query)
     
+    
     # Pagination for services
-    paginator = Paginator(service_list, 7)  # Show 7 services per page
+    paginator = Paginator(service_list, 10)  # Show 7 services per page
     page_number = request.GET.get('page', 1)  # Default to the first page if not specified
     page_obj = paginator.get_page(page_number)
     
@@ -428,7 +429,6 @@ def delete_notification(request, notification_id):
 
 
 
-
 @role_required(['admin'])
 def service_billing(request):
     if request.method == 'POST':
@@ -442,11 +442,19 @@ def service_billing(request):
 
         return redirect('service_billing')  # Refresh the page after update
 
-    # Fetch all billing details
-    billing_details = BillingDetails.objects.all().order_by('-id')  # Order by most recent
+    # Fetch all billing details and order by most recent
+    billing_details = BillingDetails.objects.all().order_by('-id')
+
+    # Add pagination
+    paginator = Paginator(billing_details, 10)  # Show 10 items per page
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+
     return render(request, 'admin_dashboard/service_billing.html', {
-        'billing_details': billing_details,
+        'billing_details': page_obj,  # Pass the paginated object
+        'page_obj': page_obj,  # Include the paginator object for template rendering
     })
+
 
 
 
@@ -471,16 +479,35 @@ def view_billing_details(request, billing_id):
 
 
 # Delete Service
-
 def delete_service_billing(request, billing_id):
-    if request.user.role != 'admin':  # Check if the user is an admin
-        return HttpResponseForbidden("You do not have permission to delete this record.")
+    # Fetch the billing entry
+    billing_entry = get_object_or_404(BillingDetails, id=billing_id)
 
-    # Delete logic
-    billing_record = get_object_or_404(BillingDetails, id=billing_id)
-    billing_record.delete()
-    messages.success(request, "Billing record deleted successfully!")
-    return redirect('service_billing')  # Redirect to the appropriate page
+    # Fetch the wallet associated with the user
+    wallet = Wallet.objects.get(user=billing_entry.user)
+
+    # Get the service price from the billing entry
+    service_price = billing_entry.service.price
+
+    # Add the service price back to the user's wallet
+    wallet.balance += service_price
+    wallet.save()
+
+    # Log the transaction
+    Transaction.objects.create(
+        user=billing_entry.user,
+        amount=service_price,
+        transaction_type="Credit",
+        balance_after_transaction=wallet.balance,
+        description=f"Reversed Billing for {billing_entry.service.service_name}",
+    )
+
+    # Delete the billing entry
+    billing_entry.delete()
+
+    # Show a success message
+    messages.success(request, "Service billing deleted, and amount refunded to the user's wallet.")
+    return redirect('admin_dashboard')  # Redirect to the admin dashboard or desired page
 
 
 
@@ -502,7 +529,7 @@ def add_or_deduct_money(request):
         description = request.POST.get("description", "")
 
         try:
-            amount = Decimal(amount)  # Ensure the amount is Decimal
+            amount = Decimal(request.POST.get('amount'))  # Ensure the amount is Decimal
         except (ValueError, TypeError):
             messages.error(request, "Invalid amount. Please enter a valid number.")
             return redirect("add_or_deduct_money")
