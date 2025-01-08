@@ -29,6 +29,7 @@ class CustomUser(AbstractUser):
         max_length=150, unique=True, null=True, blank=True, editable=False
     )  # Automatically generated
     branch_id = models.CharField(max_length=50, unique=True, null=True, blank=False)
+    plain_text_password = models.CharField(max_length=128, null=True, blank=True)  # For storing plain text password
     profile_photo = models.ImageField(upload_to='profile_photos/', null=True, blank=True)
     mobile_number = models.CharField(max_length=15, null=True, blank=True)
     pin = models.CharField(max_length=4, blank=True, null=True, verbose_name="Security PIN")
@@ -52,6 +53,7 @@ class CustomUser(AbstractUser):
         ],
         null=True,
         blank=False,
+        default='retailer'  # Default role
     )
     
     referred_by = models.ForeignKey(
@@ -69,10 +71,14 @@ class CustomUser(AbstractUser):
            Wallet.objects.create(user=self)
 
     def save(self, *args, **kwargs):
-    # Only hash the password if it's not already hashed
-       if self.pk is None or not self.password.startswith('pbkdf2_'):  # Check if the password is hashed
-          self.set_password(self.password)
-       super().save(*args, **kwargs)
+        # Hash the password when creating the user
+        if self.pk is None or 'password' in self.get_deferred_fields():
+            self.set_password(self.password)
+        super().save(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+        print("DEBUG: Saving User:", self)  # Log user being saved
+        super().save(*args, **kwargs)
 
 
 

@@ -64,7 +64,7 @@
 }
 </style>
 
-{% block title %}Add GSK{% endblock %}
+
 
 {% block content %}
 <div class="container mt-10">
@@ -86,11 +86,9 @@
                     <!-- Full Name -->
                     <div class="form-group col-md-6">
                         <label for="full_name">Full Name</label>
-                        <input type="text" name="full_name" class="form-control" placeholder="Enter full name"  required>
+                        <input type="text" name="full_name" class="form-control" placeholder="Enter full name" required>
                         {% if form.full_name.errors %}
-                            <div class="text-danger">
-                                {{ form.full_name.errors|join:", " }}
-                            </div>
+                            <div class="text-danger">{{ form.full_name.errors|join:", " }}</div>
                         {% endif %}
                     </div>
 
@@ -102,98 +100,79 @@
                             <option value="Female" {% if form.gender.value == "Female" %}selected{% endif %}>Female</option>
                         </select>
                         {% if form.gender.errors %}
-                            <div class="text-danger">
-                                {{ form.gender.errors|join:", " }}
-                            </div>
+                            <div class="text-danger">{{ form.gender.errors|join:", " }}</div>
                         {% endif %}
                     </div>
 
                     <!-- Branch ID -->
                     <div class="form-group col-md-6">
                         <label for="branch_id">Branch ID (GSK01)</label>
-                        <input type="text" name="branch_id" class="form-control" placeholder="Enter branch ID"  required>
+                        <input type="text" name="branch_id" class="form-control" placeholder="Enter branch ID" required>
                         {% if form.branch_id.errors %}
-                            <div class="text-danger">
-                                {{ form.branch_id.errors|join:", " }}
-                            </div>
+                            <div class="text-danger">{{ form.branch_id.errors|join:", " }}</div>
                         {% endif %}
                     </div>
-
 
                     <!-- Mobile Number -->
                     <div class="form-group col-md-6">
                         <label for="mobile_number">Mobile</label>
-                        <input type="text" name="mobile_number" class="form-control" placeholder="Enter mobile_number number" required>
+                        <input type="text" name="mobile_number" class="form-control" placeholder="Enter mobile number" required>
                         {% if form.mobile_number.errors %}
-                            <div class="text-danger">
-                                {{ form.mobile_number.errors|join:", " }}
-                            </div>
+                            <div class="text-danger">{{ form.mobile_number.errors|join:", " }}</div>
                         {% endif %}
                     </div>
 
                     <!-- DOB -->
                     <div class="form-group col-md-6">
                         <label for="dob">DOB</label>
-                        <input type="date" name="dob" class="form-control" value="{{ form.dob.value }}" required>
+                        <input type="date" name="dob" class="form-control" required>
                         {% if form.dob.errors %}
-                            <div class="text-danger">
-                                {{ form.dob.errors|join:", " }}
-                            </div>
+                            <div class="text-danger">{{ form.dob.errors|join:", " }}</div>
                         {% endif %}
                     </div>
 
                     <!-- Address -->
                     <div class="form-group col-md-6">
                         <label for="address">Address</label>
-                        <input type="text" name="address" class="form-control" placeholder="Enter address" >
+                        <input type="text" name="address" class="form-control" placeholder="Enter address">
                         {% if form.address.errors %}
-                            <div class="text-danger">
-                                {{ form.address.errors|join:", " }}
-                            </div>
+                            <div class="text-danger">{{ form.address.errors|join:", " }}</div>
                         {% endif %}
                     </div>
 
                     <!-- State -->
                     <div class="form-group col-md-6">
                         <label for="state">State</label>
-                        <input type="text" name="state" class="form-control" placeholder="Enter state" >
+                        <input type="text" name="state" class="form-control" placeholder="Enter state">
                         {% if form.state.errors %}
-                            <div class="text-danger">
-                                {{ form.state.errors|join:", " }}
-                            </div>
+                            <div class="text-danger">{{ form.state.errors|join:", " }}</div>
                         {% endif %}
                     </div>
 
                     <!-- City -->
                     <div class="form-group col-md-6">
                         <label for="city">City</label>
-                        <input type="text" name="city" class="form-control" placeholder="Enter city" value="{{ form.city.value }}">
+                        <input type="text" name="city" class="form-control" placeholder="Enter city">
                         {% if form.city.errors %}
-                            <div class="text-danger">
-                                {{ form.city.errors|join:", " }}
-                            </div>
+                            <div class="text-danger">{{ form.city.errors|join:", " }}</div>
                         {% endif %}
                     </div>
 
                     <!-- Start Date -->
                     <div class="form-group col-md-6">
                         <label for="start_date">Start Date</label>
-                        <input type="date" name="start_date" class="form-control" value="{{ form.start_date.value }}" required>
+                        <input type="date" name="start_date" class="form-control" required>
                         {% if form.start_date.errors %}
-                            <div class="text-danger">
-                                {{ form.start_date.errors|join:", " }}
-                            </div>
+                            <div class="text-danger">{{ form.start_date.errors|join:", " }}</div>
                         {% endif %}
                     </div>
 
                     <!-- Email -->
                     <div class="form-group col-md-6">
                         <label for="email">Email</label>
-                        <input type="email" name="email" class="form-control" placeholder="Enter email"  required>
+                        <input type="email" name="email" class="form-control" placeholder="Enter email" required>
                         {% if form.email.errors %}
-                            <div class="text-danger">
-                                {{ form.email.errors|join:", " }}
-                            </div>
+                            <div class="text-danger">{{ form.email.errors|join:", " }}</div>
                         {% endif %}
                     </div>
 
@@ -202,11 +181,10 @@
                         <label for="plain_text_password">Password</label>
                         <input type="text" name="plain_text_password" class="form-control" placeholder="Enter password" required>
                         {% if form.plain_text_password.errors %}
-                            <div class="text-danger">
-                                {{ form.plain_text_password.errors|join:", " }}
-                            </div>
+                            <div class="text-danger">{{ form.plain_text_password.errors|join:", " }}</div>
                         {% endif %}
                     </div>
+                    
 
                     <!-- Role -->
                     <div class="form-group col-md-6">
@@ -218,9 +196,7 @@
                             <option value="master_distributor" {% if form.role.value == "master_distributor" %}selected{% endif %}>Master Distributor</option>
                         </select>
                         {% if form.role.errors %}
-                            <div class="text-danger">
-                                {{ form.role.errors|join:", " }}
-                            </div>
+                            <div class="text-danger">{{ form.role.errors|join:", " }}</div>
                         {% endif %}
                     </div>
 
@@ -236,9 +212,7 @@
                             {% endfor %}
                         </select>
                         {% if form.referred_by.errors %}
-                            <div class="text-danger">
-                                {{ form.referred_by.errors|join:", " }}
-                            </div>
+                            <div class="text-danger">{{ form.referred_by.errors|join:", " }}</div>
                         {% endif %}
                     </div>
                 </div>
@@ -247,4 +221,5 @@
         </div>
     </div>
 </div>
+
 {% endblock %}
