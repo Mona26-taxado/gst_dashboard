@@ -37,7 +37,7 @@ urlpatterns = [
     path('admin/dashboard/', admin_views.admin_dashboard, name='admin_dashboard'),
     path('add-gsk/', add_gsk, name='add_gsk'),
     path('view-gsk/', view_gsk, name='view_gsk'),
-    path('dashboard/admin/edit-gsk/<int:user_id>/', admin_views.edit_gsk, name='edit_gsk'),
+    path('edit-gsk/<int:gsk_id>/', admin_views.edit_gsk, name='edit_gsk'),
     path('admin/delete-gsk/<int:user_id>/', admin_views.delete_gsk, name='delete_gsk'),
     # Admin URLs
     path('admin/view-billing/<int:billing_id>/', admin_views.view_billing_details, name='admin_view_billing_details'),

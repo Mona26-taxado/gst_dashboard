@@ -61,7 +61,7 @@
                         <td>{{ forloop.counter }}</td>
                         <td>{{ notification.title }}</td>
                         <td>{{ notification.message }}</td>
-                        <td>{{ notification.user.username }}</td>
+                        <td>{{ notification.user.full_name }}</td>
                         <td>{{ notification.timestamp }}</td>
                         <td>
                             <a href="{% url 'delete_notification' notification.id %}" 

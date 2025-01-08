@@ -78,7 +78,7 @@ def retailer_dashboard(request):
 def view_services(request):
     # Fetch only active services
     services = Service.objects.filter(status='active').values('service_name', 'price', 'status')
-    paginator = Paginator(services, 7)  # Show 7 services per page
+    paginator = Paginator(services, 10)  # Show 7 services per page
 
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
@@ -135,7 +135,7 @@ def view_customer(request):
     customers = Customer.objects.filter(created_by=request.user).order_by('id')
 
     # Pagination (7 customers per page)
-    paginator = Paginator(customers, 7)
+    paginator = Paginator(customers, 10)
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
 
