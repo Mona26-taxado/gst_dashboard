@@ -48,13 +48,7 @@ def admin_dashboard(request):
     total_services = Service.objects.count()
     # Add more stats as needed
 
-# Data for the graph
-    doughnut_data = {
-        'total_centers': total_centers,
-        'total_bills': total_bills,
-        'total_services': total_services,
-    }
-
+    
     context = {
         'total_bills': total_bills,
         'total_centers': total_centers,
@@ -76,33 +70,31 @@ def add_gsk(request):
         form = AddGSKForm(request.POST)
         if form.is_valid():
             try:
+                # Assign referred_by if applicable
                 referred_by_id = request.POST.get('referred_by')
-                if referred_by_id and referred_by_id != 'self':
+                if referred_by_id:
                     referred_by = CustomUser.objects.get(id=referred_by_id)
                     form.instance.referred_by = referred_by
 
-
-                form.instance.is_active = True
-
-                # Ensure password is hashed and user is active
-                raw_password = form.cleaned_data.get('password')
-                form.instance.password = make_password(raw_password)
-                form.instance.is_active = True  # Set user as active
-
-                # Save the user
-                form.save()
+                # Save user
+                user = form.save()
                 messages.success(request, "GSK user added successfully.")
                 return redirect('view_gsk')
             except CustomUser.DoesNotExist:
                 messages.error(request, "Referred user does not exist.")
-            except IntegrityError as e:
-                messages.error(request, f"Integrity Error: {e}")
+            except Exception as e:
+                messages.error(request, f"An error occurred: {e}")
         else:
-            messages.error(request, "Please fix the highlighted errors below.")
+            messages.error(request, "Please fix the errors below.")
     else:
         form = AddGSKForm()
 
     return render(request, 'admin_dashboard/add_gsk.html', {'form': form, 'distributors': distributors})
+
+
+
+
+
 
 
 #Pagination helps split large datasets into smaller, manageable chunks. Django’s Paginator makes this easy.
@@ -112,20 +104,24 @@ def add_gsk(request):
 @role_required(['admin'])
 def view_gsk(request):
     search_query = request.GET.get('search', '')
+    
+    # Fetch all relevant GSK users
     gsk_list = CustomUser.objects.filter(role__in=['retailer', 'distributor', 'master_distributor']).order_by('id')
 
     if search_query:
+        # Apply search filters
         gsk_list = gsk_list.filter(
-            username__icontains=search_query
-        ) | gsk_list.filter(
-            branch_id__icontains=search_query
-        ) | gsk_list.filter(
-            email__icontains=search_query
+            Q(username__icontains=search_query) |
+            Q(branch_id__icontains=search_query) |
+            Q(email__icontains=search_query)
         )
 
-    paginator = Paginator(gsk_list, 10)
+    paginator = Paginator(gsk_list, 10)  # Paginate results (10 per page)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
+
+    # Debugging: Log retrieved GSK users
+    print("GSK List:", gsk_list)
 
     context = {
         'gsk_list': page_obj,
@@ -133,6 +129,7 @@ def view_gsk(request):
         'page_obj': page_obj,
     }
     return render(request, 'admin_dashboard/view_gsk.html', context)
+
 
 
 

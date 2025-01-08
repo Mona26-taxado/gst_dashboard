@@ -10,29 +10,24 @@ from dashboard.forms import UserUpdateForm
 
 
 
-def login_view(request):
+
+def user_login(request):
+    error = None  # Initialize error variable
     if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
+        username = request.POST.get('username')  # Username/email from the form
+        password = request.POST.get('password')  # Password from the form
 
-        # Debugging: Log the inputs
-        print(f"Attempting login: Username={username}, Password={password}")
-
+        # Authenticate the user
         user = authenticate(request, username=username, password=password)
-
         if user is not None:
-            if user.is_active:
-                login(request, user)
-                print(f"User {username} logged in successfully.")
-                return redirect('dashboard')  # Adjust this redirect as per your app
-            else:
-                print(f"User {username} is inactive.")
-                messages.error(request, "Your account is inactive.")
+            login(request, user)  # Log the user in
+            return redirect('dashboard')  # Replace 'dashboard' with your redirect URL
         else:
-            print(f"Invalid login for Username={username}")
-            messages.error(request, "Invalid username or password.")
+            error = "Invalid username or password. Please try again."
 
-    return render(request, 'login.html')
+    # Render the template with the error message
+    return render(request, 'login.html', {'error': error})
+
 
 
 

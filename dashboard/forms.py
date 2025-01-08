@@ -10,23 +10,28 @@ from .models import BillingDetails
 
 
 class AddGSKForm(forms.ModelForm):
-    password = forms.CharField(
-        widget=forms.PasswordInput(attrs={'placeholder': 'Enter new password (optional)'}),
-        required=False
+    plain_text_password = forms.CharField(
+        widget=forms.TextInput(attrs={'placeholder': 'Enter password'}),  # Use TextInput for plain text
+        required=True,
+        label="Password"
     )
 
     class Meta:
         model = CustomUser
-        fields = ['full_name', 'email', 'role', 'branch_id', 'gender', 'dob',
-                  'address', 'state', 'city', 'start_date', 'referred_by', 'mobile_number']
+        fields = ['full_name', 'email', 'role', 'branch_id', 'mobile_number', 'dob', 'address', 'state', 'city', 'start_date']
 
     def save(self, commit=True):
         user = super().save(commit=False)
-        if self.cleaned_data['password']:
-            user.set_password(self.cleaned_data['password'])  # Hash the password here
+        user.set_password(self.cleaned_data['plain_text_password'])  # Hash and save the password
         if commit:
             user.save()
         return user
+
+    def clean_role(self):
+        role = self.cleaned_data.get('role')
+        if role not in ['retailer', 'distributor', 'master_distributor']:
+            raise forms.ValidationError("Invalid role selected.")
+        return role
 
 
 
