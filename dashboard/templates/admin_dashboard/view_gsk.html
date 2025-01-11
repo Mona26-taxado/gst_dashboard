@@ -23,6 +23,9 @@
 button.btn.btn-primary {
     margin-left: 15px;
 }
+ul.pagination {
+    margin-top: 23px;
+}
 
 
 </style>
@@ -49,6 +52,7 @@ button.btn.btn-primary {
                     <th>Full Name</th>
                     <th>Branch Type</th>
                     <th>Mobile Number</th>
+                    <th>Start Date</th>
                     <th>Referred By</th>
                     <th>Actions</th>
                 </tr>
@@ -56,10 +60,11 @@ button.btn.btn-primary {
             <tbody>
                 {% for gsk in gsk_list %}
                 <tr>
-                    <td>{{ forloop.counter }}</td>
+                    <td>{{ serial_start|add:forloop.counter }}</td>
                     <td>{{ gsk.full_name }} </td>
                     <td>{{ gsk.role }}</td>
                     <td>{{ gsk.mobile_number }} </td>
+                    <td>{{ gsk.created_at|date:"M d, Y" }}</td>
                     <td>
                         {% if gsk.referred_by %}
                             {{ gsk.referred_by.username }}
@@ -80,47 +85,55 @@ button.btn.btn-primary {
             </tbody>
         </table>
     </div>
-    <nav aria-label="Page navigation">
-        <ul class="pagination justify-content-center">
-            {% if page_obj.has_previous %}
+    <nav>
+        <ul class="pagination">
+            <!-- Previous Page -->
+            {% if gsk_list.has_previous %}
             <li class="page-item">
-                <a class="page-link" href="?page=1" aria-label="First">
-                    <span aria-hidden="true">&laquo;</span>
-                </a>
-            </li>
-            <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
-                    <span aria-hidden="true">&lsaquo;</span>
-                </a>
+                <a class="page-link" href="?page={{ gsk_list.previous_page_number }}">Previous</a>
             </li>
             {% endif %}
     
-            {% for num in page_obj.paginator.page_range %}
-                {% if num == page_obj.number %}
-                <li class="page-item active">
-                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                </li>
-                {% elif num >= page_obj.number|add:'-3' and num <= page_obj.number|add:'3' %}
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+            <!-- Always Show First Page -->
+            <li class="page-item {% if gsk_list.number == 1 %}active{% endif %}">
+                <a class="page-link" href="?page=1">1</a>
+            </li>
+    
+            <!-- Ellipsis Before Nearby Pages -->
+            {% if gsk_list.number > 3 %}
+            <li class="page-item disabled"><span class="page-link">...</span></li>
+            {% endif %}
+    
+            <!-- Nearby Pages -->
+            {% for page_num in gsk_list.paginator.page_range %}
+                {% if page_num >= gsk_list.number|add:-1 and page_num <= gsk_list.number|add:1 and page_num != 1 and page_num != gsk_list.paginator.num_pages %}
+                <li class="page-item {% if page_num == gsk_list.number %}active{% endif %}">
+                    <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
                 </li>
                 {% endif %}
             {% endfor %}
     
-            {% if page_obj.has_next %}
-            <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
-                    <span aria-hidden="true">&rsaquo;</span>
-                </a>
+            <!-- Ellipsis After Nearby Pages -->
+            {% if gsk_list.number < gsk_list.paginator.num_pages|add:-2 %}
+            <li class="page-item disabled"><span class="page-link">...</span></li>
+            {% endif %}
+    
+            <!-- Always Show Last Page -->
+            {% if gsk_list.paginator.num_pages > 1 %}
+            <li class="page-item {% if gsk_list.number == gsk_list.paginator.num_pages %}active{% endif %}">
+                <a class="page-link" href="?page={{ gsk_list.paginator.num_pages }}">{{ gsk_list.paginator.num_pages }}</a>
             </li>
+            {% endif %}
+    
+            <!-- Next Page -->
+            {% if gsk_list.has_next %}
             <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Last">
-                    <span aria-hidden="true">&raquo;</span>
-                </a>
+                <a class="page-link" href="?page={{ gsk_list.next_page_number }}">Next</a>
             </li>
             {% endif %}
         </ul>
     </nav>
+    
 </div>
 
 {% endblock %}

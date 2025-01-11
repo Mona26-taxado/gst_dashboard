@@ -218,31 +218,31 @@ def delete_customer(request, customer_id):
 def add_billing(request):
     if request.method == 'POST':
         # Fetch the logged-in user's wallet
-        wallet = Wallet.objects.get(user=request.user)
+        try:
+            wallet = Wallet.objects.get(user=request.user)
+        except Wallet.DoesNotExist:
+            messages.error(request, "Wallet not found. Please contact support.")
+            return redirect('retailer_dashboard')
 
         # Fetch the selected service
         service_id = request.POST.get('service')
-        service = Service.objects.get(id=service_id)
+        try:
+            service = Service.objects.get(id=service_id)
+        except Service.DoesNotExist:
+            messages.error(request, "Invalid service selected.")
+            return redirect('add_billing')
 
-        # Get the service price
         service_price = service.price
 
-        # Check if the wallet has sufficient balance
-        # Check if the wallet has sufficient balance for this service
+        # Check wallet balance
         if wallet.balance < service_price:
-            messages.error(request, "Insufficient balance to add billing for this service. Please recharge your wallet.")
-            customers = Customer.objects.all()  # Adjust filter for retailers
-            services = Service.objects.filter(status='active')
-            return render(request, 'retailer_dashboard/add_billing.html', {
-                'customers': customers,
-                'services': services,
-            })
+            messages.error(
+                request,
+                "Insufficient balance to add billing for this service. Please recharge your wallet."
+            )
+            return redirect('add_billing')
 
-        if wallet.balance <= 0:  # Or set a minimum balance threshold if needed
-            messages.error(request, "You do not have sufficient balance to add billing. Please recharge your wallet.")
-            return redirect('retailer_dashboard')  # Redirect to the retailer's dashboard or relevant page
-
-        # Deduct the service price from the wallet
+        # Deduct service price from the wallet
         wallet.balance -= service_price
         wallet.save()
 
@@ -255,7 +255,7 @@ def add_billing(request):
             description=f"Service Charge for {service.service_name}",
         )
 
-        # Proceed with adding billing details
+        # Create Billing Details
         customer_id = request.POST.get('customer')
         payment_mode = request.POST.get('payment_mode')
         payment_status = request.POST.get('payment_status')
@@ -265,10 +265,12 @@ def add_billing(request):
         address_proof = request.FILES.get('address_proof')
         photo = request.FILES.get('photo')
 
-        # Fetch the customer object
-        customer = Customer.objects.get(id=customer_id)
+        try:
+            customer = Customer.objects.get(id=customer_id, added_by=request.user)
+        except Customer.DoesNotExist:
+            messages.error(request, "Invalid customer selected.")
+            return redirect('add_billing')
 
-        # Create the BillingDetails object
         BillingDetails.objects.create(
             user=request.user,
             ref_no=ref_no,
@@ -277,15 +279,16 @@ def add_billing(request):
             payment_mode=payment_mode,
             payment_status=payment_status,
             service_status=service_status,
-            id_proof=id_proof,  # Save the uploaded file
+            id_proof=id_proof,
             address_proof=address_proof,
             photo=photo,
         )
 
+        messages.success(request, "Billing added successfully.")
         return redirect('view_billing')
 
-    # Render the form with necessary data
-    customers = Customer.objects.all()
+    # Render the form
+    customers = Customer.objects.filter(created_by=request.user).order_by('full_name')
     services = Service.objects.filter(status='active')
     return render(request, 'retailer_dashboard/add_billing.html', {
         'customers': customers,

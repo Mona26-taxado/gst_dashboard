@@ -178,10 +178,10 @@
 
                     <!-- Password -->
                     <div class="form-group col-md-6">
-                        <label for="plain_text_password">Password</label>
-                        <input type="text" name="plain_text_password" class="form-control" placeholder="Enter password" required>
-                        {% if form.plain_text_password.errors %}
-                            <div class="text-danger">{{ form.plain_text_password.errors|join:", " }}</div>
+                        <label for="plain_password">Password</label>
+                        <input type="text" name="plain_password" class="form-control" placeholder="Enter password" required>
+                        {% if form.plain_password.errors %}
+                            <div class="text-danger">{{ form.plain_password.errors|join:", " }}</div>
                         {% endif %}
                     </div>
                     

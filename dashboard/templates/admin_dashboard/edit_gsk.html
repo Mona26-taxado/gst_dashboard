@@ -65,8 +65,8 @@
             
                     <!-- DOB -->
                     <div class="form-group col-md-6">
-                        <label for="dob">DOB</label>
-                        <input type="date" name="dob" class="form-control" value="{{ form.dob.value }}">
+                        <label for="dob">Date of Birth</label>
+                        <input type="date" name="dob" class="form-control" value="{{ form.instance.dob|date:'Y-m-d' }}">
                         {% if form.dob.errors %}
                             <small class="text-danger">{{ form.dob.errors.0 }}</small>
                         {% endif %}
@@ -102,11 +102,11 @@
                     <!-- Start Date -->
                     <div class="form-group col-md-6">
                         <label for="start_date">Start Date</label>
-                        <input type="date" name="start_date" class="form-control" value="{{ form.start_date.value }}">
+                        <input type="date" name="start_date" class="form-control" value="{{ form.instance.start_date|date:'Y-m-d' }}">
                         {% if form.start_date.errors %}
                             <small class="text-danger">{{ form.start_date.errors.0 }}</small>
                         {% endif %}
-                    </div>
+                    </div>                    
             
                     <!-- Email -->
                     <div class="form-group col-md-6">
@@ -119,12 +119,14 @@
             
                     <!-- Password -->
                     <div class="form-group col-md-6">
-                        <label for="plain_text_password">Password</label>
-                        <input type="text" name="plain_text_password" class="form-control" placeholder="Enter password (leave blank to keep current)" value="{{ form.plain_text_password.value }}">
-                        {% if form.plain_text_password.errors %}
-                            <small class="text-danger">{{ form.plain_text_password.errors.0 }}</small>
+                        <label for="plain_password">Password</label>
+                        <input type="text" name="plain_password" class="form-control" value="{{ form.plain_password.value }}">
+                        {% if form.plain_password.errors %}
+                            <small class="text-danger">{{ form.plain_password.errors.0 }}</small>
                         {% endif %}
+                        <small class="text-muted">Leave blank to retain the current password.</small>
                     </div>
+                    
             
                     <!-- Role -->
                     <div class="form-group col-md-6">

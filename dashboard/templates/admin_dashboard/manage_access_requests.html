@@ -2,22 +2,41 @@
 {% load static %}
 {% block content %}
 
+
+<style>
+  li.page-item {
+    margin-top: 26px;
+}
+</style>
+
 <div class="container mt-10">
     <div class="cards">
         <div class="d-flex justify-content-between align-items-center">
-            <h2 class="card-titles mb-2">View Billing</h2>
+            <h2 class="card-titles mb-2">Manage Access</h2>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">View Billing</li>
+                    <li class="breadcrumb-item active" aria-current="page">Manage Access</li>
                 </ol>
             </nav>
         </div>
+        <form method="GET" action="" class="form-inline mb-3">
+          <input
+              type="text"
+              name="search"
+              class="form-control mr-2"
+              placeholder="Search by username or date"
+              value="{{ search_query }}"
+          >
+          <button type="submit" class="btn btn-primary">Search</button>
+      </form>
+      
         <div class="card-body">
             <div class="table-responsive">
               <table class="table table-striped table-bordered">
                 <thead>
                   <tr>
+                    <th>S. No</th>
                     <th>User</th>
                     <th>Status</th>
                     <th>Request Date</th>
@@ -27,6 +46,7 @@
                 <tbody>
                   {% for request in access_requests %}
                     <tr>
+                      <td>{{ forloop.counter0|add:start_index }}</td>
                       <td>{{ request.user.full_name }}</td>
                       <td>
                         {% if request.is_active %}
@@ -53,6 +73,54 @@
                 
               </table>
             </div>
+            <nav>
+              <ul class="pagination">
+                  <!-- Previous Page -->
+                  {% if access_requests.has_previous %}
+                  <li class="page-item">
+                      <a class="page-link" href="?page={{ access_requests.previous_page_number }}">Previous</a>
+                  </li>
+                  {% endif %}
+          
+                  <!-- Always Show First Page -->
+                  <li class="page-item {% if access_requests.number == 1 %}active{% endif %}">
+                      <a class="page-link" href="?page=1">1</a>
+                  </li>
+          
+                  <!-- Ellipsis Before Nearby Pages -->
+                  {% if access_requests.number > 3 %}
+                  <li class="page-item disabled"><span class="page-link">...</span></li>
+                  {% endif %}
+          
+                  <!-- Nearby Pages -->
+                  {% for page_num in access_requests.paginator.page_range %}
+                      {% if page_num >= access_requests.number|add:-1 and page_num <= access_requests.number|add:1 and page_num != 1 and page_num != access_requests.paginator.num_pages %}
+                      <li class="page-item {% if page_num == access_requests.number %}active{% endif %}">
+                          <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+                      </li>
+                      {% endif %}
+                  {% endfor %}
+          
+                  <!-- Ellipsis After Nearby Pages -->
+                  {% if access_requests.number < access_requests.paginator.num_pages|add:-2 %}
+                  <li class="page-item disabled"><span class="page-link">...</span></li>
+                  {% endif %}
+          
+                  <!-- Always Show Last Page -->
+                  {% if access_requests.paginator.num_pages > 1 %}
+                  <li class="page-item {% if access_requests.number == access_requests.paginator.num_pages %}active{% endif %}">
+                      <a class="page-link" href="?page={{ access_requests.paginator.num_pages }}">{{ access_requests.paginator.num_pages }}</a>
+                  </li>
+                  {% endif %}
+          
+                  <!-- Next Page -->
+                  {% if access_requests.has_next %}
+                  <li class="page-item">
+                      <a class="page-link" href="?page={{ access_requests.next_page_number }}">Next</a>
+                  </li>
+                  {% endif %}
+              </ul>
+          </nav>
         </div>
     </div>
 </div>

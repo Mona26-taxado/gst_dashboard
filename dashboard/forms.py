@@ -10,38 +10,41 @@ from .models import BillingDetails
 
 
 class AddGSKForm(forms.ModelForm):
-    plain_text_password = forms.CharField(
+    plain_password = forms.CharField(
         widget=forms.TextInput(attrs={'placeholder': 'Enter password'}),
-        required=False,  # Allow this field to be empty during edits
+        required=False,
         label="Password",
         help_text="The password will be shown in plain text for editing purposes.",
     )
 
     class Meta:
         model = CustomUser
-        fields = ['full_name', 'email', 'role', 'branch_id', 'mobile_number', 'dob', 'address', 'state', 'city', 'start_date']
+        fields = ['full_name', 'email', 'role', 'branch_id', 'mobile_number', 'dob', 'address', 'state', 'city', 'start_date', 'plain_password']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Pre-fill the plain-text password if an instance exists
         if self.instance and self.instance.pk:
-            self.fields['plain_text_password'].initial = self.instance.password
+            self.fields['plain_password'].initial = self.instance.plain_password
 
     def save(self, commit=True):
         user = super().save(commit=False)
-        # Check if the password has been updated
-        plain_password = self.cleaned_data.get('plain_text_password')
+        plain_password = self.cleaned_data.get('plain_password')
         if plain_password:
-            user.set_password(plain_password)  # Hash the new password
+            user.set_password(plain_password)  # Save hashed password
+            user.plain_password = plain_password  # Save plain text password
         if commit:
             user.save()
         return user
+
+
+
 
     def clean_role(self):
         role = self.cleaned_data.get('role')
         if role not in ['retailer', 'distributor', 'master_distributor']:
             raise forms.ValidationError("Invalid role selected.")
         return role
+
 
 
     

@@ -95,18 +95,45 @@
         
         <nav>
             <ul class="pagination">
+                <!-- Previous Page -->
                 {% if transactions.has_previous %}
                 <li class="page-item">
                     <a class="page-link" href="?page={{ transactions.previous_page_number }}">Previous</a>
                 </li>
                 {% endif %}
         
-                {% for num in transactions.paginator.page_range %}
-                <li class="page-item {% if num == transactions.number %}active{% endif %}">
-                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                <!-- Always Show First Page -->
+                <li class="page-item {% if transactions.number == 1 %}active{% endif %}">
+                    <a class="page-link" href="?page=1">1</a>
                 </li>
+        
+                <!-- Ellipsis Before Nearby Pages -->
+                {% if transactions.number > 3 %}
+                <li class="page-item disabled"><span class="page-link">...</span></li>
+                {% endif %}
+        
+                <!-- Nearby Pages -->
+                {% for page_num in transactions.paginator.page_range %}
+                    {% if page_num >= transactions.number|add:-1 and page_num <= transactions.number|add:1 and page_num != 1 and page_num != transactions.paginator.num_pages %}
+                    <li class="page-item {% if page_num == transactions.number %}active{% endif %}">
+                        <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+                    </li>
+                    {% endif %}
                 {% endfor %}
         
+                <!-- Ellipsis After Nearby Pages -->
+                {% if transactions.number < transactions.paginator.num_pages|add:-2 %}
+                <li class="page-item disabled"><span class="page-link">...</span></li>
+                {% endif %}
+        
+                <!-- Always Show Last Page -->
+                {% if transactions.paginator.num_pages > 1 %}
+                <li class="page-item {% if transactions.number == transactions.paginator.num_pages %}active{% endif %}">
+                    <a class="page-link" href="?page={{ transactions.paginator.num_pages }}">{{ transactions.paginator.num_pages }}</a>
+                </li>
+                {% endif %}
+        
+                <!-- Next Page -->
                 {% if transactions.has_next %}
                 <li class="page-item">
                     <a class="page-link" href="?page={{ transactions.next_page_number }}">Next</a>
