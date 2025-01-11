@@ -6,6 +6,8 @@ from django.utils.text import slugify
 import uuid
 import random
 from django.utils import timezone
+from django.utils.timezone import now  # Add this import
+
 
 
 
@@ -42,6 +44,7 @@ class CustomUser(AbstractUser):
     dob = models.DateField(null=True, blank=True)
     start_date = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)  # Automatically set at creation time
+    plain_password = models.CharField(max_length=128, null=True, blank=True)  # Add this field
     gender = models.CharField(
         max_length=10, choices=[("Male", "Male"), ("Female", "Female")], null=True, blank=True
     )
@@ -72,11 +75,9 @@ class CustomUser(AbstractUser):
         if not hasattr(self, 'wallet'):
            Wallet.objects.create(user=self)
 
-    def save(self, *args, **kwargs):
-        # Hash the password when creating the user
-        if self.pk is None or 'password' in self.get_deferred_fields():
-            self.set_password(self.password)
-        super().save(*args, **kwargs)
+    def set_password(self, raw_password):
+        super().set_password(raw_password)
+        self.plain_password = raw_password
 
     def save(self, *args, **kwargs):
         print("DEBUG: Saving User:", self)  # Log user being saved
@@ -284,6 +285,7 @@ class BankingPortalAccessRequest(models.Model):
     is_active = models.BooleanField(default=False)
     request_date = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(default=now)  # Sets the current timestamp as the default
 
     def __str__(self):
         return f"{self.user.username} - {'Active' if self.is_active else 'Inactive'}"

@@ -115,9 +115,17 @@ def view_gsk(request):
             Q(email__icontains=search_query)
         )
 
+    
+    gsk_list = gsk_list.order_by('-created_at')  # Order by start_date or created_at
+
+
     paginator = Paginator(gsk_list, 10)  # Paginate results (10 per page)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
+
+
+    # Calculate the serial number offset for infinite numbering
+    serial_start = (page_obj.number - 1) * paginator.per_page
 
     # Debugging: Log retrieved GSK users
     print("GSK List:", gsk_list)
@@ -126,6 +134,7 @@ def view_gsk(request):
         'gsk_list': page_obj,
         'search_query': search_query,
         'page_obj': page_obj,
+        'serial_start': serial_start,
     }
     return render(request, 'admin_dashboard/view_gsk.html', context)
 
@@ -146,8 +155,8 @@ def edit_gsk(request, gsk_id):
     else:
         form = AddGSKForm(instance=user)
 
-    # Pass the user instance (gsk) to the template
     return render(request, 'admin_dashboard/edit_gsk.html', {'form': form, 'gsk': user})
+
 
 
 
@@ -450,9 +459,14 @@ def service_billing(request):
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
 
+    # Calculate the serial number offset for infinite numbering
+    serial_start = (page_obj.number - 1) * paginator.per_page
+    
+
     return render(request, 'admin_dashboard/service_billing.html', {
         'billing_details': page_obj,  # Pass the paginated object
-        'page_obj': page_obj,  # Include the paginator object for template rendering
+        'page_obj': page_obj, # Include the paginator object for template rendering
+        'serial_start': serial_start, 
     })
 
 
@@ -609,9 +623,14 @@ def admin_view_transactions(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
+    # Calculate the serial number offset for infinite numbering
+    serial_start = (page_obj.number - 1) * paginator.per_page
+    
+
     context = {
         'transactions': page_obj,
         'search_query': search_query,
+        'serial_start': serial_start,
     }
     return render(request, 'admin_dashboard/view_transactions.html', context)
 
@@ -620,7 +639,16 @@ def admin_view_transactions(request):
 
 @staff_member_required
 def manage_access_requests(request):
-    access_requests = BankingPortalAccessRequest.objects.all()
+    # Fetch all requests and order them by the 'created_at' field in descending order
+    access_requests_list = BankingPortalAccessRequest.objects.all().order_by('-created_at')
+
+    # Paginate the access requests
+    paginator = Paginator(access_requests_list, 10)  # 10 items per page
+    page_number = request.GET.get('page', 1)
+    access_requests = paginator.get_page(page_number)
+
+    # Calculate the global starting index for the current page
+    start_index = access_requests.start_index()
 
     if request.method == 'POST':
         action = request.POST.get('action')
@@ -638,7 +666,10 @@ def manage_access_requests(request):
 
         return redirect('manage_access_requests')
 
-    return render(request, 'admin_dashboard/manage_access_requests.html', {'access_requests': access_requests})
+    return render(request, 'admin_dashboard/manage_access_requests.html', {
+        'access_requests': access_requests,
+        'start_index': start_index,
+    })
 
 
 
