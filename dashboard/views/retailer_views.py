@@ -461,6 +461,6 @@ def banking_portal_request(request):
         if request.method == 'POST':
             BankingPortalAccessRequest.objects.create(user=request.user)
             messages.success(request, "Your request has been submitted successfully.")
-            return redirect('request_access')  # Redirect to the dashboard after request submission
+            return redirect('banking_portal_request') # Redirect to the dashboard after request submission
 
     return render(request, 'retailer_dashboard/request_access.html')

@@ -5,15 +5,16 @@ from .views import not_authorized_view, custom_logout_view, CustomPasswordChange
 from .views import admin_views, retailer_views, distributor_views, master_distributor_views
 from .views import role_based_redirect
 from .views.admin_views import update_pin  # Correct import for admin_views
-from .views.admin_views import send_notifications, admin_view_transactions, manage_access_requests
+from .views.admin_views import send_notifications, admin_view_transactions
 from .views import pin_entry, account_settings  # Import the pin_entry view
 from .views import additional_services  # Import the additional_services view
 from .views.admin_views import add_gsk, view_gsk, add_or_deduct_money, edit_gsk, delete_gsk, service_billing, admin_view_transactions
-from dashboard.views.admin_views import manage_notifications, delete_notification, delete_service_billing
+from dashboard.views.admin_views import manage_notifications, delete_notification, delete_service_billing, manage_access_requests
 from dashboard.views.admin_views import add_service, edit_service, delete_service # Import the necessary views
 from dashboard.views import admin_views, retailer_views
 from dashboard.views.retailer_views import delete_customer, retailer_view_transactions, generate_qr_for_recharge, wallet_recharge_view, banking_portal_request # Correct import statement
 from dashboard.views import retailer_views
+
 
 
  #edit_customer  Import the function from retailer_views
@@ -58,6 +59,8 @@ urlpatterns = [
     path('notifications/manage/', manage_notifications, name='manage_notifications'),
     path('notifications/delete/<int:notification_id>/', delete_notification, name='delete_notification'),
     path('admin/manage-access-requests/', manage_access_requests, name='manage_access_requests'),
+
+    
 
     path('dashboard/update-pin/<int:user_id>/', update_pin, name='update_pin'),
 
