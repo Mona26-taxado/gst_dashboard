@@ -266,7 +266,7 @@ def add_billing(request):
         photo = request.FILES.get('photo')
 
         try:
-            customer = Customer.objects.get(id=customer_id, added_by=request.user)
+            customer = Customer.objects.get(id=customer_id, created_by=request.user)  # Use `created_by` instead of `added_by`
         except Customer.DoesNotExist:
             messages.error(request, "Invalid customer selected.")
             return redirect('add_billing')
@@ -288,7 +288,7 @@ def add_billing(request):
         return redirect('view_billing')
 
     # Render the form
-    customers = Customer.objects.filter(created_by=request.user).order_by('full_name')
+    customers = Customer.objects.filter(created_by=request.user) 
     services = Service.objects.filter(status='active')
     return render(request, 'retailer_dashboard/add_billing.html', {
         'customers': customers,
