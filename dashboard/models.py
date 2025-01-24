@@ -28,6 +28,7 @@ class CustomUser(AbstractUser):
     # Use email as the login identifier
     email = models.EmailField(unique=True, null=False, blank=False)
     is_retailer = models.BooleanField(default=False)
+    is_distributor = models.BooleanField(default=False)  # New field for distributor role
     username = models.CharField(
         max_length=150, unique=True, null=True, blank=True, editable=False
     )  # Automatically generated
@@ -45,6 +46,7 @@ class CustomUser(AbstractUser):
     start_date = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)  # Automatically set at creation time
     plain_password = models.CharField(max_length=128, null=True, blank=True)  # Add this field
+    current_gsk_count = models.IntegerField(default=0)
     gender = models.CharField(
         max_length=10, choices=[("Male", "Male"), ("Female", "Female")], null=True, blank=True
     )
@@ -107,7 +109,7 @@ class GSK(models.Model):
     referred_by = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='referrals')
     address = models.TextField()
     start_date = models.DateField(null=True, blank=True)
-
+    
 
 
 # Ensure your model for services has fields such as service_name, price, commission, status, and created_by (if you want to track which user created the service).
@@ -186,6 +188,7 @@ class Customer(models.Model):
     pin_code = models.CharField(max_length=6, null=True, blank=True)
     created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="customers")
     created_at = models.DateTimeField(auto_now_add=True)  # Automatically set on creation
+    current_gsk_count = models.IntegerField(default=0)  # Default value for current_gsk_count
 
 
     def __str__(self):

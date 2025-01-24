@@ -1,0 +1,290 @@
+{% extends 'base.html' %}
+{% block title %}Distributor Dashboard{% endblock %}
+{% load static %}
+{% block content %}
+<style>
+marquee {
+    font-size: 16px;
+    color: #0056b3; /* Customize text color */
+    background-color: #e9f7ff; /* Light background */
+    padding: 10px;
+    border: 1px solid #bee5eb; /* Border around marquee */
+    border-radius: 5px;
+}
+a.additional-ser {
+    text-decoration: none;
+    color: #ffff;
+}
+.container-flud {
+    margin-top: 62px;
+}
+span.badge.bg-danger {
+    color: #ffff;
+}
+span.badge.bg-success {
+    color: #ffff;
+}
+
+</style>
+<div class="container-flud">
+<div class="main-panel">
+
+          <div class="content-wrapper">
+            <!-- Marquee for Notifications -->
+    {% if notifications %}
+    <div class="alert alert-info">
+        <marquee behavior="scroll" direction="left" scrollamount="5">
+            {% for notification in notifications %}
+                <strong>{{ notification.title }}:</strong> {{ notification.message }} 
+                <span class="text-muted">({{ notification.timestamp|date:"M d, Y h:i A" }})</span>
+                &nbsp;&nbsp;|&nbsp;&nbsp;
+            {% endfor %}
+        </marquee>
+    </div>
+    {% else %}
+    <div class="alert alert-warning">
+        No notifications available.
+    </div>
+    {% endif %}
+            <div class="row">
+              <div class="col-12 grid-margin stretch-card">
+                <div class="card corona-gradient-card">
+                  <div class="card-body py-0 px-0 px-sm-3">
+                    <div class="row align-items-center">
+                      <div class="col-4 col-sm-3 col-xl-2">
+                        <img src="{% static 'assets/images/dashboard/Group126@2x.png'%}" class="gradient-corona-img img-fluid" alt="">
+                      </div>
+                      <div class="col-5 col-sm-7 col-xl-8 p-0">
+                        <h4 class="mb-1 mb-sm-0">Want even more features?</h4>
+                        <p class="mb-0 font-weight-normal d-none d-sm-block">Check out our Pro version with 5 unique layouts!</p>
+                      </div>
+                      <div class="col-3 col-sm-2 col-xl-2 pl-0 text-center">
+                        <span>
+                          <a href="#" target="_blank" class="btn btn-outline-light btn-rounded get-started-btn">Upgrade to PRO</a>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-xl-4 col-sm-6 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col-9">
+                        <div class="d-flex align-items-center align-self-start">
+                          <h3 class="mb-0">{{ total_billings }}</h3>
+                          <p class="text-success ml-2 mb-0 font-weight-medium"></p>
+                        </div>
+                      </div>
+                      <div class="col-3">
+                        <div class="icon icon-box-primary">
+                            <span class="mdi mdi-clipboard-text icon-md"></span>
+                        </div>
+                      </div>
+                    </div>
+                   <a href="{% url 'distributor_view_billing' %}" class="achor"> 
+                    <h6 class="text-muted font-weight-normal">View Billing</h6>
+                  </a>
+                  </div>
+                </div>
+              </div>
+              <div class="col-xl-4 col-sm-6 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col-9">
+                        <div class="d-flex align-items-center align-self-start">
+                          <h3 class="mb-0">₹{{ wallet_balance }}</h3>
+                          <p class="text-success ml-2 mb-0 font-weight-medium"></p>
+                        </div>
+                      </div>
+                      <div class="col-3">
+                        <div class="icon icon-box-success ">
+                          <span class="menu-icon">
+                            <i class="mdi mdi-wallet-plus icon-md"></i>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <a href="{% url 'qr_payment' user_id=request.user.id %}" class="achor">
+                      <h6 class="text-muted font-weight-normal">Wallet Balance</h6>
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-xl-4 col-sm-6 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col-9">
+                        <div class="d-flex align-items-center align-self-start">
+                          <h3 class="mb-0">{{ total_services }}</h3>
+                          
+                          <p class="text-danger ml-2 mb-0 font-weight-medium"></p>
+                        </div>
+                      </div>
+                      <div class="col-3">
+                        <div class="icon icon-box-danger">
+                          <span class="mdi mdi-diamond icon-md"></span>
+                        </div>
+                      </div>
+                    </div>
+                    <a href="{% url 'distributor_view_services' %}" class="achor">
+                      <h6 class="text-muted font-weight-normal">Total Services</h6>
+                      
+                    </a>
+                  </div>
+                </div>
+              </div>
+              
+            </div>
+            <!-- Support Design Start -->
+            <a href="tel:+91 9129971644" class="whatsApp"><img src="{% static 'assets/images/customer-service.png'%}" class="whtsap-icon" alt="whtsap-icon"/></a>
+            
+            <!-- Support Design End -->
+            <div class="row">
+              <div class="col-md-4 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <h4 class="card-title">Total Sales</h4>
+                    <canvas id="doughnutChart" class="transaction-chart"></canvas>
+                    <div class="bg-gray-dark d-flex d-md-block d-xl-flex flex-row py-3 px-4 px-md-3 px-xl-4 rounded mt-3">
+                      <div class="text-md-center text-xl-left">
+                        <h6 class="mb-1">Total Services</h6>
+                        <p class="text-muted mb-0"></p>
+                      </div>
+                      <div class="align-self-center flex-grow text-right text-md-center text-xl-right py-md-2 py-xl-0">
+                        <h6 class="font-weight-bold mb-0">{{ total_services }}</h6>
+                      </div>
+                    </div>
+                    <div class="bg-gray-dark d-flex d-md-block d-xl-flex flex-row py-3 px-4 px-md-3 px-xl-4 rounded mt-3">
+                      <div class="text-md-center text-xl-left">
+                        <h6 class="mb-1">Total Billing</h6>
+                        <p class="text-muted mb-0"></p>
+                      </div>
+                      <div class="align-self-center flex-grow text-right text-md-center text-xl-right py-md-2 py-xl-0">
+                        <h6 class="font-weight-bold mb-0">{{ total_billings }}</h6>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-8 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="d-flex flex-row justify-content-between">
+                      <h4 class="card-title mb-1">Net Income</h4>
+                      <p class="text-muted mb-1">Your data status</p>
+                    </div><h4 class="card-title"><i>Sales of this Month</i></h4>
+                        <canvas id="barChart" style="height:324px; display: block; width:552px ;"></canvas>
+                      </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="row">
+              <div class="col-sm-6 grid-margin">
+                <div class="card">
+                  <div class="card-body">
+                    <h5></h5>
+                    <a href="{% url 'pin_entry' %}" class="additional-ser">
+                    <div class="row">
+                      <div class="col-8 col-sm-12 col-xl-8 my-auto">
+                        <div class="d-flex d-sm-block d-md-flex align-items-center">
+                          <h2 class="mb-0">Additional Services</h2>
+                         
+                        </div>
+                        
+                      </div>
+                      <div class="col-4 col-sm-12 col-xl-4 text-center text-xl-right">
+                        <i class="icon-lg mdi mdi-codepen text-primary ml-auto"></i>
+                      </div>
+                    </div>
+                    </a>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-sm-6 grid-margin">
+                <div class="card">
+                  <div class="card-body">
+                    <h5></h5>
+                    <a href="#" class="additional-ser">
+                    <div class="row">
+                      <div class="col-8 col-sm-12 col-xl-8 my-auto">
+                        <div class="d-flex d-sm-block d-md-flex align-items-center">
+                          <h2 class="mb-0">Equipments Store</h2>
+                          
+                        </div>
+                        
+                      </div>
+                      <div class="col-4 col-sm-12 col-xl-4 text-center text-xl-right">
+                        <i class="icon-lg mdi mdi-monitor text-success ml-auto"></i>
+                      </div>
+                    </div>
+                  </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row ">
+              <div class="col-12 grid-margin">
+                <div class="card">
+                  <div class="card-body">
+                    <h4 class="card-title">Latest Services</h4>
+                    <div class="table-responsive">
+                      <table class="table table-striped table-bordered">
+                          <thead>
+                              <tr>
+                                  <th>S. No.</th>
+                                  <th>Ref No.</th>
+                                  <th>Customer Name</th>
+                                  <th>Billing Date</th>
+                                  <th>Payment Status</th>
+                                  <th>Service Status</th>
+                              </tr>
+                          </thead>
+                          <tbody>
+                              {% for billing in billing_details %}
+                              <tr>
+                                  <td>{{ forloop.counter }}</td>
+                                  <td>{{ billing.ref_no }}</td>
+                                  <td>{{ billing.customer.full_name }}</td>
+                                  <td>{{ billing.billing_date }}</td>
+                                  <td>
+                                      <span class="badge bg-success">{{ billing.payment_status }}</span>
+                                  </td>
+                                  <td>
+                                      <span class="badge 
+                                          {% if billing.service_status == 'Complete' %}
+                                              bg-success
+                                          {% elif billing.service_status == 'In Progress' %}
+                                              bg-warning
+                                          {% else %}
+                                              bg-danger
+                                          {% endif %}">{{ billing.service_status }}
+                                      </span>
+                                  </td>
+                              </tr>
+                              {% empty %}
+                              <tr>
+                                  <td colspan="7" class="text-center">No Billing Records Found</td>
+                              </tr>
+                              {% endfor %}
+                          </tbody>
+                      </table>
+                  </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- content-wrapper ends -->
+        </div>
+      </div>
+    </div>
+
+{% endblock %}

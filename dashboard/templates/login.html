@@ -131,22 +131,24 @@ body {
       </div>
         <header>Grahak Sahaayata Kendra</header>
         <form method="post">
-            {% csrf_token %}
-            {% if error %}
-                <p style="color: red; font-weight: bold;">{{ error }}</p>
-            {% endif %}
-            <div class="field">
-                <span class="mdi mdi-account"></span>
-                <input type="mail" name="username" placeholder="Username" required>
-            </div>
-            <div class="field space">
-                <span class="mdi mdi-lock"></span>
-                <input type="password" name="password" placeholder="Password" required>
-            </div>
-            <div class="field-btn">
-                <button type="submit">Login</button>
-            </div>
-        </form>
+          {% csrf_token %}
+          <!-- Error message display -->
+          {% if error %}
+    <p style="color: red; font-weight: bold;">{{ error }}</p>
+{% endif %}
+
+          <div class="field">
+              <span class="mdi mdi-account"></span>
+              <input type="text" name="username" placeholder="Username" required>
+          </div>
+          <div class="field space">
+              <span class="mdi mdi-lock"></span>
+              <input type="password" name="password" placeholder="Password" required>
+          </div>
+          <div class="field-btn">
+              <button type="submit">Login</button>
+          </div>
+      </form>
     </div>
 </div>
 

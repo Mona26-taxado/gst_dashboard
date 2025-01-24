@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+{% block content %}
+
+
+<style>
+    
+    .breadcrumb-item a {
+        color: #63b3ed;
+        text-decoration: none;
+    }
+    
+    .breadcrumb-item.active {
+        color: #a0aec0;
+    }
+    .card-header.text-white {
+        display: flex;
+        justify-content: space-between;
+    }
+    
+    .mt-7, .my-5 {
+        margin-top: 5rem !important;
+    }
+    
+    button.btn.btn-primary {
+    margin-left: 15px;
+}
+.pagination {
+    display: flex;
+    justify-content: center;
+    padding: 10px;
+}
+
+.pagination .page-item {
+    margin: 0 2px;
+}
+
+.pagination .page-item .page-link {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+.form-inline {
+  display: flex;
+  align-items: center;
+} 
+    </style>
+
+
+<div class="container mt-7">
+    <div class="d-flex justify-content-between align-items-center">
+        <h2>View Services</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'distributor_dashboard' %}">Dashboard</a></li>
+                <li class="breadcrumb-item active" aria-current="page">View Service</li>
+            </ol>
+        </nav>
+    </div>
+    <form method="get" class="form-inline mb-3">
+        <input type="text" name="search" value="{{ search_query }}" class="form-control" placeholder="Search Services">
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>S NO</th>
+                    <th>Service Name</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for service in page_obj %}
+                <tr>
+                    <td>{{ start_index|add:forloop.counter0 }}</td>
+                    <td>{{ service.service_name }}</td>
+                    <td>{{ service.price }}</td>
+                    <td>{{ service.status }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3">No services available</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+    </table>
+    </div>
+
+    <nav>
+        <ul class="pagination">
+            <!-- Previous Page -->
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+            </li>
+            {% endif %}
+    
+            <!-- Always Show First Page -->
+            <li class="page-item {% if page_obj.number == 1 %}active{% endif %}">
+                <a class="page-link" href="?page=1">1</a>
+            </li>
+    
+            <!-- Ellipsis Before Nearby Pages -->
+            {% if page_obj.number > 3 %}
+            <li class="page-item disabled"><span class="page-link">...</span></li>
+            {% endif %}
+    
+            <!-- Nearby Pages -->
+            {% for page_num in page_obj.paginator.page_range %}
+                {% if page_num >= page_obj.number|add:-1 and page_num <= page_obj.number|add:1 and page_num != 1 and page_num != page_obj.paginator.num_pages %}
+                <li class="page-item {% if page_num == page_obj.number %}active{% endif %}">
+                    <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+                </li>
+                {% endif %}
+            {% endfor %}
+    
+            <!-- Ellipsis After Nearby Pages -->
+            {% if page_obj.number < page_obj.paginator.num_pages|add:-2 %}
+            <li class="page-item disabled"><span class="page-link">...</span></li>
+            {% endif %}
+    
+            <!-- Always Show Last Page -->
+            {% if page_obj.paginator.num_pages > 1 %}
+            <li class="page-item {% if page_obj.number == page_obj.paginator.num_pages %}active{% endif %}">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a>
+            </li>
+            {% endif %}
+    
+            <!-- Next Page -->
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+
+</div>
+{% endblock %}

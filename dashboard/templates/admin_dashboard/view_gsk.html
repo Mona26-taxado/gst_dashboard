@@ -35,7 +35,7 @@ ul.pagination {
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'add_gsk' %}">Add GSK</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'admin_add_gsk' %}">Add GSK</a></li>
                 <li class="breadcrumb-item active" aria-current="page">View GSK</li>
             </ol>
         </nav>
@@ -67,10 +67,11 @@ ul.pagination {
                     <td>{{ gsk.created_at|date:"M d, Y" }}</td>
                     <td>
                         {% if gsk.referred_by %}
-                            {{ gsk.referred_by.username }}
-                        {% else %}
-                            Self
-                        {% endif %}
+    {{ gsk.referred_by.role|title }} - {{ gsk.referred_by.full_name }}
+{% else %}
+    Self
+{% endif %}
+
                     </td>
                     <td>
                         <a href="{% url 'edit_gsk' gsk.id %}" class="btn btn-warning btn-sm">Edit</a>

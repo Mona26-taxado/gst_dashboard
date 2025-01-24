@@ -1,32 +1,38 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required 
 from django.contrib.auth import authenticate, login, logout
-from dashboard.utils import role_required
+from dashboard.utils import role_required, generate_qr
 from django.contrib import messages
-from dashboard.models import Notification
+from dashboard.models import Notification, CustomUser
 from django.contrib.auth import logout
 from dashboard.forms import UserUpdateForm
+from django.http import HttpResponseForbidden, HttpResponse
 
 
 
 
 
-def user_login(request):
-    error = None  # Initialize error variable
-    if request.method == 'POST':
-        username = request.POST.get('username')  # Username/email from the form
-        password = request.POST.get('password')  # Password from the form
 
-        # Authenticate the user
+
+def login_view(request):
+    error = None  # Initialize the error variable
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+
+        # Authenticate user
         user = authenticate(request, username=username, password=password)
         if user is not None:
-            login(request, user)  # Log the user in
-            return redirect('dashboard')  # Replace 'dashboard' with your redirect URL
+            # Log the user in if authentication succeeds
+            login(request, user)
+            return redirect("dashboard")  # Redirect to your post-login page
         else:
-            error = "Invalid username or password. Please try again."
+            # Set error message if authentication fails
+            error = "Invalid username or password!"
+            print(f"Error set in view: {error}")  # Debugging
 
-    # Render the template with the error message
-    return render(request, 'login.html', {'error': error})
+    # Render login page with error message
+    return render(request, "login.html", {"error": error})
 
 
 
@@ -147,3 +153,20 @@ class CustomPasswordChangeView(PasswordChangeView):
 
 
 
+
+@role_required(['retailer', 'distributor'])
+def generate_qr_for_recharge(request, user_id):
+    try:
+        distributor = CustomUser.objects.get(id=user_id)
+        user_name = distributor.full_name
+
+        # Generate the QR code
+        qr_code_path = generate_qr(user_name)
+
+        return render(request, 'recharge_wallet.html', {
+            'user_name': user_name,
+            'qr_code': qr_code_path,
+            'user_id': user_id,  # Pass user_id for the form action
+        })
+    except Exception as e:
+        return HttpResponse(f"An error occurred: {str(e)}")

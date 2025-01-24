@@ -7,14 +7,14 @@ from .views import role_based_redirect
 from .views.admin_views import update_pin  # Correct import for admin_views
 from .views.admin_views import send_notifications, admin_view_transactions
 from .views import pin_entry, account_settings  # Import the pin_entry view
-from .views import additional_services  # Import the additional_services view
-from .views.admin_views import add_gsk, view_gsk, add_or_deduct_money, edit_gsk, delete_gsk, service_billing, admin_view_transactions
+from .views import additional_services, generate_qr_for_recharge  # Import the additional_services view
+from .views.admin_views import add_gsk as admin_add_gsk, view_gsk as admin_view_gsk, add_or_deduct_money, edit_gsk, delete_gsk, service_billing, admin_view_transactions
 from dashboard.views.admin_views import manage_notifications, delete_notification, delete_service_billing, manage_access_requests
 from dashboard.views.admin_views import add_service, edit_service, delete_service # Import the necessary views
 from dashboard.views import admin_views, retailer_views
-from dashboard.views.retailer_views import delete_customer, retailer_view_transactions, generate_qr_for_recharge, wallet_recharge_view, banking_portal_request # Correct import statement
+from dashboard.views.retailer_views import add_customer as retailer_add_customer, delete_customer as retailer_delete_customer, retailer_view_transactions, wallet_recharge_view, banking_portal_request # Correct import statement
 from dashboard.views import retailer_views
-
+from dashboard.views.distributor_views import add_gsk, view_gsk, edit_gsk, delete_gsk, add_customer as distributor_add_customer, delete_customer, distributor_view_transactions, wallet_recharge_view, banking_portal_request
 
 
  #edit_customer  Import the function from retailer_views
@@ -35,9 +35,11 @@ urlpatterns = [
 
     # Admin URLs
     path('not-authorized/', not_authorized_view, name='not_authorized'),
+    path('qr-payment/<int:user_id>/', generate_qr_for_recharge, name='qr_payment'),
+
     path('admin/dashboard/', admin_views.admin_dashboard, name='admin_dashboard'),
-    path('add-gsk/', add_gsk, name='add_gsk'),
-    path('view-gsk/', view_gsk, name='view_gsk'),
+    path('admin/add-gsk/', admin_add_gsk, name='admin_add_gsk'),
+    path('admin/view-gsk/', admin_view_gsk, name='admin_view_gsk'),
     path('edit-gsk/<int:gsk_id>/', admin_views.edit_gsk, name='edit_gsk'),
     path('admin/delete-gsk/<int:user_id>/', admin_views.delete_gsk, name='delete_gsk'),
     # Admin URLs
@@ -68,24 +70,43 @@ urlpatterns = [
 
     # Retailer URLs
     path('retailer/dashboard/', retailer_views.retailer_dashboard, name='retailer_dashboard'),
-    path('add_customer/', retailer_views.add_customer, name='add_customer'),
-    path('view_customer/', retailer_views.view_customer, name='view_customer'),
-    path('edit_customer/<int:customer_id>/', retailer_views.edit_customer, name='edit_customer'),  # Ensure this name matches
+    path('retailer/add-customer/', retailer_views.add_customer, name='retailer_add_customer'),
+    path('retailer/view-customer/', retailer_views.view_customer, name='retailer_view_customer'),
+    path('retailer/edit-customer/<int:customer_id>/', retailer_views.edit_customer, name='retailer_edit_customer'),
     path('retailer/delete-customer/<int:customer_id>/', retailer_views.delete_customer, name='retailer_delete_customer'),
     path('retailer/view-services/', retailer_views.view_services, name='retailer_view_services'),
-    path('retailer/qr-payment/<int:user_id>/', generate_qr_for_recharge, name='qr_payment'),
     path('retailer/wallet-recharge/', wallet_recharge_view, name='wallet_recharge_page'),
-    path('add-billing/', retailer_views.add_billing, name='add_billing'),
+    path('retailer/add-billing/', retailer_views.add_billing, name='retailer_add_billing'),
     path('banking-portal/request/', banking_portal_request, name='banking_portal_request'),
     
-    path('view-billing/', retailer_views.view_billing, name='view_billing'),
-    path('view-billing/<int:billing_id>/', retailer_views.view_billing_details, name='view_billing_details'),
-    path('edit-billing/<int:billing_id>/', retailer_views.edit_billing, name='edit_billing'),
+    path('retailer/view-billing/', retailer_views.view_billing, name='retailer_view_billing'),
+    path('retailer/view-billing/<int:billing_id>/', retailer_views.view_billing_details, name='retailer_view_billing_details'),
+    path('retailer/edit-billing/<int:billing_id>/', retailer_views.edit_billing, name='retailer_edit_billing'),
     path('dashboard/retailer/view-transactions/', retailer_view_transactions, name='retailer_view_transactions'),
 
 
     # Distributor URLs
     path('distributor/dashboard/', distributor_views.distributor_dashboard, name='distributor_dashboard'),
+    path('distributor/add-gsk/', distributor_views.add_gsk, name='distributor_add_gsk'),
+    path('distributor/view-gsk/', distributor_views.view_gsk, name='distributor_view_gsk'),
+    path('distributor/edit-gsk/<int:gsk_id>/', edit_gsk, name='distributor_edit_gsk'),
+    path('distributor/add-customer/', distributor_views.add_customer, name='distributor_add_customer'),
+    path('distributor/view-customer/', distributor_views.view_customer, name='distributor_view_customer'),
+    path('distributor/edit-customer/<int:customer_id>/', distributor_views.edit_customer, name='distributor_edit_customer'),
+    path('distributor/delete-customer/<int:customer_id>/', distributor_views.delete_customer, name='distributor_delete_customer'),
+    path('distributor/view-services/', distributor_views.view_services, name='distributor_view_services'),
+    path('distributor/wallet-recharge/', wallet_recharge_view, name='wallet_recharge_page'),
+    path('distributor/add-billing/', distributor_views.add_billing, name='distributor_add_billing'),
+    path('banking-portal/request/', banking_portal_request, name='banking_portal_request'),
+    
+    path('distributor/view-billing/', distributor_views.view_billing, name='distributor_view_billing'),
+    path('distributor/edit-billing/<int:billing_id>/', distributor_views.edit_billing, name='distributor_edit_billing'),
+    path('distributor/delete-gsk/<int:gsk_id>/', distributor_views.delete_gsk, name='distributor_delete_gsk'),
+    path('distributor/view-billing/<int:billing_id>/', distributor_views.view_billing_details, name='distributor_view_billing_details'),
+    path('dashboard/distributor/view-transactions/', distributor_view_transactions, name='distributor_view_transactions'),
+    path('distributor/transfer-money/', distributor_views.transfer_money, name='transfer_money'),
+
+
 
     # Master Distributor URLs
     path('master-distributor/dashboard/', master_distributor_views.master_distributor_dashboard, name='master_distributor_dashboard'),
