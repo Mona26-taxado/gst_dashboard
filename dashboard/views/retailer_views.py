@@ -13,6 +13,7 @@ from decimal import Decimal
 from django.core.paginator import Paginator
 from datetime import datetime
 from django.db.models import Sum
+from django.db.models import  Q
 from django.http import HttpResponseForbidden, HttpResponse
 from dashboard.models import CustomUser
 import qrcode
@@ -61,6 +62,8 @@ def retailer_dashboard(request):
     
     # Count total billings for the retailer
     total_billings = BillingDetails.objects.filter(user=request.user).count()
+
+    billing_details = BillingDetails.objects.filter(user=request.user).order_by('-billing_date')[:7]  # Sort by newest first
     
     # Pass total_services to the context
     context = {
@@ -68,6 +71,7 @@ def retailer_dashboard(request):
         'total_services': total_services,
         'wallet_balance': wallet_balance,
         'total_billings': total_billings,  # Include total billings count
+        'billing_details': billing_details,  # Include billing details for the retailer
     }
     return render(request, 'retailer_dashboard/retailer_dashboard.html', context)
 
@@ -120,7 +124,7 @@ def add_customer(request):
             # Now save the object to the database
             customer.save()
             messages.success(request, "Customer added successfully!")
-            return redirect('view_customer')  # Redirect after successful save
+            return redirect('retailer_view_customer')  # Redirect after successful save
     else:
         form = AddCustomerForm()
     return render(request, 'retailer_dashboard/add_customer.html', {'form': form})
@@ -137,10 +141,21 @@ def view_customer(request):
     if request.user.role != 'retailer':
         return HttpResponseForbidden("You are not authorized to view this page.")
 
-    # Fetch only the customers created by the logged-in retailer
-    customers = Customer.objects.filter(created_by=request.user).order_by('-created_at')  # Sort by newest first
+    # Get the search query from the GET request
+    search_query = request.GET.get('search', '')
 
-    # Pagination (7 customers per page)
+    # Fetch only the customers created by the logged-in retailer and apply the search filter if a query exists
+    customers = Customer.objects.filter(created_by=request.user)
+    if search_query:
+        customers = customers.filter(
+            Q(full_name__icontains=search_query) |  # Search by customer name
+            Q(email__icontains=search_query)  # Add other search fields as needed
+        )
+
+    # Order customers by newest first
+    customers = customers.order_by('-created_at')
+
+    # Pagination (10 customers per page)
     paginator = Paginator(customers, 10)
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
@@ -151,7 +166,9 @@ def view_customer(request):
     return render(request, 'retailer_dashboard/view_customer.html', {
         'page_obj': page_obj,
         'start_index': start_index,
+        'search_query': search_query,  # Pass the search query to the template
     })
+
 
 
 
@@ -190,7 +207,7 @@ def edit_customer(request, customer_id):
         print("After Save:", customer)  # Debug after save
 
         messages.success(request, "Customer updated successfully!")
-        return redirect('view_customer')  # Redirect after successful update
+        return redirect('retailer_view_customer')  # Redirect after successful update
 
     # Render the edit form
     return render(request, 'retailer_dashboard/edit_customer.html', {'customer': customer})
@@ -221,8 +238,8 @@ def add_billing(request):
         try:
             wallet = Wallet.objects.get(user=request.user)
         except Wallet.DoesNotExist:
-            messages.error(request, "Wallet not found. Please contact support.")
-            return redirect('retailer_dashboard')
+            messages.error(request, "Insufficient balance to add billing for this service. Please recharge your wallet.")
+            return redirect('retailer_add_billing')
 
         # Fetch the selected service
         service_id = request.POST.get('service')
@@ -240,7 +257,7 @@ def add_billing(request):
                 request,
                 "Insufficient balance to add billing for this service. Please recharge your wallet."
             )
-            return redirect('add_billing')
+            return redirect('retailer_add_billing')
 
         # Deduct service price from the wallet
         wallet.balance -= service_price
@@ -285,7 +302,7 @@ def add_billing(request):
         )
 
         messages.success(request, "Billing added successfully.")
-        return redirect('view_billing')
+        return redirect('retailer_view_billing')
 
     # Render the form
     customers = Customer.objects.filter(created_by=request.user) 
@@ -455,7 +472,7 @@ def banking_portal_request(request):
         if access_request.is_active:
             return redirect('https://taxado.finstore.app/')  # Redirect to banking portal if already active
         else:
-            messages.info(request, "Your request is pending. Please wait for approval.")
+            messages.info(request, "Your request is pending from the Bank. Please wait for approval.")
     except BankingPortalAccessRequest.DoesNotExist:
         # Create a new request if none exists
         if request.method == 'POST':

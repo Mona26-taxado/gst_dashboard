@@ -12,7 +12,35 @@ a.additional-ser {
     text-decoration: none;
     color: #fff;
 }
+.status-dropdown {
+        border: none; /* Remove borders */
+        font-weight: bold; /* Bold text */
+        text-align: center; /* Center align text */
+        width: 100%; /* Full-width dropdown */
+        height: 35px; /* Set height */
+    }
 
+    /* Specific background colors for statuses */
+    .status-dropdown.pending {
+        background-color: red;
+        color: white;
+    }
+
+    .status-dropdown.in-progress {
+        background-color: orange;
+        color: white;
+    }
+
+    .status-dropdown.complete {
+        background-color: green;
+        color: white;
+    }
+    
+    .dropdown-item:hover, .dropdown-item:focus {
+    color: #fefeff;
+    text-decoration: none;
+    background-color: #2c2e35;
+    }
 </style>
      
       <!-- partial -->
@@ -87,7 +115,7 @@ a.additional-ser {
                         </div>
                       </div>
                     </div>
-                    <a href="{% url 'view_gsk' %}" class="achor">
+                    <a href="{% url 'admin_view_gsk' %}" class="achor">
                       <h6 class="text-muted font-weight-normal">Total Center</h6>
                     </a>
                   </div>
@@ -215,34 +243,54 @@ a.additional-ser {
                   <div class="card-body">
                     <h4 class="card-title">Latest Services</h4>
                     <div class="table-responsive">
-                      <table class="table table-striped">
-                        <thead>
-                          <tr>
-                            <th>S. No.</th>
-                            <th>Customer Name</th>
-                            <th>Reference Number</th>
-                            <th>Service Name</th>
-                            <th>Billing Date</th>
-                            <th>Service Status</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {% for billing in latest_service_billings %}
-                          <tr>
-                            <td>{{ forloop.counter }}</td>
-                            <td>{{ billing.customer_full_name }}</td> <!-- Replace 'customer_name' with your field -->
-                            <td>{{ billing.reference_number }}</td> <!-- Replace 'reference_number' with your field -->
-                            <td>{{ billing.service_name }}</td> <!-- Replace 'service_name' with your field -->
-                            <td>{{ billing.billing_date }}</td> <!-- Replace 'billing_date' with your field -->
-                            <td>{{ billing.status }}</td> <!-- Replace 'status' with your field -->
-                          </tr>
-                          {% empty %}
-                          <tr>
-                            <td colspan="6">No Service Billing Records Found</td>
-                          </tr>
-                          {% endfor %}
-                        </tbody>
+                      <table class="table table-striped table-bordered">
+                          <thead>
+                              <tr>
+                                  <th>S. No.</th>
+                                  <th>Ref No.</th>
+                                  <th>Customer Name</th>
+                                  <th>Billing Date</th>
+                                  <th>Service Name</th>
+                                  <th>Service Status</th>
+                              </tr>
+                          </thead>
+                          <tbody>
+                              {% for billing in billing_details %}
+                              <tr>
+                                  <td>{{ forloop.counter }}</td>
+                                  <td>{{ billing.ref_no }}</td>
+                                  <td>{{ billing.customer.full_name }}</td>
+                                  <td>{{ billing.billing_date }}</td>
+                                  <td>{{ billing.service.service_name }}</td>
+                                  <td>
+                                      <form method="POST" style="display: inline;">
+                                          {% csrf_token %}
+                                          <input type="hidden" name="billing_id" value="{{ billing.id }}">
+                                          <select name="service_status"
+                                                  class="status-dropdown {% if billing.service_status == 'Pending' %}pending{% elif billing.service_status == 'In Progress' %}in-progress{% elif billing.service_status == 'Complete' %}complete{% endif %}"
+                                                  onchange="this.form.submit()">
+                                              <option value="Pending" {% if billing.service_status == 'Pending' %}selected{% endif %}>
+                                                  Pending
+                                              </option>
+                                              <option value="In Progress" {% if billing.service_status == 'In Progress' %}selected{% endif %}>
+                                                  In Progress
+                                              </option>
+                                              <option value="Complete" {% if billing.service_status == 'Complete' %}selected{% endif %}>
+                                                  Complete
+                                              </option>
+                                          </select>
+                                      </form>
+                                  </td>
+                                  
+                              </tr>
+                              {% empty %}
+                              <tr>
+                                  <td colspan="7" class="text-center">No Billing Records Found</td>
+                              </tr>
+                              {% endfor %}
+                          </tbody>
                       </table>
+                      
                   </div>
                   </div>
                 </div>

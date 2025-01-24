@@ -18,6 +18,12 @@ a.additional-ser {
 .container-flud {
     margin-top: 62px;
 }
+span.badge.bg-danger {
+    color: #ffff;
+}
+span.badge.bg-success {
+    color: #ffff;
+}
 
 </style>
 <div class="container-flud">
@@ -79,7 +85,7 @@ a.additional-ser {
                         </div>
                       </div>
                     </div>
-                   <a href="{% url 'view_billing' %}" class="achor"> 
+                   <a href="{% url 'retailer_view_billing' %}" class="achor"> 
                     <h6 class="text-muted font-weight-normal">View Billing</h6>
                   </a>
                   </div>
@@ -231,7 +237,7 @@ a.additional-ser {
                   <div class="card-body">
                     <h4 class="card-title">Latest Services</h4>
                     <div class="table-responsive">
-                      <table class="table table-striped">
+                      <table class="table table-striped table-bordered">
                           <thead>
                               <tr>
                                   <th>S. No.</th>
@@ -243,9 +249,9 @@ a.additional-ser {
                               </tr>
                           </thead>
                           <tbody>
-                              {% for billing in page_obj %}
+                              {% for billing in billing_details %}
                               <tr>
-                                  <td>{{ start_index|add:forloop.counter0 }}</td>
+                                  <td>{{ forloop.counter }}</td>
                                   <td>{{ billing.ref_no }}</td>
                                   <td>{{ billing.customer.full_name }}</td>
                                   <td>{{ billing.billing_date }}</td>
@@ -263,7 +269,6 @@ a.additional-ser {
                                           {% endif %}">{{ billing.service_status }}
                                       </span>
                                   </td>
-                                  
                               </tr>
                               {% empty %}
                               <tr>

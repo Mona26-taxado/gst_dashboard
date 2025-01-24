@@ -46,6 +46,7 @@ def admin_dashboard(request):
     total_bills = BillingDetails.objects.count()
     total_centers = CustomUser.objects.filter(role__in=['retailer', 'distributor', 'master_distributor']).count()
     total_services = Service.objects.count()
+    billing_details = BillingDetails.objects.all().order_by('-id')[:7]
     # Add more stats as needed
 
     
@@ -53,6 +54,7 @@ def admin_dashboard(request):
         'total_bills': total_bills,
         'total_centers': total_centers,
         'total_services': total_services,
+        'billing_details': billing_details,
     }
 
     return render(request, 'admin_dashboard/admin_home.html', context)
@@ -79,7 +81,7 @@ def add_gsk(request):
                 # Save user
                 user = form.save()
                 messages.success(request, "GSK user added successfully.")
-                return redirect('view_gsk')
+                return redirect('admin_view_gsk')
             except CustomUser.DoesNotExist:
                 messages.error(request, "Referred user does not exist.")
             except Exception as e:
@@ -142,6 +144,7 @@ def view_gsk(request):
 
 
 
+
 @login_required
 @role_required(['admin'])
 def edit_gsk(request, gsk_id):
@@ -151,7 +154,7 @@ def edit_gsk(request, gsk_id):
         if form.is_valid():
             form.save()
             messages.success(request, "GSK user details updated successfully.")
-            return redirect('view_gsk')
+            return redirect('admin_view_gsk')
     else:
         form = AddGSKForm(instance=user)
 
@@ -180,7 +183,7 @@ def delete_gsk(request, user_id):
         messages.error(request, f"An error occurred: {str(e)}")
 
     # Redirect to the GSK list view
-    return redirect('view_gsk')
+    return redirect('admin_view_gsk')
 
 
 
@@ -521,7 +524,7 @@ def delete_service_billing(request, billing_id):
 
     # Show a success message
     messages.success(request, "Service billing deleted, and amount refunded to the user's wallet.")
-    return redirect('admin_dashboard')  # Redirect to the admin dashboard or desired page
+    return redirect('service_billing')  # Redirect to the admin dashboard or desired page
 
 
 
@@ -542,16 +545,16 @@ def add_or_deduct_money(request):
         amount = request.POST.get("amount")
         description = request.POST.get("description", "")
 
+        # Validate and convert the amount to Decimal
         try:
-            amount = Decimal(request.POST.get('amount'))  # Ensure the amount is Decimal
+            amount = Decimal(amount)
+            if amount <= 0:
+                raise ValueError("Amount must be greater than zero.")
         except (ValueError, TypeError):
-            messages.error(request, "Invalid amount. Please enter a valid number.")
+            messages.error(request, "Invalid amount. Please enter a valid number greater than zero.")
             return redirect("add_or_deduct_money")
 
-        if amount <= 0:
-            messages.error(request, "Amount must be greater than zero.")
-            return redirect("add_or_deduct_money")
-
+        # Fetch the retailer and wallet
         try:
             retailer = User.objects.get(id=retailer_id)
             wallet, created = Wallet.objects.get_or_create(user=retailer)
@@ -559,17 +562,21 @@ def add_or_deduct_money(request):
             if action == "add":
                 wallet.balance += amount
                 transaction_type = "Credit"
-                success_message = f"₹{amount} added to {retailer.full_name}'s wallet successfully!"
+                success_message = f"₹{amount} added to {retailer.get_full_name()}'s wallet successfully!"
             elif action == "deduct":
-                # Check if the wallet has sufficient balance
+                # Ensure sufficient wallet balance
                 if wallet.balance >= amount:
                     wallet.balance -= amount
                     transaction_type = "Debit"
-                    success_message = f"₹{amount} deducted from {retailer.full_name}'s wallet successfully!"
+                    success_message = f"₹{amount} deducted from {retailer.get_full_name()}'s wallet successfully!"
                 else:
-                    messages.error(request, "Insufficient balance!")
+                    messages.error(request, "Insufficient wallet balance to complete the deduction.")
                     return redirect("add_or_deduct_money")
+            else:
+                messages.error(request, "Invalid action specified.")
+                return redirect("add_or_deduct_money")
 
+            # Save wallet changes
             wallet.save()
 
             # Log the transaction
@@ -578,17 +585,19 @@ def add_or_deduct_money(request):
                 transaction_type=transaction_type,
                 amount=amount,
                 balance_after_transaction=wallet.balance,
-                description=description
+                description=description,
             )
 
             messages.success(request, success_message)
         except User.DoesNotExist:
             messages.error(request, "Retailer not found!")
+        except Exception as e:
+            messages.error(request, f"An error occurred: {str(e)}")
 
         return redirect("view_transactions")
 
-    # Fetch all users to display in the dropdown
-    users = User.objects.filter(is_staff=False)  # Adjust filter logic as needed
+    # Fetch all users for the dropdown in the template
+    users = User.objects.filter(is_staff=False)  # Adjust filters as needed
     return render(request, "admin_dashboard/add_money.html", {"users": users})
 
 
@@ -614,7 +623,7 @@ def admin_view_transactions(request):
     if search_query:
         transactions = transactions.filter(
             Q(user__full_name__icontains=search_query) |
-            Q(service_name__icontains=search_query) |
+            # Q(service_name__icontains=search_query) |
             Q(description__icontains=search_query)
         )
 
@@ -639,8 +648,16 @@ def admin_view_transactions(request):
 
 @staff_member_required
 def manage_access_requests(request):
-    # Fetch all requests and order them by the 'created_at' field in descending order
+    # Get the search query from the GET request
+    search_query = request.GET.get('search', '')
+
+    # Fetch all access requests and apply a search filter if the query exists
     access_requests_list = BankingPortalAccessRequest.objects.all().order_by('-created_at')
+    if search_query:
+        access_requests_list = access_requests_list.filter(
+            Q(user__username__icontains=search_query) |  # Assuming you are filtering by username
+            Q(user__email__icontains=search_query)  # Add other filters as needed
+        )
 
     # Paginate the access requests
     paginator = Paginator(access_requests_list, 10)  # 10 items per page
@@ -669,8 +686,8 @@ def manage_access_requests(request):
     return render(request, 'admin_dashboard/manage_access_requests.html', {
         'access_requests': access_requests,
         'start_index': start_index,
+        'search_query': search_query,  # Pass the search query to the template
     })
-
 
 
 

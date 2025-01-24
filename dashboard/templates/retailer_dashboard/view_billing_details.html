@@ -10,7 +10,7 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{% url 'retailer_dashboard' %}">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="{% url 'add_customer' %}">Add Customer</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'retailer_add_customer' %}">Add Customer</a></li>
                     <li class="breadcrumb-item active" aria-current="page">View Customer</li>
                 </ol>
             </nav>
@@ -22,7 +22,7 @@
                     <h5 class="text-primary"><strong>To</strong></h5>
                     <p>Name: {{ retailer.full_name }}</p>
                     <p>Email: {{ retailer.email }}</p>
-                    <p>Mobile: {{ retailer.profile.mobile_number }}</p> <!-- Assuming retailer has a profile model -->
+                    <p>Mobile: {{ retailer.mobile_number }}</p> <!-- Assuming retailer has a profile model -->
                 </div>
 
                 <!-- For Details (Add Customer Details) -->
@@ -30,7 +30,7 @@
                     <h5 class="text-primary"><strong>For</strong></h5>
                     <p>Name: {{ customer.full_name }}</p>
                     <p>Email: {{ customer.email }}</p>
-                    <p>Mobile: {{ customer.mobile_number }}</p>
+                    <p>Mobile: {{ customer.mobile }}</p>
                 </div>
 
                     <div class="col-md-4">

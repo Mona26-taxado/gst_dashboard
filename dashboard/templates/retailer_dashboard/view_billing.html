@@ -26,6 +26,12 @@
 ul.dropdown-menu.show {
     background: #3e3e3e;
 }
+span.badge.bg-danger {
+    color: #ffff;
+}
+span.badge.bg-success {
+    color: #ffff;
+}
 
 .pagination {
     display: flex;
@@ -109,10 +115,10 @@ input.form-control {
                                 </button>
                                 <ul class="dropdown-menu" aria-labelledby="actionDropdown">
                                     <li>
-                                        <a class="dropdown-item" href="{% url 'edit_billing' billing.id %}">Edit Details</a>
+                                        <a class="dropdown-item" href="{% url 'retailer_edit_billing' billing.id %}">Edit Details</a>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" href="{% url 'view_billing_details' billing.id %}" >View Details</a>
+                                        <a class="dropdown-item" href="{% url 'retailer_view_billing_details' billing.id %}" >View Details</a>
     
                                     </li>
                                 </ul>

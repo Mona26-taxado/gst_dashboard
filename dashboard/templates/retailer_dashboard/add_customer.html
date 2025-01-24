@@ -12,13 +12,13 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{% url 'retailer_dashboard' %}">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="{% url 'view_customer' %}">Manage Customer</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'retailer_view_customer' %}">Manage Customer</a></li>
                     <li class="breadcrumb-item active" aria-current="page">Add Customer</li>
                 </ol>
             </nav>
         </div>
         <div class="card-body">
-            <form method="POST" action="{% url 'add_customer' %}">
+            <form method="POST" action="{% url 'retailer_add_customer' %}">
                 {% csrf_token %}
                 <div class="row">
                     <!-- Full Name -->

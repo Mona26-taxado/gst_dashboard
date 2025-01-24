@@ -18,10 +18,10 @@
         <form method="post">
             {% csrf_token %}
             <div class="form-group">
-                <label for="retailer_id">Select Retailer</label>
+                <label for="retailer_id">Select Customer</label>
                 <select name="retailer_id" id="retailer_id" class="form-control">
                     {% for user in users %}
-                        <option value="{{ user.id }}">{{ user.full_name }} ({{ user.username }})</option>
+                        <option value="{{ user.id }}">{{ user.full_name }} ({{ user.role }})</option>
                     {% endfor %}
                 </select>
             </div>

@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit GSK{% endblock %}
+
+{% block content %}
+<div class="container mt-10">
+    <div class="cards">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 class="card-titles mb-2">Edit GSK</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'distributor_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'distributor_view_gsk' %}">Manage GSK</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Edit GSK</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{% url 'distributor_edit_gsk' gsk.id %}">
+                {% csrf_token %}
+                <div class="row">
+                    <!-- Full Name -->
+                    <div class="form-group col-md-6">
+                        <label for="full_name">Full Name</label>
+                        <input type="text" name="full_name" class="form-control" value="{{ form.full_name.value }}">
+                        {% if form.full_name.errors %}
+                            <small class="text-danger">{{ form.full_name.errors.0 }}</small>
+                        {% endif %}
+                    </div>
+            
+                    <!-- Gender -->
+                    <div class="form-group col-md-6">
+                        <label for="gender">Gender</label>
+                        <select class="form-control" name="gender">
+                            <option value="Male" {% if form.gender.value == "Male" %}selected{% endif %}>Male</option>
+                            <option value="Female" {% if form.gender.value == "Female" %}selected{% endif %}>Female</option>
+                        </select>
+                        {% if form.gender.errors %}
+                            <small class="text-danger">{{ form.gender.errors.0 }}</small>
+                        {% endif %}
+                    </div>
+            
+                    <!-- Branch ID -->
+                    <div class="form-group col-md-6">
+                        <label for="branch_id">Branch ID (GSK01)</label>
+                        <input type="text" name="branch_id" class="form-control" value="{{ form.branch_id.value }}">
+                        {% if form.branch_id.errors %}
+                            <small class="text-danger">{{ form.branch_id.errors.0 }}</small>
+                        {% endif %}
+                    </div>
+
+
+
+                    <!-- Mobile Number -->
+                    <div class="form-group col-md-6">
+                        <label for="mobile_number">Mobile</label>
+                        <input type="text" name="mobile_number" class="form-control" value="{{ form.mobile_number.value }}">
+                        {% if form.mobile_number.errors %}
+                            <small class="text-danger">{{ form.mobile_number.errors.0 }}</small>
+                        {% endif %}
+                    </div> 
+
+                    
+            
+                    <!-- DOB -->
+                    <div class="form-group col-md-6">
+                        <label for="dob">Date of Birth</label>
+                        <input type="date" name="dob" class="form-control" value="{{ form.instance.dob|date:'Y-m-d' }}">
+                        {% if form.dob.errors %}
+                            <small class="text-danger">{{ form.dob.errors.0 }}</small>
+                        {% endif %}
+                    </div>
+            
+                    <!-- Address -->
+                    <div class="form-group col-md-6">
+                        <label for="address">Address</label>
+                        <input type="text" name="address" class="form-control" value="{{ form.address.value }}">
+                        {% if form.address.errors %}
+                            <small class="text-danger">{{ form.address.errors.0 }}</small>
+                        {% endif %}
+                    </div>
+            
+                    <!-- State -->
+                    <div class="form-group col-md-6">
+                        <label for="state">State</label>
+                        <input type="text" name="state" class="form-control" value="{{ form.state.value }}">
+                        {% if form.state.errors %}
+                            <small class="text-danger">{{ form.state.errors.0 }}</small>
+                        {% endif %}
+                    </div>
+            
+                    <!-- City -->
+                    <div class="form-group col-md-6">
+                        <label for="city">City</label>
+                        <input type="text" name="city" class="form-control" value="{{ form.city.value }}">
+                        {% if form.city.errors %}
+                            <small class="text-danger">{{ form.city.errors.0 }}</small>
+                        {% endif %}
+                    </div>
+            
+                    <!-- Start Date -->
+                    <div class="form-group col-md-6">
+                        <label for="start_date">Start Date</label>
+                        <input type="date" name="start_date" class="form-control" value="{{ form.instance.start_date|date:'Y-m-d' }}">
+                        {% if form.start_date.errors %}
+                            <small class="text-danger">{{ form.start_date.errors.0 }}</small>
+                        {% endif %}
+                    </div>                    
+            
+                    <!-- Email -->
+                    <div class="form-group col-md-6">
+                        <label for="email">Email</label>
+                        <input type="email" name="email" class="form-control" value="{{ form.email.value }}">
+                        {% if form.email.errors %}
+                            <small class="text-danger">{{ form.email.errors.0 }}</small>
+                        {% endif %}
+                    </div>
+            
+                    <!-- Password -->
+                    <div class="form-group col-md-6">
+                        <label for="plain_password">Password</label>
+                        <input type="text" name="plain_password" class="form-control" value="{{ form.plain_password.value }}">
+                        {% if form.plain_password.errors %}
+                            <small class="text-danger">{{ form.plain_password.errors.0 }}</small>
+                        {% endif %}
+                        <small class="text-muted">Leave blank to retain the current password.</small>
+                    </div>
+                    
+            
+                    <!-- Role -->
+                    <div class="form-group col-md-6">
+                        <label for="role">Branch Type</label>
+                        <select class="form-control" name="role">
+                            <option value="" {% if form.role.value == "" %}selected{% endif %}>-- Select Role --</option>
+                            <option value="retailer" {% if form.role.value == "retailer" %}selected{% endif %}>Retailer</option>
+                            <option value="distributor" {% if form.role.value == "distributor" %}selected{% endif %}>Distributor</option>
+                            <option value="master_distributor" {% if form.role.value == "master_distributor" %}selected{% endif %}>Master Distributor</option>
+                        </select>
+                        {% if form.role.errors %}
+                            <small class="text-danger">{{ form.role.errors.0 }}</small>
+                        {% endif %}
+                    </div>
+            
+                    <!-- Referred By -->
+                    <div class="form-group col-md-6">
+                        <label for="referred_by">Referred By</label>
+                        <select class="form-control" name="referred_by">
+                            <option value="" {% if form.referred_by.value == "" %}selected{% endif %}>Self</option>
+                            {% for distributor in distributors %}
+                                <option value="{{ distributor.id }}" {% if form.referred_by.value == distributor.id %}selected{% endif %}>
+                                    {{ distributor.username }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        {% if form.referred_by.errors %}
+                            <small class="text-danger">{{ form.referred_by.errors.0 }}</small>
+                        {% endif %}
+                    </div>
+                </div>
+            
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-primary mt-3">Update</button>
+            </form>
+            
+            
+
+            {% if messages %}
+                <ul class="mt-3">
+                    {% for message in messages %}
+                        <li class="alert alert-{{ message.tags }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
