@@ -443,6 +443,8 @@ def delete_notification(request, notification_id):
 
 @role_required(['admin'])
 def service_billing(request):
+    search_query = request.GET.get('search', '')  # Capture the search query from the request
+
     if request.method == 'POST':
         # Handle Service Status Update
         billing_id = request.POST.get('billing_id')
@@ -454,8 +456,12 @@ def service_billing(request):
 
         return redirect('service_billing')  # Refresh the page after update
 
-    # Fetch all billing details and order by most recent
-    billing_details = BillingDetails.objects.all().order_by('-id')
+    # Fetch all billing details and filter only by Ref No
+    billing_details = BillingDetails.objects.all()
+    if search_query:
+        billing_details = billing_details.filter(ref_no__icontains=search_query)
+
+    billing_details = billing_details.order_by('-id')
 
     # Add pagination
     paginator = Paginator(billing_details, 10)  # Show 10 items per page
@@ -464,13 +470,14 @@ def service_billing(request):
 
     # Calculate the serial number offset for infinite numbering
     serial_start = (page_obj.number - 1) * paginator.per_page
-    
 
     return render(request, 'admin_dashboard/service_billing.html', {
         'billing_details': page_obj,  # Pass the paginated object
-        'page_obj': page_obj, # Include the paginator object for template rendering
-        'serial_start': serial_start, 
+        'page_obj': page_obj,  # Include the paginator object for template rendering
+        'serial_start': serial_start,
+        'search_query': search_query,  # Pass the search query back to the template
     })
+
 
 
 
@@ -488,7 +495,25 @@ def update_service_status(request, billing_id):
 # View Billing Details
 def view_billing_details(request, billing_id):
     billing_details = get_object_or_404(BillingDetails, id=billing_id)
-    return render(request, 'admin_dashboard/view_billing_details.html', {'billing_details': billing_details})
+
+    # Check user roles for access control
+    if request.user.role not in ['admin', 'retailer', 'distributor']:
+        return HttpResponseForbidden("You are not authorized to view this billing.")
+
+    # Handle file upload for admins
+    if request.user.role == 'admin' and request.method == 'POST':
+        file = request.FILES.get('admin_completed_file')
+        if file:
+            billing_details.admin_completed_file = file
+            billing_details.service_status = 'Complete'  # Optional: Mark service as complete
+            billing_details.save()
+            messages.success(request, "Completed service file uploaded successfully.")
+        else:
+            messages.error(request, "Please upload a valid file.")
+
+    return render(request, 'admin_dashboard/view_billing_details.html', {
+        'billing_details': billing_details,
+    })
 
 
 

@@ -2,6 +2,22 @@
 {% block content %}
 
 
+<style>
+    .card {
+    position: relative;
+    display: flex
+;
+    flex-direction: column;
+    min-width: 0;
+    word-wrap: break-word;
+    background-color: #191c24;
+    background-clip: border-box;
+    border: 1px solid rgba(0, 0, 0, 0.125);
+    border-radius: 0.25rem;
+    margin-bottom: 22px;
+}
+</style>
+
 
 <div class="container mt-10">
     <div class="cards">
@@ -112,6 +128,22 @@
                     </form>
                 </div>
             </div>
+
+            <div class="col mt-4">
+                <div class="card">
+                <div class="card-header">
+                    <h4>Completed Service File</h4>
+                </div>
+                <div class="card-body">
+                    {% if billing_details.admin_completed_file %}
+                        <a href="{{ billing_details.admin_completed_file.url }}" class="btn btn-primary" download>Download Completed File</a>
+                    {% else %}
+                        <p>No completed service file uploaded yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+            </div>
+            
         </div>
         
         
