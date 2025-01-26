@@ -233,6 +233,7 @@ class BillingDetails(models.Model):
         default='Pending',
     )
     service_notes = models.TextField(null=True, blank=True)
+    admin_completed_file = models.FileField(upload_to='completed_service_files/', null=True, blank=True)
 
     def save(self, *args, **kwargs):
         if not self.ref_no:
