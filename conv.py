@@ -8,3 +8,4 @@ with open("db_utf8.json", "r", encoding="utf-8") as file:
 with open("cleaned_db.json", "w", encoding="utf-8") as file:
     json.dump(data, file, ensure_ascii=False, indent=4)
 
+print("Conversion completed.")
