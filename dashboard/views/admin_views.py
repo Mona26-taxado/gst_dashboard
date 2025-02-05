@@ -23,6 +23,7 @@ from django.db.models import F, Q
 from django.db.models.signals import pre_delete
 from django.db import IntegrityError
 from django.contrib.auth.hashers import make_password
+from django.core.exceptions import PermissionDenied
 
 
 
@@ -492,24 +493,29 @@ def update_service_status(request, billing_id):
 
 
 
-# View Billing Details
+@login_required
 def view_billing_details(request, billing_id):
     billing_details = get_object_or_404(BillingDetails, id=billing_id)
 
     # Check user roles for access control
     if request.user.role not in ['admin', 'retailer', 'distributor']:
-        return HttpResponseForbidden("You are not authorized to view this billing.")
+        raise PermissionDenied("You are not authorized to view this billing.")
 
     # Handle file upload for admins
     if request.user.role == 'admin' and request.method == 'POST':
         file = request.FILES.get('admin_completed_file')
+        notes = request.POST.get('service_notes', '')
+
         if file:
             billing_details.admin_completed_file = file
+            billing_details.service_notes = notes
             billing_details.service_status = 'Complete'  # Optional: Mark service as complete
             billing_details.save()
-            messages.success(request, "Completed service file uploaded successfully.")
+            messages.success(request, "Completed service file and notes uploaded successfully.")
         else:
             messages.error(request, "Please upload a valid file.")
+
+        return redirect('admin_view_billing_details', billing_id=billing_id)
 
     return render(request, 'admin_dashboard/view_billing_details.html', {
         'billing_details': billing_details,

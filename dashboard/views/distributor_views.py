@@ -329,7 +329,7 @@ def delete_customer(request, customer_id):
     customer = get_object_or_404(Customer, id=customer_id)
     customer.delete()
     messages.success(request, "Customer deleted successfully.")
-    return redirect('view_customer')  # Ensure the name matches the URL pattern in urls.py
+    return redirect('distributor_view_customer')  # Ensure the name matches the URL pattern in urls.py
 
 
 
