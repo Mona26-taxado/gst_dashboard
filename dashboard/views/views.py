@@ -23,16 +23,16 @@ def login_view(request):
         # Authenticate user
         user = authenticate(request, username=username, password=password)
         if user is not None:
-            # Log the user in if authentication succeeds
-            login(request, user)
+            login(request, user)  # Log the user in if authentication succeeds
             return redirect("dashboard")  # Redirect to your post-login page
         else:
-            # Set error message if authentication fails
-            error = "Invalid username or password!"
-            print(f"Error set in view: {error}")  # Debugging
+            error = "Invalid username or password!"  # Set error message if authentication fails
+            print(f"Error: {error}")  # Debugging
 
     # Render login page with error message
+    print(f"Rendering login page. Error: {error}")  # Debugging
     return render(request, "login.html", {"error": error})
+
 
 
 

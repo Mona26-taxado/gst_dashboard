@@ -130,12 +130,14 @@ body {
         <img src="{% static 'assets/images/Sahaayata-pay-logo.png' %}" alt="logo" style="width: 100px; height: 100px;">
       </div>
         <header>Grahak Sahaayata Kendra</header>
+        {% if error %}
+    <div class="alert alert-danger">
+        {{ error }}
+    </div>
+{% endif %}
         <form method="post">
           {% csrf_token %}
           <!-- Error message display -->
-          {% if error %}
-    <p style="color: red; font-weight: bold;">{{ error }}</p>
-{% endif %}
 
           <div class="field">
               <span class="mdi mdi-account"></span>
