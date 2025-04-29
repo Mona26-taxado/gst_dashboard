@@ -48,6 +48,32 @@
   display: flex;
   align-items: center;
 } 
+
+/* Service Status Styles */
+.status-badge {
+    padding: 0.35em 0.65em;
+    font-size: 0.875em;
+    font-weight: 500;
+    border-radius: 0.25rem;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+}
+
+.status-active {
+    background-color: #00d25b !important;
+    color: #ffffff !important;
+}
+
+.status-pending {
+    background-color: #ffab00 !important;
+    color: #ffffff !important;
+}
+
+.status-completed {
+    background-color: #0090e7 !important;
+    color: #ffffff !important;
+}
     </style>
 
 
@@ -81,11 +107,15 @@
                     <td>{{ start_index|add:forloop.counter0 }}</td>
                     <td>{{ service.service_name }}</td>
                     <td>{{ service.price }}</td>
-                    <td>{{ service.status }}</td>
+                    <td>
+                        <span class="status-badge {% if service.status == 'Active' %}status-active{% elif service.status == 'Pending' %}status-pending{% elif service.status == 'Completed' %}status-completed{% endif %}">
+                            {{ service.status }}
+                        </span>
+                    </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="3">No services available</td>
+                    <td colspan="4">No services available</td>
                 </tr>
                 {% endfor %}
             </tbody>

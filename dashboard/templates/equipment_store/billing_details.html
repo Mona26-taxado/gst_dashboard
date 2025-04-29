@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-10">
+    <div class="store-header">
+        <h2>Equipment Billing</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'distributor_dashboard' %}">Dashboard</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Equipment Billing</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Billing Details</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{% url 'equipment_payment' %}" id="billingForm">
+                        {% csrf_token %}
+                        <input type="hidden" name="equipment_id" value="{{ equipment.id }}">
+                        <input type="hidden" name="quantity" value="{{ quantity }}">
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Full Name *</label>
+                                <input type="text" class="form-control" name="full_name" value="{{ request.user.full_name }}" required minlength="3" maxlength="100">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Email *</label>
+                                <input type="email" class="form-control" name="email" value="{{ request.user.email }}" required>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Mobile Number *</label>
+                                <input type="tel" class="form-control" name="mobile" value="{{ request.user.mobile_number }}" required pattern="[0-9]{10}" title="Please enter a valid 10-digit mobile number">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Address *</label>
+                                <input type="text" class="form-control" name="address" value="{{ request.user.address }}" required minlength="5" maxlength="200">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label">City *</label>
+                                <input type="text" class="form-control" name="city" value="{{ request.user.city }}" required minlength="2" maxlength="50">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">State *</label>
+                                <select class="form-select" name="state" required>
+                                    <option value="">Select State</option>
+                                    <option value="Andhra Pradesh" {% if request.user.state == "Andhra Pradesh" %}selected{% endif %}>Andhra Pradesh</option>
+                                    <option value="Arunachal Pradesh" {% if request.user.state == "Arunachal Pradesh" %}selected{% endif %}>Arunachal Pradesh</option>
+                                    <option value="Assam" {% if request.user.state == "Assam" %}selected{% endif %}>Assam</option>
+                                    <option value="Bihar" {% if request.user.state == "Bihar" %}selected{% endif %}>Bihar</option>
+                                    <option value="Chhattisgarh" {% if request.user.state == "Chhattisgarh" %}selected{% endif %}>Chhattisgarh</option>
+                                    <option value="Goa" {% if request.user.state == "Goa" %}selected{% endif %}>Goa</option>
+                                    <option value="Gujarat" {% if request.user.state == "Gujarat" %}selected{% endif %}>Gujarat</option>
+                                    <option value="Haryana" {% if request.user.state == "Haryana" %}selected{% endif %}>Haryana</option>
+                                    <option value="Himachal Pradesh" {% if request.user.state == "Himachal Pradesh" %}selected{% endif %}>Himachal Pradesh</option>
+                                    <option value="Jharkhand" {% if request.user.state == "Jharkhand" %}selected{% endif %}>Jharkhand</option>
+                                    <option value="Karnataka" {% if request.user.state == "Karnataka" %}selected{% endif %}>Karnataka</option>
+                                    <option value="Kerala" {% if request.user.state == "Kerala" %}selected{% endif %}>Kerala</option>
+                                    <option value="Madhya Pradesh" {% if request.user.state == "Madhya Pradesh" %}selected{% endif %}>Madhya Pradesh</option>
+                                    <option value="Maharashtra" {% if request.user.state == "Maharashtra" %}selected{% endif %}>Maharashtra</option>
+                                    <option value="Manipur" {% if request.user.state == "Manipur" %}selected{% endif %}>Manipur</option>
+                                    <option value="Meghalaya" {% if request.user.state == "Meghalaya" %}selected{% endif %}>Meghalaya</option>
+                                    <option value="Mizoram" {% if request.user.state == "Mizoram" %}selected{% endif %}>Mizoram</option>
+                                    <option value="Nagaland" {% if request.user.state == "Nagaland" %}selected{% endif %}>Nagaland</option>
+                                    <option value="Odisha" {% if request.user.state == "Odisha" %}selected{% endif %}>Odisha</option>
+                                    <option value="Punjab" {% if request.user.state == "Punjab" %}selected{% endif %}>Punjab</option>
+                                    <option value="Rajasthan" {% if request.user.state == "Rajasthan" %}selected{% endif %}>Rajasthan</option>
+                                    <option value="Sikkim" {% if request.user.state == "Sikkim" %}selected{% endif %}>Sikkim</option>
+                                    <option value="Tamil Nadu" {% if request.user.state == "Tamil Nadu" %}selected{% endif %}>Tamil Nadu</option>
+                                    <option value="Telangana" {% if request.user.state == "Telangana" %}selected{% endif %}>Telangana</option>
+                                    <option value="Tripura" {% if request.user.state == "Tripura" %}selected{% endif %}>Tripura</option>
+                                    <option value="Uttar Pradesh" {% if request.user.state == "Uttar Pradesh" %}selected{% endif %}>Uttar Pradesh</option>
+                                    <option value="Uttarakhand" {% if request.user.state == "Uttarakhand" %}selected{% endif %}>Uttarakhand</option>
+                                    <option value="West Bengal" {% if request.user.state == "West Bengal" %}selected{% endif %}>West Bengal</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">PIN Code *</label>
+                                <input type="text" class="form-control" name="pincode" value="{{ request.user.postcode }}" required pattern="[0-9]{6}" title="Please enter a valid 6-digit PIN code">
+                            </div>
+                        </div>
+
+                        <div class="card mt-4">
+                            <div class="card-header">
+                                <h5>Order Summary</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <p><strong>{{ equipment.name }}</strong></p>
+                                        <p class="text-muted">Quantity: {{ quantity }}</p>
+                                    </div>
+                                    <div class="col-md-4 text-end">
+                                        <p>₹{{ base_price }}</p>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <p>GST (18%)</p>
+                                    </div>
+                                    <div class="col-md-4 text-end">
+                                        <p>₹{{ gst_amount }}</p>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <h5>Total Amount</h5>
+                                    </div>
+                                    <div class="col-md-4 text-end">
+                                        <h5>₹{{ total_amount }}</h5>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg w-100">Proceed to Payment</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+[data-theme="light"] .card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+}
+
+[data-theme="dark"] .card {
+    background: #2d3238;
+    border: 1px solid #3d4249;
+}
+
+.card-header {
+    background: transparent;
+    border-bottom: 1px solid rgba(0,0,0,0.125);
+}
+
+[data-theme="dark"] .card-header {
+    border-bottom: 1px solid rgba(255,255,255,0.125);
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+
+[data-theme="dark"] .form-control:focus, [data-theme="dark"] .form-select:focus {
+    border-color: #3d4249;
+    box-shadow: 0 0 0 0.2rem rgba(61,66,73,.25);
+}
+
+.form-control.is-invalid, .form-select.is-invalid {
+    border-color: #dc3545;
+}
+
+.invalid-feedback {
+    color: #dc3545;
+    display: none;
+    margin-top: 0.25rem;
+    font-size: 0.875em;
+}
+
+.form-control.is-invalid ~ .invalid-feedback {
+    display: block;
+}
+</style>
+
+<script>
+document.getElementById('billingForm').addEventListener('submit', function(event) {
+    const form = event.target;
+    if (!form.checkValidity()) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    form.classList.add('was-validated');
+});
+</script>
+{% endblock %} 

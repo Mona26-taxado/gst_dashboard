@@ -20,141 +20,14 @@
     </ul>
     <ul class="navbar-nav navbar-nav-right">
       <li class="nav-item d-lg-block">
-        <a class="nav-link btn btn-success create-new-button"  href="{% url 'banking_portal_request' %}">Banking Portal</a>
-        <!-- <div class="dropdown-menu dropdown-menu-right navbar-dropdown preview-list" aria-labelledby="createbuttonDropdown">
-          <h6 class="p-3 mb-0">Projects</h6>
-          <div class="dropdown-divider"></div>
-          <a class="dropdown-item preview-item">
-            <div class="preview-thumbnail">
-              <div class="preview-icon bg-dark rounded-circle">
-                <i class="mdi mdi-file-outline text-primary"></i>
-              </div>
-            </div>
-            <div class="preview-item-content">
-              <p class="preview-subject ellipsis mb-1">Software Development</p>
-            </div>
-          </a>
-          <div class="dropdown-divider"></div>
-          <a class="dropdown-item preview-item">
-            <div class="preview-thumbnail">
-              <div class="preview-icon bg-dark rounded-circle">
-                <i class="mdi mdi-web text-info"></i>
-              </div>
-            </div>
-            <div class="preview-item-content">
-              <p class="preview-subject ellipsis mb-1">UI Development</p>
-            </div>
-          </a>
-          <div class="dropdown-divider"></div>
-          <a class="dropdown-item preview-item">
-            <div class="preview-thumbnail">
-              <div class="preview-icon bg-dark rounded-circle">
-                <i class="mdi mdi-layers text-danger"></i>
-              </div>
-            </div>
-            <div class="preview-item-content">
-              <p class="preview-subject ellipsis mb-1">Software Testing</p>
-            </div>
-          </a>
-          <div class="dropdown-divider"></div>
-          <p class="p-3 mb-0 text-center">See all projects</p>
-        </div> -->
+        <a class="nav-link btn btn-success create-new-button" href="{% url 'banking_portal_request' %}">Banking Portal</a>
       </li>
-      <!-- <li class="nav-item nav-settings d-none d-lg-block">
-        <a class="nav-link" href="#" id="theme-toggle">
-          <i class="mdi mdi-white-balance-sunny"></i>
-        </a>
-        
-      </li> -->
-      
-      <!-- <li class="nav-item dropdown border-left">
-        <a class="nav-link count-indicator dropdown-toggle" id="messageDropdown" href="#" data-toggle="dropdown" aria-expanded="false">
-          <i class="mdi mdi-email"></i>
-          <span class="count bg-success"></span>
-        </a>
-        <div class="dropdown-menu dropdown-menu-right navbar-dropdown preview-list" aria-labelledby="messageDropdown">
-          <h6 class="p-3 mb-0">Messages</h6>
-          <div class="dropdown-divider"></div>
-          <a class="dropdown-item preview-item">
-            <div class="preview-thumbnail">
-              <img src="{% static 'assets/images/faces/9815472.png'%}" alt="image" class="rounded-circle profile-pic">
-            </div>
-            <div class="preview-item-content">
-              <p class="preview-subject ellipsis mb-1">Mark send you a message</p>
-              <p class="text-muted mb-0"> 1 Minutes ago </p>
-            </div>
-          </a>
-          <div class="dropdown-divider"></div>
-          <a class="dropdown-item preview-item">
-            <div class="preview-thumbnail">
-              <img src="{% static 'assets/images/faces/face2.jpg'%}" alt="image" class="rounded-circle profile-pic">
-            </div>
-            <div class="preview-item-content">
-              <p class="preview-subject ellipsis mb-1">Cregh send you a message</p>
-              <p class="text-muted mb-0"> 15 Minutes ago </p>
-            </div>
-          </a>
-          <div class="dropdown-divider"></div>
-          <a class="dropdown-item preview-item">
-            <div class="preview-thumbnail">
-              <img src="{% static 'assets/images/faces/face3.jpg'%}" alt="image" class="rounded-circle profile-pic">
-            </div>
-            <div class="preview-item-content">
-              <p class="preview-subject ellipsis mb-1">Profile picture updated</p>
-              <p class="text-muted mb-0"> 18 Minutes ago </p>
-            </div>
-          </a>
-          <div class="dropdown-divider"></div>
-          <p class="p-3 mb-0 text-center">4 new messages</p>
-        </div>
-      </li> -->
-      <!-- <li class="nav-item dropdown border-left">
-        <a class="nav-link count-indicator dropdown-toggle" id="notificationDropdown" href="#" data-toggle="dropdown">
-          <i class="mdi mdi-bell"></i>
-          <span class="count bg-danger"></span>
-        </a>
-        <div class="dropdown-menu dropdown-menu-right navbar-dropdown preview-list" aria-labelledby="notificationDropdown">
-          <h6 class="p-3 mb-0">Notifications</h6>
-          <div class="dropdown-divider"></div>
-          <a class="dropdown-item preview-item">
-            <div class="preview-thumbnail">
-              <div class="preview-icon bg-dark rounded-circle">
-                <i class="mdi mdi-calendar text-success"></i>
-              </div>
-            </div>
-            <div class="preview-item-content">
-              <p class="preview-subject mb-1">Event today</p>
-              <p class="text-muted ellipsis mb-0"> Just a reminder that you have an event today </p>
-            </div>
-          </a>
-          <div class="dropdown-divider"></div>
-          <a class="dropdown-item preview-item">
-            <div class="preview-thumbnail">
-              <div class="preview-icon bg-dark rounded-circle">
-                <i class="mdi mdi-settings text-danger"></i>
-              </div>
-            </div>
-            <div class="preview-item-content">
-              <p class="preview-subject mb-1">Settings</p>
-              <p class="text-muted ellipsis mb-0"> Update dashboard </p>
-            </div>
-          </a>
-          <div class="dropdown-divider"></div>
-          <a class="dropdown-item preview-item">
-            <div class="preview-thumbnail">
-              <div class="preview-icon bg-dark rounded-circle">
-                <i class="mdi mdi-link-variant text-warning"></i>
-              </div>
-            </div>
-            <div class="preview-item-content">
-              <p class="preview-subject mb-1">Launch Admin</p>
-              <p class="text-muted ellipsis mb-0"> New admin wow! </p>
-            </div>
-          </a>
-          <div class="dropdown-divider"></div>
-          <p class="p-3 mb-0 text-center">See all notifications</p>
-        </div>
-      </li> -->
+      <li class="nav-item d-lg-block ml-2">
+        <button class="nav-link btn btn-outline-primary" id="theme-toggle">
+          <i class="mdi mdi-weather-sunny" id="theme-icon"></i>
+          <span class="ml-1" id="theme-text">Light Mode</span>
+        </button>
+      </li>
       <li class="nav-item dropdown">
         <a class="nav-link" id="profileDropdown" href="#" data-toggle="dropdown">
           <div class="navbar-profile">
@@ -164,22 +37,10 @@
           </div>
         </a>
         <div class="dropdown-menu dropdown-menu-right navbar-dropdown preview-list" aria-labelledby="profileDropdown">
-          <!-- <h6 class="p-3 mb-0">Profile</h6> -->
-          <div class="dropdown-divider"></div>
-          <!-- <a class="dropdown-item preview-item">
-            <div class="preview-thumbnail">
-              <div class="preview-icon bg-dark rounded-circle">
-                <i class="mdi mdi-settings text-success"></i>
-              </div>
-            </div>
-            <div class="preview-item-content">
-              <p class="preview-subject mb-1">Settings</p>
-            </div>
-          </a> -->
           <div class="dropdown-divider"></div>
           <a href="{% url 'logout' %}" class="dropdown-item preview-item">
             <div class="preview-thumbnail">
-              <div class="preview-icon bg-dark rounded-circle">
+              <div class="preview-icon bg-transparent">
                 <i class="mdi mdi-logout text-danger"></i>
               </div>
             </div>
@@ -187,6 +48,7 @@
               <p class="preview-subject mb-1">Log out</p>
             </div>
           </a>
+        </div>
       </li>
     </ul>
     <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" data-toggle="offcanvas">
@@ -196,11 +58,114 @@
 </nav>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
-    var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
-      return new bootstrap.Dropdown(dropdownToggleEl);
-    });
-    console.log("Dropdowns initialized!");
+document.addEventListener("DOMContentLoaded", function () {
+  // Initialize dropdowns
+  var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
+  var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
+    return new bootstrap.Dropdown(dropdownToggleEl);
   });
+
+  // Theme toggle functionality
+  const themeToggleBtn = document.getElementById('theme-toggle');
+  const themeIcon = document.getElementById('theme-icon');
+  const themeText = document.getElementById('theme-text');
+  
+  // Check for saved theme preference, default to light
+  const currentTheme = localStorage.getItem('theme') || 'light';
+  document.documentElement.setAttribute('data-theme', currentTheme);
+  updateThemeUI(currentTheme);
+
+  // Theme toggle click handler
+  themeToggleBtn.addEventListener('click', function() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    updateThemeUI(newTheme);
+  });
+
+  // Update theme UI elements
+  function updateThemeUI(theme) {
+    if (theme === 'dark') {
+      themeIcon.className = 'mdi mdi-weather-sunny';
+      themeText.textContent = 'Light Mode';
+    } else {
+      themeIcon.className = 'mdi mdi-weather-night';
+      themeText.textContent = 'Dark Mode';
+    }
+  }
+});
 </script>
+
+<style>
+/* Dropdown menu theme styles */
+[data-theme="light"] .dropdown-menu {
+    background-color: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+[data-theme="dark"] .dropdown-menu {
+    background-color: #2d3238 !important;
+    border: 1px solid #3d4249 !important;
+}
+
+[data-theme="light"] .dropdown-item {
+    color: #2d3748 !important;
+}
+
+[data-theme="dark"] .dropdown-item {
+    color: #ffffff !important;
+}
+
+[data-theme="light"] .dropdown-item:hover {
+    background-color: #f7fafc !important;
+}
+
+[data-theme="dark"] .dropdown-item:hover {
+    background-color: #3d4249 !important;
+}
+
+[data-theme="light"] .dropdown-divider {
+    border-top: 1px solid #e2e8f0 !important;
+}
+
+[data-theme="dark"] .dropdown-divider {
+    border-top: 1px solid #3d4249 !important;
+}
+
+/* Logout icon styles */
+.preview-icon {
+    width: 40px !important;
+    height: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 0.5rem !important;
+}
+
+[data-theme="light"] .preview-icon {
+    background-color: #fff5f5 !important;
+}
+
+[data-theme="dark"] .preview-icon {
+    background-color: rgba(252, 66, 74, 0.2) !important;
+}
+
+.text-danger {
+    color: #fc424a !important;
+}
+
+/* Preview item hover effect */
+.preview-item {
+    transition: all 0.3s ease !important;
+}
+
+.preview-item:hover {
+    transform: translateY(-1px) !important;
+}
+
+#theme-text {
+  display: none !important;
+}
+</style>

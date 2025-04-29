@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Edit Service Charge</h2>
+    <form method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="adjusted_service_charge">New Service Charge (₹)</label>
+            <input type="number" name="adjusted_service_charge" class="form-control" step="0.01" value="{{ invoice.original_service_charge }}">
+        </div>
+        <button type="submit" class="btn btn-success mt-3">Save Changes</button>
+        <a href="{% url 'view_invoice' invoice.id %}" class="btn btn-secondary mt-3">Cancel</a>
+    </form>
+</div>
+{% endblock %}

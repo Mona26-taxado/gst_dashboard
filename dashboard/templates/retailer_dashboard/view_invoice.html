@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Invoice Details</h2>
+    <table class="table table-bordered">
+        <tr>
+            <th>Invoice Number</th>
+            <td>{{ invoice.invoice_number }}</td>
+        </tr>
+        <tr>
+            <th>Customer Name</th>
+            <td>{{ invoice.customer_name }}</td>
+        </tr>
+        <tr>
+            <th>Service</th>
+            <td>{{ invoice.service_name }}</td>
+        </tr>
+        <tr>
+            <th>Original Service Charge</th>
+            <td>₹{{ invoice.original_service_charge }}</td>
+        </tr>
+        <tr>
+            <th>Adjusted Service Charge</th>
+            <td>
+                {% if invoice.adjusted_service_charge %}
+                    ₹{{ invoice.adjusted_service_charge }}
+                {% else %}
+                    <a href="{% url 'edit_invoice' invoice.id %}" class="btn btn-warning btn-sm">Edit Service Charge</a>
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <th>Invoice Date</th>
+            <td>{{ invoice.invoice_date }}</td>
+        </tr>
+    </table>
+    <a href="{% url 'retailer_view_billing' %}" class="btn btn-secondary">Back</a>
+</div>
+{% endblock %}
