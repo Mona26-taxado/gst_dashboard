@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from dashboard.utils import role_required, generate_qr
+from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from dashboard.models import Notification
 from dashboard.models import Customer, CustomUser
@@ -12,15 +13,17 @@ from django.http import JsonResponse
 from decimal import Decimal
 from django.core.paginator import Paginator
 from datetime import datetime
-from django.db.models import Sum
+from django.db.models import Sum, Count
 from django.db.models import  Q
 from django.http import HttpResponseForbidden, HttpResponse
 from dashboard.models import CustomUser
 import qrcode
+import uuid
 from django.http import Http404
 import logging
 import os
 from dashboard.models import BankingPortalAccessRequest
+import calendar
 
 
 
@@ -234,12 +237,8 @@ def delete_customer(request, customer_id):
 @role_required(['retailer'])
 def add_billing(request):
     if request.method == 'POST':
-        # Fetch the logged-in user's wallet
-        try:
-            wallet = Wallet.objects.get(user=request.user)
-        except Wallet.DoesNotExist:
-            messages.error(request, "Insufficient balance to add billing for this service. Please recharge your wallet.")
-            return redirect('retailer_add_billing')
+        # Ensure the retailer has a wallet
+        wallet, created = Wallet.objects.get_or_create(user=request.user)
 
         # Fetch the selected service
         service_id = request.POST.get('service')
@@ -249,21 +248,18 @@ def add_billing(request):
             messages.error(request, "Invalid service selected.")
             return redirect('add_billing')
 
-        service_price = service.price
+        service_price = service.price if service.price else 0  # Ensure price is valid
 
-        # Check wallet balance
+        # Check wallet balance before deducting
         if wallet.balance < service_price:
-            messages.error(
-                request,
-                "Insufficient balance to add billing for this service. Please recharge your wallet."
-            )
+            messages.error(request, "Insufficient balance. Please recharge your wallet.")
             return redirect('retailer_add_billing')
 
-        # Deduct service price from the wallet
+        # Deduct balance
         wallet.balance -= service_price
         wallet.save()
 
-        # Log the transaction
+        # Log transaction
         Transaction.objects.create(
             user=request.user,
             amount=service_price,
@@ -272,41 +268,46 @@ def add_billing(request):
             description=f"Service Charge for {service.service_name}",
         )
 
-        # Create Billing Details
+        # Fetch customer
         customer_id = request.POST.get('customer')
-        payment_mode = request.POST.get('payment_mode')
-        payment_status = request.POST.get('payment_status')
-        service_status = 'Pending'
-        ref_no = f"REF-942-{random.randint(100000000, 999999999)}"
-        id_proof = request.FILES.get('id_proof')
-        address_proof = request.FILES.get('address_proof')
-        photo = request.FILES.get('photo')
-
         try:
-            customer = Customer.objects.get(id=customer_id, created_by=request.user)  # Use `created_by` instead of `added_by`
+            customer = Customer.objects.get(id=customer_id, created_by=request.user)
         except Customer.DoesNotExist:
             messages.error(request, "Invalid customer selected.")
             return redirect('add_billing')
 
-        BillingDetails.objects.create(
+        # Create Billing Details
+        billing = BillingDetails.objects.create(
             user=request.user,
-            ref_no=ref_no,
+            ref_no=f"REF-942-{random.randint(100000000, 999999999)}",
             customer=customer,
             service=service,
-            payment_mode=payment_mode,
-            payment_status=payment_status,
-            service_status=service_status,
-            id_proof=id_proof,
-            address_proof=address_proof,
-            photo=photo,
+            payment_mode=request.POST.get('payment_mode'),
+            payment_status=request.POST.get('payment_status'),
+            service_status='Pending',
+            id_proof=request.FILES.get('id_proof'),
+            address_proof=request.FILES.get('address_proof'),
+            photo=request.FILES.get('photo'),
         )
 
-        messages.success(request, "Billing added successfully.")
+        # ✅ Generate Invoice After Billing ✅
+        Invoice.objects.create(
+            billing=billing,
+            retailer=request.user,
+            invoice_number=str(uuid.uuid4()),  # Unique Invoice Number
+            customer_name=customer.full_name,
+            service_name=service.service_name,
+            original_service_charge=service_price,
+            invoice_date=timezone.now()
+        )
+
+        messages.success(request, "Billing and Invoice added successfully.")
         return redirect('retailer_view_billing')
 
-    # Render the form
-    customers = Customer.objects.filter(created_by=request.user) 
+    # Fetch customers created by the retailer
+    customers = Customer.objects.filter(created_by=request.user)
     services = Service.objects.filter(status='active')
+
     return render(request, 'retailer_dashboard/add_billing.html', {
         'customers': customers,
         'services': services,
@@ -328,16 +329,19 @@ def view_billing(request):
         return HttpResponseForbidden("You are not authorized to view this page.")
 
     # Fetch only the billing records created by the logged-in retailer
-    billing_details = BillingDetails.objects.filter(user=request.user).order_by('-billing_date')  # Sort by newest first
+    billing_details = BillingDetails.objects.filter(user=request.user).order_by('-billing_date')
+
+    # Debugging: Print invoice IDs
+    for bill in billing_details:
+        print(f"Invoice ID: {bill.id}")
 
     # Pagination (e.g., 10 billing records per page)
     paginator = Paginator(billing_details, 10)
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
 
-    return render(request, 'retailer_dashboard/view_billing.html', {
-        'page_obj': page_obj,
-    })
+    return render(request, 'retailer_dashboard/view_billing.html', {'page_obj': page_obj})
+
 
 
 
@@ -481,3 +485,70 @@ def banking_portal_request(request):
             return redirect('banking_portal_request') # Redirect to the dashboard after request submission
 
     return render(request, 'retailer_dashboard/request_access.html')
+
+
+
+# Edit Invoice
+
+@login_required
+@role_required(['retailer'])
+def get_retailer_monthly_deductions(request):
+    """Get monthly wallet deductions data for the retailer dashboard."""
+    today = timezone.now()
+    current_year = today.year
+    current_month = today.month
+    
+    # Get all months in the current year up to current month
+    months_data = []
+    labels = []
+    
+    for month in range(1, current_month + 1):
+        # Get total deductions for this month
+        monthly_deductions = Transaction.objects.filter(
+            user=request.user,
+            transaction_type="Debit",
+            created_at__year=current_year,
+            created_at__month=month
+        ).aggregate(
+            total=Sum('amount')
+        )['total'] or 0
+        
+        # Format month name
+        month_name = calendar.month_abbr[month]
+        
+        months_data.append(float(monthly_deductions))
+        labels.append(f"{month_name} {current_year}")
+
+    return JsonResponse({
+        'labels': labels,
+        'data': months_data,
+        'current_month_deductions': float(months_data[-1]) if months_data else 0
+    })
+
+
+@login_required
+@role_required(['retailer'])
+def get_services_distribution(request):
+    """Get services distribution data for the retailer dashboard."""
+    current_year = timezone.now().year
+    
+    # Get service distribution data
+    service_distribution = BillingDetails.objects.filter(
+        user=request.user,
+        billing_date__year=current_year
+    ).values('service__service_name').annotate(
+        count=Count('id')
+    ).order_by('-count')
+
+    # Format the service distribution data for the doughnut chart
+    labels = []
+    data = []
+    for item in service_distribution:
+        if item['service__service_name']:  # Check for null service names
+            labels.append(item['service__service_name'])
+            data.append(item['count'])
+
+    return JsonResponse({
+        'labels': labels,
+        'data': data
+    })

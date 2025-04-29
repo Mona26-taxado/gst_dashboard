@@ -7,12 +7,12 @@
 }
 </style>
 
-<!-- Retailer Menu -->
+<!-- Admin Menu -->
 <nav class="sidebar sidebar-offcanvas" id="sidebar">
     <div class="sidebar-brand-wrapper d-none d-lg-flex align-items-center justify-content-center fixed-top">
       <a href="#" class="logo d-flex align-items-center">
         <img src="{% static 'assets/images/Sahaayata-pay-logo.png'%}" alt="logo-1" width="20%">
-        <span class="d-none d-lg-block"><span style="color:green;">GRAHAK</span> <br/>SAHAAYATA <br/><span style="color:orange;">KENDRA</span></span>
+        <span class="d-none d-lg-block"><span style="color:#16ff25;">GRAHAK</span> <br/>SAHAAYATA<br/><span style="color:#ff6416;">KENDRA</span></span>
       </a>
     </div>
     {% if user.role == 'admin' %}
@@ -173,6 +173,7 @@
           </ul>
         </div>
       </li>
+      
       <li class="nav-item menu-items">
         <a class="nav-link" data-toggle="collapse" href="#ui-kit" aria-expanded="false" aria-controls="ui-kit">
           <span class="menu-icon">
@@ -187,7 +188,20 @@
             
           </ul>
         </div>
-     
+     </li>
+     <li class="nav-item menu-items">
+        <a class="nav-link" data-toggle="collapse" href="#equipment-billing" aria-expanded="false" aria-controls="equipment-billing">
+          <span class="menu-icon">
+            <i class="mdi mdi-cart text-success"></i>
+          </span>
+          <span class="menu-title">Equipment Billing</span>
+          <i class="menu-arrow"></i>
+        </a>
+        <div class="collapse" id="equipment-billing">
+          <ul class="nav flex-column sub-menu">
+            <li class="nav-item"> <a class="nav-link" href="{% url 'admin_equipment_billing' %}">Equipment Orders</a></li>
+          </ul>
+        </div>
   {% endif %}
 
 
@@ -232,7 +246,7 @@
               <p class="preview-subject ellipsis mb-1 text-small">Change Password</p>
             </div>
           </a>
-      <!-- Admin Menu -->
+      <!-- Retailer Menu -->
 
         </div>
       </div>
@@ -324,12 +338,18 @@
       </div>
     </li>
     <li class="nav-item menu-items">
-      <a class="nav-link" href="#noti"  data-toggle="collapse" aria-expanded="false" aria-controls="noti">
+      <a class="nav-link" data-toggle="collapse" href="#equip" aria-expanded="false" aria-controls="auth">
         <span class="menu-icon">
-          <i class="mdi mdi-bell"></i>
+          <i class="mdi mdi-store text-success"></i>
         </span>
         <span class="menu-title">Equipment Store</span>
       </a>
+      <div class="collapse" id="equip">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item"> <a class="nav-link" href="{% url 'equipment_store' %}">Equipment Store</a></li>
+          
+        </ul>
+      </div>
     </li>
   </ul>
   {% endif %}
@@ -488,9 +508,9 @@
       </div>
     </li>
     <li class="nav-item menu-items">
-      <a class="nav-link" href="#noti"  data-toggle="collapse" aria-expanded="false" aria-controls="noti">
+      <a class="nav-link" href="{% url 'equipment_store' %}">
         <span class="menu-icon">
-          <i class="mdi mdi-bell"></i>
+          <i class="mdi mdi-store text-success"></i>
         </span>
         <span class="menu-title">Equipment Store</span>
       </a>

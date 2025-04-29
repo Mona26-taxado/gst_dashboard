@@ -7,6 +7,7 @@ import uuid
 import random
 from django.utils import timezone
 from django.utils.timezone import now  # Add this import
+from decimal import Decimal
 
 
 
@@ -294,6 +295,53 @@ class BankingPortalAccessRequest(models.Model):
     def __str__(self):
         return f"{self.user.username} - {'Active' if self.is_active else 'Inactive'}"
     
+
+
+
+
+#Invoice
+
+class Equipment(models.Model):
+    name = models.CharField(max_length=200)
+    description = models.TextField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    stock = models.IntegerField(default=0)
+    image = models.ImageField(upload_to='equipment_images/', null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Equipment'
+        verbose_name_plural = 'Equipment'
+
+    def __str__(self):
+        return self.name
+
+class EquipmentOrder(models.Model):
+    equipment = models.ForeignKey(Equipment, on_delete=models.CASCADE)
+    user = models.ForeignKey('CustomUser', on_delete=models.CASCADE, null=True, blank=True)  # Make nullable temporarily
+    quantity = models.IntegerField(default=1)
+    order_date = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=[
+        ('pending', 'Pending'),
+        ('paid', 'Paid'),
+        ('cancelled', 'Cancelled')
+    ], default='pending')
+    base_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    gst_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    class Meta:
+        verbose_name = 'Equipment Order'
+        verbose_name_plural = 'Equipment Orders'
+
+    def __str__(self):
+        return f"Order #{self.id} - {self.equipment.name}"
+
+    def save(self, *args, **kwargs):
+        if not self.pk:  # Only calculate prices on creation
+            self.base_price = self.equipment.price * self.quantity
+            self.gst_amount = self.base_price * Decimal('0.18')
+            self.total_amount = self.base_price + self.gst_amount
+        super().save(*args, **kwargs)
 
 
 

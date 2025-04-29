@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-10">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h2 class="card-title mb-4">Complete Your Payment</h2>
+                    
+                    <div class="amount-display mb-4">
+                        <h3>Amount to Pay: ₹{{ total_amount }}</h3>
+                    </div>
+                    
+                    <div class="qr-code-container mb-4">
+                        <img src="data:image/png;base64,{{ qr_code }}" alt="Payment QR Code" class="img-fluid">
+                    </div>
+
+                    <div class="payment-options mb-4">
+                        <div class="d-grid">
+                            <a href="upi://pay?pa=9336323478@okbizaxis&pn=Grahak%20Sahaayata%20Kendra&am={{ total_amount }}&tn=Order%20{{ order_id }}" class="btn btn-upi btn-lg">
+                                <div class="btn-upi-content">
+                                    <i class="mdi mdi-cellphone-link"></i>
+                                    <span class="btn-text">Pay with UPI App</span>
+                                    <span class="btn-amount">₹{{ total_amount }}</span>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="text-muted my-3">- OR -</div>
+                        <p class="mb-0">Scan QR code with any UPI app</p>
+                    </div>
+                    
+                    <div class="payment-instructions mb-4">
+                        <div class="alert alert-info">
+                            <h5 class="alert-heading"><i class="mdi mdi-information me-2"></i>Payment Instructions</h5>
+                            <ol class="text-start mb-0">
+                                <li>Click "Pay with UPI App" or scan the QR code</li>
+                                <li>Complete the payment in your UPI app</li>
+                                <li>Wait for confirmation on this page</li>
+                                <li>Do not close this page until payment is confirmed</li>
+                            </ol>
+                        </div>
+                    </div>
+                    
+                    <div id="payment-status" class="alert alert-info">
+                        <i class="mdi mdi-clock-outline me-2"></i>Waiting for payment...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" id="order-id" value="{{ order_id }}">
+
+<script>
+function checkPaymentStatus() {
+    const orderId = document.getElementById('order-id').value;
+    
+    fetch(`/equipment-store/check-payment-status/${orderId}/`)
+        .then(response => response.json())
+        .then(data => {
+            const statusDiv = document.getElementById('payment-status');
+            
+            if (data.status === 'success') {
+                statusDiv.className = 'alert alert-success';
+                statusDiv.innerHTML = '<i class="mdi mdi-check-circle me-2"></i>Payment successful! Redirecting...';
+                window.location.href = data.redirect_url;
+            } else if (data.status === 'error') {
+                statusDiv.className = 'alert alert-info';
+                statusDiv.innerHTML = '<i class="mdi mdi-refresh me-2"></i>Checking payment status...';
+                setTimeout(checkPaymentStatus, 3000);
+            } else {
+                statusDiv.className = 'alert alert-info';
+                statusDiv.innerHTML = '<i class="mdi mdi-clock-outline me-2"></i>' + data.message;
+                setTimeout(checkPaymentStatus, 3000);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            const statusDiv = document.getElementById('payment-status');
+            statusDiv.className = 'alert alert-info';
+            statusDiv.innerHTML = '<i class="mdi mdi-refresh me-2"></i>Checking payment status...';
+            setTimeout(checkPaymentStatus, 3000);
+        });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    checkPaymentStatus();
+});
+</script>
+
+<style>
+.qr-code-container {
+    max-width: 300px;
+    margin: 0 auto;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: 10px;
+}
+
+[data-theme="dark"] .qr-code-container {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.qr-code-container img {
+    width: 100%;
+    height: auto;
+}
+
+.alert {
+    margin-bottom: 0;
+}
+
+.payment-options {
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+.btn-upi {
+    background: linear-gradient(45deg, #2196F3, #00BCD4);
+    border: none;
+    color: white;
+    padding: 15px 25px;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+}
+
+.btn-upi:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(33, 150, 243, 0.4);
+    background: linear-gradient(45deg, #1E88E5, #00ACC1);
+    color: white;
+}
+
+.btn-upi:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+}
+
+.btn-upi-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.btn-upi .mdi {
+    font-size: 24px;
+}
+
+.btn-upi .btn-text {
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.btn-upi .btn-amount {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 16px;
+    margin-left: 8px;
+}
+
+[data-theme="dark"] .btn-upi {
+    background: linear-gradient(45deg, #1976D2, #0097A7);
+    box-shadow: 0 4px 15px rgba(25, 118, 210, 0.3);
+}
+
+[data-theme="dark"] .btn-upi:hover {
+    background: linear-gradient(45deg, #1565C0, #00838F);
+    box-shadow: 0 8px 20px rgba(25, 118, 210, 0.4);
+}
+
+.alert-info {
+    border-left: 4px solid #0dcaf0;
+    background-color: rgba(13, 202, 240, 0.1);
+    color: inherit;
+}
+
+.alert-success {
+    border-left: 4px solid #198754;
+    background-color: rgba(25, 135, 84, 0.1);
+    color: inherit;
+}
+
+.payment-instructions ol {
+    padding-left: 1.2rem;
+}
+
+.payment-instructions li {
+    margin-bottom: 0.5rem;
+}
+
+.payment-instructions li:last-child {
+    margin-bottom: 0;
+}
+
+.amount-display {
+    background: linear-gradient(45deg, rgba(33, 150, 243, 0.1), rgba(0, 188, 212, 0.1));
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid rgba(33, 150, 243, 0.2);
+}
+
+[data-theme="dark"] .amount-display {
+    background: linear-gradient(45deg, rgba(25, 118, 210, 0.1), rgba(0, 151, 167, 0.1));
+    border: 1px solid rgba(25, 118, 210, 0.2);
+}
+</style>
+{% endblock %} 

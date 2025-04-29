@@ -23,6 +23,9 @@ from dashboard.models import BankingPortalAccessRequest
 from django.db.models import Q
 from dashboard.forms import AddGSKForm 
 from decimal import Decimal # Ensure this form is defined or imported
+from django.db.models import Count
+from django.utils import timezone
+from datetime import timedelta
 
 
 
@@ -630,3 +633,85 @@ def transfer_money(request):
     except Wallet.DoesNotExist:
         messages.error(request, "Wallet not found for your account. Please contact support.")
         return redirect('distributor_dashboard')
+
+
+@role_required(['distributor'])
+def get_distributor_dashboard_data(request):
+    """Get data for distributor dashboard charts and statistics."""
+    today = timezone.now()
+    current_month = today.month
+    current_year = today.year
+
+    # Get monthly billing data
+    monthly_billing = BillingDetails.objects.filter(
+        user=request.user,
+        billing_date__year=current_year,
+        billing_date__month=current_month
+    ).aggregate(
+        total_amount=Sum('amount'),
+        total_billings=Count('id')
+    )
+
+    # Get yearly billing data
+    yearly_billing = BillingDetails.objects.filter(
+        user=request.user,
+        billing_date__year=current_year
+    ).aggregate(
+        total_amount=Sum('amount'),
+        total_billings=Count('id')
+    )
+
+    # Get service distribution data
+    service_distribution = BillingDetails.objects.filter(
+        user=request.user,
+        billing_date__year=current_year
+    ).values('service__service_name').annotate(
+        count=Count('id')
+    ).order_by('-count')
+
+    # Get monthly trend (last 6 months)
+    months_data = []
+    labels = []
+    
+    for i in range(5, -1, -1):
+        target_date = today - timedelta(days=i*30)
+        month = target_date.month
+        year = target_date.year
+        
+        monthly_amount = BillingDetails.objects.filter(
+            user=request.user,
+            billing_date__year=year,
+            billing_date__month=month
+        ).aggregate(
+            total=Sum('amount')
+        )['total'] or 0
+        
+        month_name = target_date.strftime('%b-%Y')
+        months_data.append(float(monthly_amount))
+        labels.append(month_name)
+
+    # Format the service distribution data for the doughnut chart
+    service_labels = []
+    service_data = []
+    for item in service_distribution:
+        service_labels.append(item['service__service_name'])
+        service_data.append(item['count'])
+
+    return JsonResponse({
+        'monthly': {
+            'total_amount': float(monthly_billing['total_amount'] or 0),
+            'total_billings': monthly_billing['total_billings'] or 0
+        },
+        'yearly': {
+            'total_amount': float(yearly_billing['total_amount'] or 0),
+            'total_billings': yearly_billing['total_billings'] or 0
+        },
+        'service_distribution': {
+            'labels': service_labels,
+            'data': service_data
+        },
+        'trend': {
+            'labels': labels,
+            'data': months_data
+        }
+    })

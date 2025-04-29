@@ -4,156 +4,238 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Login - Grahak Sahaayata Kendra</title>
     <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
     <link rel="stylesheet" href="{% static 'assets/vendors/mdi/css/materialdesignicons.min.css'%}">
     <link rel="shortcut icon" href="{% static 'assets/images/Sahaayata-pay-logo.png' %}" />
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#3498db"/>
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+    <link rel="apple-touch-icon" href="{% static 'assets/images/Sahaayata-pay-logo.png' %}"/>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Grahak Sahaayata">
     <style>
         * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  user-select: none;
-}
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
 
-body {
-  font-family: "Poppins", sans-serif;
-  color: white;
-}
+        body {
+            font-family: "Poppins", sans-serif;
+            color: white;
+        }
 
-.bg-img {
-  background: url("https://images.pexels.com/photos/34088/pexels-photo.jpg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940");
-  height: 100vh;
-  background-size: cover;
-  background-position: center;
-  position: relative; /* Ensure proper positioning for the overlay */
-}
+        .bg-img {
+            background: url("https://images.pexels.com/photos/34088/pexels-photo.jpg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940");
+            height: 100vh;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
 
-.bg-img:after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: 100%;
-  background: rgba(0, 0, 0, 0.7); /* Overlay to enhance readability */
-}
+        .bg-img:after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.7);
+        }
 
-.content {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-  padding: 40px 30px;
-  width: 350px;
-  z-index: 99999;
-  border-radius: 10px; /* Rounded corners */
-}
+        .content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            padding: 40px 30px;
+            width: 350px;
+            z-index: 99999;
+            border-radius: 10px;
+        }
 
-.content header {
-  color: white;
-  font-size: 20px;
-  font-weight: 600;
-  margin-bottom: 20px;
-}
+        .content header {
+            color: white;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
 
-.field {
-  position: relative;
-  height: 45px;
-  margin: 15px 0;
-  display: flex;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.9); /* Background for inputs */
-  border-radius: 27px;
-  padding: 0 10px;
-}
+        .field {
+            position: relative;
+            height: 45px;
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 27px;
+            padding: 0 10px;
+        }
 
-.field span {
-  color: #222;
-  font-size: 20px;
-  margin-right: 10px;
-}
+        .field span {
+            color: #222;
+            font-size: 20px;
+            margin-right: 10px;
+        }
 
-.field input {
-  width: 100%;
-  border: none;
-  outline: none;
-  background: transparent;
-  font-size: 16px;
-  color: #222;
-}
+        .field input {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 16px;
+            color: #222;
+        }
 
-.field-btn {
-  margin-top: 20px;
-}
+        .field-btn {
+            margin-top: 20px;
+        }
 
-.field-btn button {
-  width: 100%;
-  height: 45px;
-  background: #3498db; /* Blue background */
-  border: none;
-  color: white;
-  font-size: 18px;
-  font-weight: 600;
-  cursor: pointer;
-  border-radius: 27px;
-  transition: background 0.3s ease;
-}
+        .field-btn button {
+            width: 100%;
+            height: 45px;
+            background: #3498db;
+            border: none;
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 27px;
+            transition: background 0.3s ease;
+        }
 
-.field-btn button:hover {
-  background: #2a80b9; /* Slightly darker on hover */
-}
+        .field-btn button:hover {
+            background: #2a80b9;
+        }
 
-.pass {
-  margin-top: 10px;
-  text-align: left;
-}
+        .pass {
+            margin-top: 10px;
+            text-align: left;
+        }
 
-.pass a {
-  color: white;
-  text-decoration: none;
-  font-size: 14px;
-}
+        .pass a {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+        }
 
-.pass a:hover {
-  text-decoration: underline;
-}
+        .pass a:hover {
+            text-decoration: underline;
+        }
 
+        #installButton {
+            display: none;
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: #27ae60;
+            border: none;
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 27px;
+            transition: background 0.3s ease;
+        }
 
+        #installButton:hover {
+            background: #219a52;
+        }
+
+        #installButton .mdi {
+            margin-right: 8px;
+        }
+
+        .alert {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .alert-danger {
+            background: rgba(231, 76, 60, 0.9);
+            color: white;
+        }
     </style>
 </head>
 <body>
-  <div class="bg-img">
-    <div class="content">
-      <div>
-        <img src="{% static 'assets/images/Sahaayata-pay-logo.png' %}" alt="logo" style="width: 100px; height: 100px;">
-      </div>
-        <header>Grahak Sahaayata Kendra</header>
-        {% if error %}
-    <div class="alert alert-danger">
-        {{ error }}
+    <div class="bg-img">
+        <div class="content">
+            <div>
+                <img src="{% static 'assets/images/Sahaayata-pay-logo.png' %}" alt="logo" style="width: 100px; height: 100px;">
+            </div>
+            <header>Grahak Sahaayata Kendra</header>
+            {% if error %}
+            <div class="alert alert-danger">
+                {{ error }}
+            </div>
+            {% endif %}
+            <form method="post">
+                {% csrf_token %}
+                <div class="field">
+                    <span class="mdi mdi-account"></span>
+                    <input type="text" name="username" placeholder="Username" required>
+                </div>
+                <div class="field space">
+                    <span class="mdi mdi-lock"></span>
+                    <input type="password" name="password" placeholder="Password" required>
+                </div>
+                <div class="field-btn">
+                    <button type="submit">Login</button>
+                </div>
+            </form>
+            <button id="installButton" style="display: none;">
+                <span class="mdi mdi-download"></span>Install App
+            </button>
+        </div>
     </div>
-{% endif %}
-        <form method="post">
-          {% csrf_token %}
-          <!-- Error message display -->
 
-          <div class="field">
-              <span class="mdi mdi-account"></span>
-              <input type="text" name="username" placeholder="Username" required>
-          </div>
-          <div class="field space">
-              <span class="mdi mdi-lock"></span>
-              <input type="password" name="password" placeholder="Password" required>
-          </div>
-          <div class="field-btn">
-              <button type="submit">Login</button>
-          </div>
-      </form>
-    </div>
-</div>
+    <script>
+        // PWA Install functionality
+        let deferredPrompt;
 
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent Chrome 67 and earlier from automatically showing the prompt
+            e.preventDefault();
+            // Stash the event so it can be triggered later
+            deferredPrompt = e;
+            // Show the install button
+            document.getElementById('installButton').style.display = 'inline-flex';
+        });
+
+        document.getElementById('installButton').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                // Show the install prompt
+                deferredPrompt.prompt();
+                // Wait for the user to respond to the prompt
+                const { outcome } = await deferredPrompt.userChoice;
+                // We no longer need the prompt. Clear it up.
+                deferredPrompt = null;
+                // Hide the install button
+                document.getElementById('installButton').style.display = 'none';
+            }
+        });
+
+        // Hide the install button if the app is already installed
+        window.addEventListener('appinstalled', () => {
+            document.getElementById('installButton').style.display = 'none';
+        });
+
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register("{% static 'service-worker.js' %}").then(registration => {
+                    console.log('ServiceWorker registration successful');
+                }).catch(err => {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
+    </script>
 </body>
 </html>
 

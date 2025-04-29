@@ -12,3 +12,7 @@ from .views import account_settings, CustomPasswordChangeView
 
 __all__ = ['add_service', 'view_services']
 
+# This file is intentionally empty to make the directory a Python package
+
+# This file makes the views directory a Python package
+

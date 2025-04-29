@@ -1,389 +1,495 @@
-$(function() {
+$(document).ready(function() {
   /* ChartJS
    * -------
    * Data and config for chartjs
    */
   'use strict';
-  var data = {
-    labels: ["Jan-2024", "Feb-2024", "Mar-2024", "Apr-2024", "May-2024", "Jun-2024",],
-    datasets: [{
-      label: 'Income of Month',
-      data: [15000, 20000, 25000, 20000, 25000, 30000],
-      backgroundColor: [
-        'rgba(255, 99, 132, 0.2)',
-        'rgba(54, 162, 235, 0.2)',
-        'rgba(255, 206, 86, 0.2)',
-        'rgba(75, 192, 192, 0.2)',
-        'rgba(153, 102, 255, 0.2)',
-        'rgba(255, 159, 64, 0.2)'
-      ],
-      borderColor: [
-        'rgba(255,99,132,1)',
-        'rgba(54, 162, 235, 1)',
-        'rgba(255, 206, 86, 1)',
-        'rgba(75, 192, 192, 1)',
-        'rgba(153, 102, 255, 1)',
-        'rgba(255, 159, 64, 1)'
-      ],
-      borderWidth: 1,
-      fill: false
-    }]
-  };
-  var multiLineData = {
-    labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
-    datasets: [{
-        label: 'Dataset 1',
-        data: [12, 19, 3, 5, 2, 3],
-        borderColor: [
-          '#587ce4'
-        ],
-        borderWidth: 2,
-        fill: false
-      },
-      {
-        label: 'Dataset 2',
-        data: [5, 23, 7, 12, 42, 23],
-        borderColor: [
-          '#ede190'
-        ],
-        borderWidth: 2,
-        fill: false
-      },
-      {
-        label: 'Dataset 3',
-        data: [15, 10, 21, 32, 12, 33],
-        borderColor: [
-          '#f44252'
-        ],
-        borderWidth: 2,
-        fill: false
-      }
-    ]
-  };
-  var options = {
-    scales: {
-      yAxes: [{
-        ticks: {
-          beginAtZero: true
-        },
-        gridLines: {
-          color: "rgba(204, 204, 204,0.1)"
-        }
-      }],
-      xAxes: [{
-        gridLines: {
-          color: "rgba(204, 204, 204,0.1)"
-        }
-      }]
-    },
-    legend: {
-      display: false
-    },
-    elements: {
-      point: {
-        radius: 0
-      }
-    }
-  };
-
   
-  var doughnutPieData = {
-    datasets: [{
-      data: [30, 40, 30],
-      backgroundColor: [
-        'rgba(255, 99, 132, 0.5)',
-        'rgba(54, 162, 235, 0.5)',
-        'rgba(255, 206, 86, 0.5)',
-        'rgba(75, 192, 192, 0.5)',
-        'rgba(153, 102, 255, 0.5)',
-        'rgba(255, 159, 64, 0.5)'
-      ],
-      borderColor: [
-        'rgba(255,99,132,1)',
-        'rgba(54, 162, 235, 1)',
-        'rgba(255, 206, 86, 1)',
-        'rgba(75, 192, 192, 1)',
-        'rgba(153, 102, 255, 1)',
-        'rgba(255, 159, 64, 1)'
-      ],
-    }],
+  // Debug flag
+  const DEBUG = true;
 
-    // These labels appear in the legend and in the tooltips when hovering different arcs
-    labels: [
-      'Pink',
-      'Blue',
-      'Yellow',
-    ]
+  // Theme Colors
+  const themeColors = {
+    primary: '#0090e7',
+    success: '#00d25b',
+    warning: '#ffab00',
+    danger: '#fc424a',
+    info: '#8f5fe8',
+    secondary: '#0c161f',
+    gradients: {
+      primary: ['rgba(0, 144, 231, 0.5)', 'rgba(0, 144, 231, 0.05)'],
+      success: ['rgba(0, 210, 91, 0.5)', 'rgba(0, 210, 91, 0.05)'],
+      info: ['rgba(143, 95, 232, 0.5)', 'rgba(143, 95, 232, 0.05)']
+    }
   };
-  var doughnutPieOptions = {
+
+  // Utility Functions
+  const utils = {
+    formatCurrency: function(amount) {
+      return new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      }).format(amount);
+    },
+
+    createGradient: function(ctx, colors) {
+      const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+      gradient.addColorStop(0, colors[0]);
+      gradient.addColorStop(1, colors[1]);
+      return gradient;
+    },
+
+    getRandomColor: function(opacity = 0.2) {
+      const r = Math.floor(Math.random() * 255);
+      const g = Math.floor(Math.random() * 255);
+      const b = Math.floor(Math.random() * 255);
+      return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+    },
+
+    generateColors: function(count, opacity = 0.2) {
+      return Array(count).fill().map(() => this.getRandomColor(opacity));
+    },
+
+    // Default chart colors
+    chartColors: {
+      primary: 'rgba(54, 162, 235, 0.5)',
+      success: 'rgba(75, 192, 192, 0.5)',
+      warning: 'rgba(255, 206, 86, 0.5)',
+      danger: 'rgba(255, 99, 132, 0.5)',
+      info: 'rgba(153, 102, 255, 0.5)',
+      secondary: 'rgba(255, 159, 64, 0.5)'
+    },
+
+    // Function to destroy existing chart if it exists
+    destroyChart: function(chartInstance) {
+      if (chartInstance) {
+        chartInstance.destroy();
+      }
+    },
+
+    debug: function(message, data) {
+      if (DEBUG) {
+        console.log('Debug:', message, data || '');
+      }
+    }
+  };
+
+  // Chart Configurations
+  const chartConfigs = {
+    commonOptions: {
     responsive: true,
+      maintainAspectRatio: false,
     animation: {
-      animateScale: true,
-      animateRotate: true
-    }
-  };
-  var areaData = {
-    labels: ["2013", "2014", "2015", "2016", "2017"],
-    datasets: [{
-      label: '# of Votes',
-      data: [12, 19, 3, 5, 2, 3],
-      backgroundColor: [
-        'rgba(255, 99, 132, 0.2)',
-        'rgba(54, 162, 235, 0.2)',
-        'rgba(255, 206, 86, 0.2)',
-        'rgba(75, 192, 192, 0.2)',
-        'rgba(153, 102, 255, 0.2)',
-        'rgba(255, 159, 64, 0.2)'
-      ],
-      borderColor: [
-        'rgba(255,99,132,1)',
-        'rgba(54, 162, 235, 1)',
-        'rgba(255, 206, 86, 1)',
-        'rgba(75, 192, 192, 1)',
-        'rgba(153, 102, 255, 1)',
-        'rgba(255, 159, 64, 1)'
-      ],
-      borderWidth: 1,
-      fill: true, // 3: no fill
-    }]
-  };
-
-  var areaOptions = {
-    plugins: {
-      filler: {
-        propagate: true
+        duration: 1000,
+        easing: 'easeInOutQuart'
+      },
+      layout: {
+        padding: {
+          left: 0,
+          right: 0,
+          top: 0,
+          bottom: 0
       }
     },
     scales: {
       yAxes: [{
         gridLines: {
-          color: "rgba(204, 204, 204,0.1)"
+            color: 'rgba(204, 204, 204, 0.1)',
+            drawBorder: false,
+            zeroLineColor: 'rgba(204, 204, 204, 0.1)'
+          },
+          ticks: {
+            beginAtZero: true,
+            padding: 10,
+            callback: function(value) {
+              return utils.formatCurrency(value);
+            },
+            fontColor: '#9ca3af'
         }
       }],
       xAxes: [{
         gridLines: {
-          color: "rgba(204, 204, 204,0.1)"
-        }
-      }]
-    }
-  }
-
-  var multiAreaData = {
-    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-    datasets: [{
-        label: 'Facebook',
-        data: [8, 11, 13, 15, 12, 13, 16, 15, 13, 19, 11, 14],
-        borderColor: ['rgba(255, 99, 132, 0.5)'],
-        backgroundColor: ['rgba(255, 99, 132, 0.5)'],
-        borderWidth: 1,
-        fill: true
-      },
-      {
-        label: 'Twitter',
-        data: [7, 17, 12, 16, 14, 18, 16, 12, 15, 11, 13, 9],
-        borderColor: ['rgba(54, 162, 235, 0.5)'],
-        backgroundColor: ['rgba(54, 162, 235, 0.5)'],
-        borderWidth: 1,
-        fill: true
-      },
-      {
-        label: 'Linkedin',
-        data: [6, 14, 16, 20, 12, 18, 15, 12, 17, 19, 15, 11],
-        borderColor: ['rgba(255, 206, 86, 0.5)'],
-        backgroundColor: ['rgba(255, 206, 86, 0.5)'],
-        borderWidth: 1,
-        fill: true
-      }
-    ]
-  };
-
-  var multiAreaOptions = {
-    plugins: {
-      filler: {
-        propagate: true
-      }
-    },
-    elements: {
-      point: {
-        radius: 0
-      }
-    },
-    scales: {
-      xAxes: [{
-        gridLines: {
-          display: false
-        }
-      }],
-      yAxes: [{
-        gridLines: {
-          display: false
-        }
-      }]
-    }
-  }
-
-  var scatterChartData = {
-    datasets: [{
-        label: 'First Dataset',
-        data: [{
-            x: -10,
-            y: 0
+            display: false,
+            drawBorder: false
           },
-          {
-            x: 0,
-            y: 3
-          },
-          {
-            x: -25,
-            y: 5
-          },
-          {
-            x: 40,
-            y: 5
+          ticks: {
+            padding: 10,
+            fontColor: '#9ca3af'
           }
-        ],
-        backgroundColor: [
-          'rgba(255, 99, 132, 0.2)'
-        ],
-        borderColor: [
-          'rgba(255,99,132,1)'
-        ],
-        borderWidth: 1
+        }]
       },
-      {
-        label: 'Second Dataset',
-        data: [{
-            x: 10,
-            y: 5
-          },
-          {
-            x: 20,
-            y: -30
-          },
-          {
-            x: -25,
-            y: 15
-          },
-          {
-            x: -10,
-            y: 5
-          }
-        ],
-        backgroundColor: [
-          'rgba(54, 162, 235, 0.2)',
-        ],
-        borderColor: [
-          'rgba(54, 162, 235, 1)',
-        ],
-        borderWidth: 1
-      }
-    ]
-  }
-
-  var scatterChartOptions = {
-    scales: {
-      xAxes: [{
-        type: 'linear',
-        position: 'bottom',
-        gridLines: {
-          color: "rgba(204, 204, 204,0.1)"
+      legend: {
+        display: true,
+        position: 'top',
+        labels: {
+          fontColor: '#9ca3af',
+          usePointStyle: true,
+          padding: 20,
+          boxWidth: 8
         }
-      }],
+      },
+      tooltips: {
+        mode: 'index',
+        intersect: false,
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        titleFontColor: '#fff',
+        bodyFontColor: '#fff',
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+        borderWidth: 1,
+        cornerRadius: 4,
+        xPadding: 10,
+        yPadding: 10,
+        callbacks: {
+          label: function(tooltipItem, data) {
+            return data.datasets[tooltipItem.datasetIndex].label + ': ' + utils.formatCurrency(tooltipItem.yLabel);
+          }
+        }
+      }
+    },
+
+    pieOptions: {
+      responsive: true,
+      maintainAspectRatio: false,
+      legend: {
+        position: 'right',
+        labels: {
+          boxWidth: 12
+        }
+      },
+      animation: {
+        animateScale: true,
+        animateRotate: true
+      }
+    }
+  };
+
+  // Track chart instances
+  let charts = {
+    income: null,
+    barChart: null,
+    lineChart: null,
+    pieChart: null,
+    doughnutChart: null,
+    areaChart: null,
+    trend: null
+  };
+
+  // Chart Data Fetching Functions
+  const api = {
+    getDashboardData: function() {
+      return $.ajax({
+        url: '/get-dashboard-data/',
+        method: 'GET'
+      });
+    },
+    getMonthlyIncome: function() {
+      return $.ajax({
+        url: '/get-monthly-income-data/',
+        method: 'GET'
+      });
+    }
+  };
+
+  // Chart Initialization Functions
+  function initIncomeChart() {
+    utils.debug('Initializing Income Chart');
+    
+    const canvas = document.getElementById('incomeChart');
+    if (!canvas) {
+      utils.debug('Income Chart canvas not found');
+      return;
+    }
+
+    // Destroy existing chart if it exists
+    if (charts.income) {
+      charts.income.destroy();
+    }
+
+    const ctx = canvas.getContext('2d');
+    const gradient = utils.createGradient(ctx, themeColors.gradients.primary);
+    
+    // Set default data in case API fails
+    const defaultData = {
+      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+      data: [10000, 15000, 20000, 25000, 30000, 35000]
+    };
+
+    // First create chart with default data
+    charts.income = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: defaultData.labels,
+        datasets: [{
+          label: 'Monthly Income',
+          data: defaultData.data,
+          backgroundColor: gradient,
+          borderColor: themeColors.primary,
+          borderWidth: 2,
+          borderRadius: 5,
+          hoverBackgroundColor: themeColors.primary,
+          pointBackgroundColor: '#fff',
+          pointBorderColor: themeColors.primary,
+          pointHoverBackgroundColor: themeColors.primary,
+          pointHoverBorderColor: '#fff'
+        }]
+      },
+      options: {
+        ...chartConfigs.commonOptions,
+        barRoundness: 1,
+    scales: {
+          ...chartConfigs.commonOptions.scales,
       yAxes: [{
-        gridLines: {
-          color: "rgba(204, 204, 204,0.1)"
+            ...chartConfigs.commonOptions.scales.yAxes[0],
+            ticks: {
+              ...chartConfigs.commonOptions.scales.yAxes[0].ticks,
+              maxTicksLimit: 6
         }
       }]
     }
   }
-  // Get context with jQuery - using jQuery's .get() method.
-  if ($("#barChart").length) {
-    var barChartCanvas = $("#barChart").get(0).getContext("2d");
-    // This will get the first returned node in the jQuery collection.
-    var barChart = new Chart(barChartCanvas, {
+    });
+
+    // Then fetch real data
+    $.ajax({
+      url: '/get-monthly-income-data/',
+      method: 'GET',
+      success: function(response) {
+        utils.debug('Income data received', response);
+        
+        if (response && response.labels && response.total_centers && response.total_bills) {
+          charts.income.data.labels = response.labels;
+          charts.income.data.datasets = [
+            {
+              label: 'Total Centers',
+              data: response.total_centers,
+              backgroundColor: utils.chartColors.primary,
+              borderColor: utils.chartColors.primary,
+              borderWidth: 2,
+              borderRadius: 5
+            },
+            {
+              label: 'Total Bills',
+              data: response.total_bills,
+              backgroundColor: utils.chartColors.danger,
+              borderColor: utils.chartColors.danger,
+              borderWidth: 2,
+              borderRadius: 5
+            }
+          ];
+          charts.income.update();
+        }
+      },
+      error: function(error) {
+        utils.debug('Error fetching income data:', error);
+      }
+    });
+  }
+
+  function initBarChart() {
+    const ctx = document.getElementById('barChart');
+    if (!ctx) return;
+
+    const data = {
+      labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+      datasets: [{
+        label: 'Sales',
+        data: [15000, 20000, 25000, 30000, 35000, 40000],
+        backgroundColor: Object.values(utils.chartColors),
+        borderColor: Object.values(utils.chartColors),
+        borderWidth: 1
+      }]
+    };
+
+    charts.barChart = new Chart(ctx, {
       type: 'bar',
       data: data,
-      options: options
+      options: chartConfigs.commonOptions
     });
   }
 
-  if ($("#lineChart").length) {
-    var lineChartCanvas = $("#lineChart").get(0).getContext("2d");
-    var lineChart = new Chart(lineChartCanvas, {
+  function initLineChart() {
+    const ctx = document.getElementById('lineChart');
+    if (!ctx) return;
+
+    const data = {
+      labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+      datasets: [{
+        label: 'Revenue',
+        data: [25000, 30000, 27000, 35000, 40000, 45000],
+        borderColor: utils.chartColors.primary,
+        tension: 0.4,
+        fill: false
+      }]
+    };
+
+    charts.lineChart = new Chart(ctx, {
       type: 'line',
       data: data,
-      options: options
+      options: chartConfigs.commonOptions
     });
   }
 
-  if ($("#linechart-multi").length) {
-    var multiLineCanvas = $("#linechart-multi").get(0).getContext("2d");
-    var lineChart = new Chart(multiLineCanvas, {
-      type: 'line',
-      data: multiLineData,
-      options: options
-    });
-  }
+  function initDoughnutChart() {
+    const ctx = document.getElementById('doughnutChart');
+    if (!ctx) return;
 
-  if ($("#areachart-multi").length) {
-    var multiAreaCanvas = $("#areachart-multi").get(0).getContext("2d");
-    var multiAreaChart = new Chart(multiAreaCanvas, {
-      type: 'line',
-      data: multiAreaData,
-      options: multiAreaOptions
-    });
-  }
+    const data = {
+      labels: ['Online', 'Offline', 'Other'],
+      datasets: [{
+        data: [45000, 35000, 20000],
+        backgroundColor: [
+          utils.chartColors.primary,
+          utils.chartColors.success,
+          utils.chartColors.warning
+        ]
+      }]
+    };
 
-  if ($("#doughnutChart").length) {
-    var doughnutChartCanvas = $("#doughnutChart").get(0).getContext("2d");
-    var doughnutChart = new Chart(doughnutChartCanvas, {
+    charts.doughnutChart = new Chart(ctx, {
       type: 'doughnut',
-      data: doughnutPieData,
-      options: doughnutPieOptions
+      data: data,
+      options: chartConfigs.pieOptions
     });
   }
 
-  if ($("#pieChart").length) {
-    var pieChartCanvas = $("#pieChart").get(0).getContext("2d");
-    var pieChart = new Chart(pieChartCanvas, {
-      type: 'pie',
-      data: doughnutPieData,
-      options: doughnutPieOptions
-    });
-  }
+  function initTrendChart() {
+    utils.debug('Initializing Trend Chart');
+    
+    const canvas = document.getElementById('trendChart');
+    if (!canvas) {
+      utils.debug('Trend Chart canvas not found');
+      return;
+    }
 
-  if ($("#areaChart").length) {
-    var areaChartCanvas = $("#areaChart").get(0).getContext("2d");
-    var areaChart = new Chart(areaChartCanvas, {
+    // Destroy existing chart if it exists
+    if (charts.trend) {
+      charts.trend.destroy();
+    }
+
+    const ctx = canvas.getContext('2d');
+    const gradient = utils.createGradient(ctx, themeColors.gradients.success);
+    
+    // Set default data in case API fails
+    const defaultData = {
+      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+      data: [5000, 8000, 12000, 15000, 20000, 25000]
+    };
+
+    // First create chart with default data
+    charts.trend = new Chart(ctx, {
       type: 'line',
-      data: areaData,
-      options: areaOptions
+      data: {
+        labels: defaultData.labels,
+        datasets: [{
+          label: 'Sales Trend',
+          data: defaultData.data,
+          backgroundColor: gradient,
+          borderColor: themeColors.success,
+          borderWidth: 3,
+          pointRadius: 4,
+          pointBackgroundColor: '#fff',
+          pointBorderColor: themeColors.success,
+          pointHoverRadius: 6,
+          pointHoverBackgroundColor: themeColors.success,
+          pointHoverBorderColor: '#fff',
+          tension: 0.4,
+          fill: true
+        }]
+      },
+      options: {
+        ...chartConfigs.commonOptions,
+        elements: {
+          line: {
+            tension: 0.4
+          }
+        }
+      }
+    });
+
+    // Then fetch real data
+    $.ajax({
+      url: '/get-dashboard-data/',
+      method: 'GET',
+      success: function(response) {
+        utils.debug('Trend data received', response);
+        
+        if (response && response.trend && response.trend.labels && response.trend.total_services && response.trend.total_bills) {
+          charts.trend.data.labels = response.trend.labels;
+          charts.trend.data.datasets = [
+            {
+              label: 'Total Services',
+              data: response.trend.total_services,
+              backgroundColor: utils.chartColors.success,
+              borderColor: utils.chartColors.success,
+              borderWidth: 2,
+              borderRadius: 5
+            },
+            {
+              label: 'Total Bills',
+              data: response.trend.total_bills,
+              backgroundColor: utils.chartColors.danger,
+              borderColor: utils.chartColors.danger,
+              borderWidth: 2,
+              borderRadius: 5
+            }
+          ];
+          charts.trend.update();
+        } else if (response && response.trend && response.trend.labels && response.trend.data) {
+          // fallback for old data
+          charts.trend.data.labels = response.trend.labels;
+          charts.trend.data.datasets[0].data = response.trend.data;
+          charts.trend.update();
+        }
+      },
+      error: function(error) {
+        utils.debug('Error fetching trend data:', error);
+      }
     });
   }
 
-  if ($("#scatterChart").length) {
-    var scatterChartCanvas = $("#scatterChart").get(0).getContext("2d");
-    var scatterChart = new Chart(scatterChartCanvas, {
-      type: 'scatter',
-      data: scatterChartData,
-      options: scatterChartOptions
-    });
+  // Update Dashboard Statistics
+  function updateDashboardStats(data) {
+    utils.debug('Updating dashboard stats', data);
+    
+    if (data.monthly) {
+      $('#monthlyAmount').text(utils.formatCurrency(data.monthly.total_amount || 0));
+      $('#monthlyOrders').text(data.monthly.total_orders || 0);
+    }
+    if (data.yearly) {
+      $('#yearlyAmount').text(utils.formatCurrency(data.yearly.total_amount || 0));
+      $('#yearlyOrders').text(data.yearly.total_orders || 0);
+    }
   }
 
-  if ($("#browserTrafficChart").length) {
-    var doughnutChartCanvas = $("#browserTrafficChart").get(0).getContext("2d");
-    var doughnutChart = new Chart(doughnutChartCanvas, {
-      type: 'doughnut',
-      data: browserTrafficData,
-      options: doughnutPieOptions
-    });
-  }
+  // Handle Window Resize
+  let resizeTimer;
+  $(window).on('resize', function() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function() {
+      utils.debug('Window resized, reinitializing charts');
+      initIncomeChart();
+      initTrendChart();
+    }, 250);
+  });
 
-  
+  // Auto-refresh data every 5 minutes
+  let refreshInterval = setInterval(function() {
+    utils.debug('Refreshing charts');
+    initIncomeChart();
+    initTrendChart();
+  }, 300000);
+
+  // Initialize everything when document is ready
+  utils.debug('Starting chart initialization');
+  initIncomeChart();
+  initTrendChart();
+
+  // Year selector change event
+  $('#yearSelector').on('change', function() {
+    initIncomeChart();
+    initTrendChart();
+  });
 });
-
-
-
-// Doughnut Chart Start //
-
 

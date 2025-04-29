@@ -5,15 +5,30 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="manifest" href="/static/manifest.json">
-<meta name="theme-color" content="#0047ab">
-    <title>{% block title %}GST SAHAAYATA KENDRA{% endblock %}</title>
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+    <meta name="theme-color" content="#0047ab">
+    
+    <!-- PWA icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'assets/images/Sahaayata-pay-logo.png' %}">
+    <link rel="icon" type="image/png" sizes="48x48" href="{% static 'assets/images/Sahaayata-pay-logo.png' %}">
+    <link rel="icon" type="image/png" sizes="128x128" href="{% static 'assets/images/Sahaayata-pay-logo.png' %}">
+    <link rel="icon" type="image/png" sizes="192x192" href="{% static 'assets/images/Sahaayata-pay-logo.png' %}">
+    <link rel="icon" type="image/png" sizes="512x512" href="{% static 'assets/images/Sahaayata-pay-logo.png' %}">
+    
+    <!-- Apple specific -->
+    <link rel="apple-touch-icon" sizes="192x192" href="{% static 'assets/images/Sahaayata-pay-logo.png' %}">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="GSK">
+    
+    <title>{% block title %}Grahak Sahaayata Kendra{% endblock %}</title>
     <!-- Plugins: CSS -->
     <link rel="stylesheet" href="{% static 'assets/vendors/mdi/css/materialdesignicons.min.css' %}">
     <link rel="stylesheet" href="{% static 'assets/vendors/css/vendor.bundle.base.css' %}">
     <!-- Layout styles -->
     <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
     <link rel="stylesheet" href="{% static 'assets/css/custom.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/themes.css' %}">
     <link rel="shortcut icon" href="{% static 'assets/images/Sahaayata-pay-logo.png' %}" />
 
     
@@ -58,31 +73,32 @@
     <!-- endinject -->
     <!-- Custom js for this page -->
     <script src="{% static 'assets/js/dashboard.js'%}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('{% static "sw.js" %}')
+            .then(function(registration) {
+              console.log('ServiceWorker registration successful');
+            })
+            .catch(function(err) {
+              console.log('ServiceWorker registration failed: ', err);
+            });
+        });
+      }
+    </script>
 
-  
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
+        var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
+          return new bootstrap.Dropdown(dropdownToggleEl);
+        });
+        console.log("Dropdowns initialized!");
+      });
+    </script>
 
-    
-  
-
-
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
-    var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
-      return new bootstrap.Dropdown(dropdownToggleEl);
-    });
-    console.log("Dropdowns initialized!");
-  });
-
-
-</script>
-
-
-
-
-
-
+    {% block extra_js %}{% endblock %}
   </body>
 </html>

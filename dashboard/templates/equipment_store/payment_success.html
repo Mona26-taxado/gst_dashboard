@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-10">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        <i class="mdi mdi-check-circle text-success" style="font-size: 64px;"></i>
+                    </div>
+                    <h2 class="card-title">Payment Successful!</h2>
+                    <p class="card-text">Your order #{{ order.id }} has been confirmed.</p>
+                    <div class="order-details mt-4">
+                        <h4>Order Details</h4>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <tr>
+                                    <td>Equipment:</td>
+                                    <td>{{ order.equipment.name }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Quantity:</td>
+                                    <td>{{ order.quantity }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Amount Paid:</td>
+                                    <td>₹{{ order.total_amount }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <a href="{% url 'equipment_store' %}" class="btn btn-primary">Continue Shopping</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

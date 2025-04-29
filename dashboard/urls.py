@@ -15,6 +15,8 @@ from dashboard.views import admin_views, retailer_views
 from dashboard.views.retailer_views import add_customer as retailer_add_customer, delete_customer as retailer_delete_customer, retailer_view_transactions, wallet_recharge_view, banking_portal_request # Correct import statement
 from dashboard.views import retailer_views
 from dashboard.views.distributor_views import add_gsk, view_gsk, edit_gsk, delete_gsk, add_customer as distributor_add_customer, delete_customer, distributor_view_transactions, wallet_recharge_view, banking_portal_request
+from .views.views import equipment_store, get_monthly_income_data
+from .views.equipment_views import equipment_billing, equipment_payment, check_payment_status, payment_success, admin_equipment_billing, update_equipment_order_status
 
 
  #edit_customer  Import the function from retailer_views
@@ -70,6 +72,8 @@ urlpatterns = [
 
     # Retailer URLs
     path('retailer/dashboard/', retailer_views.retailer_dashboard, name='retailer_dashboard'),
+    path('retailer/monthly-deductions/', retailer_views.get_retailer_monthly_deductions, name='retailer_monthly_deductions'),
+    path('retailer/services-distribution/', retailer_views.get_services_distribution, name='retailer_services_distribution'),
     path('retailer/add-customer/', retailer_views.add_customer, name='retailer_add_customer'),
     path('retailer/view-customer/', retailer_views.view_customer, name='retailer_view_customer'),
     path('retailer/edit-customer/<int:customer_id>/', retailer_views.edit_customer, name='retailer_edit_customer'),
@@ -83,6 +87,7 @@ urlpatterns = [
     path('retailer/view-billing/<int:billing_id>/', retailer_views.view_billing_details, name='retailer_view_billing_details'),
     path('retailer/edit-billing/<int:billing_id>/', retailer_views.edit_billing, name='retailer_edit_billing'),
     path('dashboard/retailer/view-transactions/', retailer_view_transactions, name='retailer_view_transactions'),
+
 
 
     # Distributor URLs
@@ -118,5 +123,13 @@ urlpatterns = [
     # Other routes
     path('additional-services/', additional_services, name='additional_services'),
     path('account/settings/', account_settings, name='account_settings'),
+    path('equipment-store/', equipment_store, name='equipment_store'),
+    path('equipment-store/billing/<int:equipment_id>/', equipment_billing, name='equipment_billing'),
+    path('equipment-store/payment/', equipment_payment, name='equipment_payment'),
+    path('equipment-store/check-payment-status/<int:order_id>/', check_payment_status, name='check_payment_status'),
+    path('equipment-store/payment/success/<int:order_id>/', payment_success, name='payment_success'),
+    path('equipment-store/admin-billing/', admin_equipment_billing, name='admin_equipment_billing'),
+    path('equipment-store/update-order-status/<int:order_id>/', update_equipment_order_status, name='update_equipment_order_status'),
+    path('get-monthly-income-data/', get_monthly_income_data, name='get_monthly_income_data'),
 
 ]

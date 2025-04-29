@@ -41,6 +41,101 @@ a.additional-ser {
     text-decoration: none;
     background-color: #2c2e35;
     }
+
+.stat-card {
+    background: rgba(0, 0, 0, 0.05);
+    padding: 15px 20px;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .stat-card {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] .stat-card:hover {
+    box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1);
+}
+
+#yearSelector {
+    background: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 8px 15px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+[data-theme="dark"] #yearSelector {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+#yearSelector:hover {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] #yearSelector:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* Add new chart styles */
+.chart-container {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .chart-container {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.chart-container:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] .chart-container:hover {
+    box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1);
+}
+
+.chart-title {
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin-bottom: 15px;
+}
+
+.stats-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: 8px;
+    flex: 1;
+    margin: 0 5px;
+}
+
+[data-theme="dark"] .stat-item {
+    background: rgba(255, 255, 255, 0.03);
+}
+@media (max-width: 768px) {
+  .container-flud {
+    margin-top: 110px;
+}
+}
 </style>
      
       <!-- partial -->
@@ -61,7 +156,7 @@ a.additional-ser {
                       </div>
                       <div class="col-5 col-sm-7 col-xl-8 p-0">
                         <h4 class="mb-1 mb-sm-0">Want even more features?</h4>
-                        <p class="mb-0 font-weight-normal d-none d-sm-block">Check out our Pro version with Grahak Sahaayata Kendra!</p>
+                        <p class="mb-0 font-weight-normal d-none d-sm-block">Check out our Pro version with Grahak Sahaayata KLendra!</p>
                       </div>
                       <div class="col-3 col-sm-2 col-xl-2 pl-0 text-center">
                         <span>
@@ -149,45 +244,51 @@ a.additional-ser {
               
             </div>
             <!-- Support Design Start -->
-            <a href="tel:+91 9129971644" class="whatsApp"><img src="{% static 'assets/images/customer-service.png'%}" class="whtsap-icon" alt="whtsap-icon"/></a>
+            <a href="tel:+91 7007843082" class="whatsApp"><img src="{% static 'assets/images/customer-service.png'%}" class="whtsap-icon" alt="whtsap-icon"/></a>
             
             <!-- Support Design End -->
             <div class="row">
-              <div class="col-md-4 grid-margin stretch-card">
+              <div class="col-md-8 grid-margin stretch-card">
                 <div class="card">
                   <div class="card-body">
-                    <h4 class="card-title">Total Sales</h4>
-                    <canvas id="doughnutChart"></canvas>
-                    <div class="bg-gray-dark d-flex d-md-block d-xl-flex flex-row py-3 px-4 px-md-3 px-xl-4 rounded mt-3">
-                      <div class="text-md-center text-xl-left">
-                        <h6 class="mb-1">Total GSK:</h6>
-                        <p class="text-muted mb-0"></p>
-                      </div>
-                      <div class="align-self-center flex-grow text-right text-md-center text-xl-right py-md-2 py-xl-0">
-                        <h6 class="font-weight-bold mb-0">{{ total_centers }}</h6>
-                      </div>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                      <h4 class="card-title mb-0">Monthly Income</h4>
                     </div>
-                    <div class="bg-gray-dark d-flex d-md-block d-xl-flex flex-row py-3 px-4 px-md-3 px-xl-4 rounded mt-3">
-                      <div class="text-md-center text-xl-left">
-                        <h6 class="mb-1">Total Billing: </h6>
-                        <p class="text-muted mb-0"></p>
+                    <div class="chart-container">
+                      <canvas id="incomeChart"></canvas>
+                    </div>
+                    <div class="stats-container">
+                      <div class="stat-item">
+                        <h6>Total GSK</h6>
+                        <h4 id="monthlyAmount">{{ total_centers }}</h4>
                       </div>
-                      <div class="align-self-center flex-grow text-right text-md-center text-xl-right py-md-2 py-xl-0">
-                        <h6 class="font-weight-bold mb-0">{{ total_bills }}</h6>
+                      <div class="stat-item">
+                        <h6>Total Billing</h6>
+                        <h4 id="monthlyOrders">{{ total_bills }}</h4>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-              <div class="col-md-8 grid-margin stretch-card">
+
+              <div class="col-md-4 grid-margin stretch-card">
                 <div class="card">
                   <div class="card-body">
-                    <div class="d-flex flex-row justify-content-between">
-                      <h4 class="card-title mb-1">Net Income</h4>
-                      <p class="text-muted mb-1">Sales of This Month: ₹{{ net_income_monthly }}</p>
+                    <h4 class="card-title">Total Sales</h4>
+                    <div class="chart-container">
+                      <canvas id="trendChart"></canvas>
                     </div>
-                        <canvas id="barChart" style="height:324px; display: block; width:552px ;"></canvas>
+                    <div class="stats-container">
+                      <div class="stat-item">
+                        <h6>Total Service</h6>
+                        <h4 id="yearlyAmount"> {{ total_services }}</h4>
                       </div>
+                      <div class="stat-item">
+                        <h6>Total Income</h6>
+                        <h4 id="yearlyOrders">0</h4>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -219,7 +320,7 @@ a.additional-ser {
                 <div class="card">
                   <div class="card-body">
                     <h5></h5>
-                    <a href="{% url 'pin_entry' %}" class="additional-ser">
+                    <a href="{% url 'equipment_store' %}" class="additional-ser">
                     <div class="row">
                       <div class="col-8 col-sm-12 col-xl-8 my-auto">
                         <div class="d-flex d-sm-block d-md-flex align-items-center">
@@ -305,4 +406,6 @@ a.additional-ser {
       <!-- page-body-wrapper ends -->
     </div>
    
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+<script src="{% static 'assets/js/chart.js' %}"></script>
 {% endblock %}
