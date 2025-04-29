@@ -16,7 +16,7 @@
     <link rel="icon" type="image/png" sizes="512x512" href="{% static 'assets/images/Sahaayata-pay-logo.png' %}">
     
     <!-- Apple specific -->
-    <link rel="apple-touch-icon" sizes="192x192" href="{% static 'assets/images/Sahaayata-pay-logo.png' %}">
+    <link rel="apple-touch-icon" sizes="192x192" href="{% static 'Sahaayata-pay-logo.png' %}">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="apple-mobile-web-app-title" content="GSK">
@@ -29,7 +29,7 @@
     <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
     <link rel="stylesheet" href="{% static 'assets/css/custom.css' %}">
     <link rel="stylesheet" href="{% static 'assets/css/themes.css' %}">
-    <link rel="shortcut icon" href="{% static 'assets/images/Sahaayata-pay-logo.png' %}" />
+    <link rel="shortcut icon" href="{% static 'Sahaayata-pay-logo.png' %}" />
 
     
   </head>
@@ -70,6 +70,7 @@
     <script src="{% static 'assets/js/misc.js'%}"></script>
     <script src="{% static 'assets/js/settings.js'%}"></script>
     <script src="{% static 'assets/js/todolist.js'%}"></script>
+    <script src="{% static 'service-worker.js'%}"></script>
     <!-- endinject -->
     <!-- Custom js for this page -->
     <script src="{% static 'assets/js/dashboard.js'%}"></script>
@@ -97,6 +98,30 @@
         });
         console.log("Dropdowns initialized!");
       });
+
+      let deferredInstallPrompt;
+
+window.addEventListener('beforeinstallprompt', e => {
+  // Prevent Chrome’s mini-infobar from appearing
+  e.preventDefault();
+  // Stash the event so you can trigger it later.
+  deferredInstallPrompt = e;
+  // Show your “Install” button
+  document.querySelector('#btn-install').style.display = 'block';
+});
+
+document.querySelector('#btn-install').addEventListener('click', async () => {
+  // Hide your button:
+  document.querySelector('#btn-install').style.display = 'none';
+  // Show the install prompt
+  deferredInstallPrompt.prompt();
+  // Wait for the user to respond
+  const { outcome } = await deferredInstallPrompt.userChoice;
+  console.log('User response to the install prompt:', outcome);
+  // Clear the saved prompt since it can only be used once
+  deferredInstallPrompt = null;
+});
+
     </script>
 
     {% block extra_js %}{% endblock %}
