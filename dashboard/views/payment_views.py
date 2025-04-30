@@ -4,6 +4,9 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from ..models import Equipment, EquipmentOrder
 from decimal import Decimal
+import qrcode
+import base64
+from io import BytesIO
 
 @login_required
 def billing_details(request, equipment_id):
@@ -88,4 +91,36 @@ def process_payment(request):
         'order': order
     }
     
-    return render(request, 'equipment_store/payment_processing.html', context) 
+    return render(request, 'equipment_store/payment_processing.html', context)
+
+@login_required
+def initiate_upi_payment(request):
+    if request.method == 'POST':
+        amount = request.POST.get('amount')
+        plan_id = request.POST.get('plan_id')
+        
+        # Generate UPI payment link
+        upi_id = "9336323478@okbizaxis"
+        upi_link = f"upi://pay?pa={upi_id}&pn=Grahak%20Sahaayata%20Kendra&am={amount}&tn=Recharge%20Plan%20{plan_id}"
+        
+        # Generate QR code
+        qr = qrcode.QRCode(version=1, box_size=10, border=5)
+        qr.add_data(upi_link)
+        qr.make(fit=True)
+        qr_image = qr.make_image(fill_color="black", back_color="white")
+        
+        # Convert QR code to base64 string
+        buffer = BytesIO()
+        qr_image.save(buffer, format="PNG")
+        qr_code_base64 = base64.b64encode(buffer.getvalue()).decode()
+        
+        context = {
+            'amount': amount,
+            'plan_id': plan_id,
+            'qr_code': qr_code_base64,
+            'upi_link': upi_link
+        }
+        
+        return render(request, 'dashboard/upi_payment.html', context)
+    
+    return redirect('recharge_plans') 

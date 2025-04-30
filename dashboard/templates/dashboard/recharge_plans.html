@@ -1,0 +1,41 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Recharge Plans</h2>
+    <div class="row">
+        {% for plan in plans %}
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">{{ plan.name }}</h5>
+                </div>
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">₹{{ plan.amount }}</h6>
+                    <p class="card-text">{{ plan.description }}</p>
+                    <div class="d-flex justify-content-between">
+                        <form method="post" action="{% url 'initiate_upi_payment' %}" class="d-inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="amount" value="{{ plan.amount }}">
+                            <input type="hidden" name="plan_id" value="{{ plan.id }}">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-wallet"></i> Pay with UPI
+                            </button>
+                        </form>
+                        <form method="post" action="{% url 'initiate_payment' %}" class="d-inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="amount" value="{{ plan.amount }}">
+                            <input type="hidden" name="plan_id" value="{{ plan.id }}">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-credit-card"></i> Pay with Card
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %} 

@@ -73,6 +73,7 @@
                     <th>Service Name</th>
                     <th>Price</th>
                     <th>Status</th>
+                    <th>Apply</th>
                 </tr>
             </thead>
             <tbody>
@@ -82,10 +83,13 @@
                     <td>{{ service.service_name }}</td>
                     <td>{{ service.price }}</td>
                     <td>{{ service.status }}</td>
+                    <td>
+                        <a href="{% url 'retailer_add_customer' %}" class="btn btn-success btn-sm">Apply Now</a>
+                    </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="3">No services available</td>
+                    <td colspan="5">No services available</td>
                 </tr>
                 {% endfor %}
             </tbody>

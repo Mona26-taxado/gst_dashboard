@@ -235,10 +235,13 @@ class BillingDetails(models.Model):
     )
     service_notes = models.TextField(null=True, blank=True)
     admin_completed_file = models.FileField(upload_to='completed_service_files/', null=True, blank=True)
+    invoice_id = models.CharField(max_length=100, unique=True, null=True, blank=True)  # Add this field
 
     def save(self, *args, **kwargs):
         if not self.ref_no:
             self.ref_no = f"REF-{random.randint(1000, 9999)}-{random.randint(1000000000, 9999999999)}"
+        if not self.invoice_id:
+            self.invoice_id = f"INV-{random.randint(1000, 9999)}-{random.randint(1000000000, 9999999999)}"
         super().save(*args, **kwargs)
 
 
@@ -342,6 +345,18 @@ class EquipmentOrder(models.Model):
             self.gst_amount = self.base_price * Decimal('0.18')
             self.total_amount = self.base_price + self.gst_amount
         super().save(*args, **kwargs)
+
+class Invoice(models.Model):
+    billing = models.ForeignKey('BillingDetails', on_delete=models.CASCADE)
+    retailer = models.ForeignKey('CustomUser', on_delete=models.CASCADE)
+    invoice_number = models.CharField(max_length=255, unique=True)
+    customer_name = models.CharField(max_length=255)
+    service_name = models.CharField(max_length=255)
+    original_service_charge = models.DecimalField(max_digits=10, decimal_places=2)
+    invoice_date = models.DateTimeField()
+
+    def __str__(self):
+        return f"Invoice {self.invoice_number} for {self.customer_name}"
 
 
 

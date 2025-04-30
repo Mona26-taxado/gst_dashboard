@@ -349,7 +349,7 @@ def get_monthly_income_data(request):
         labels.append(month_name)
         centers_data.append(centers_count)
         bills_data.append(bills_count)
-
+    
     return JsonResponse({
         'labels': labels,
         'total_centers': centers_data,

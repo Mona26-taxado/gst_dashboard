@@ -268,15 +268,15 @@ $(document).ready(function() {
               borderColor: utils.chartColors.primary,
               borderWidth: 2,
               borderRadius: 5
-            },
-            {
+      },
+      {
               label: 'Total Bills',
               data: response.total_bills,
               backgroundColor: utils.chartColors.danger,
               borderColor: utils.chartColors.danger,
               borderWidth: 2,
               borderRadius: 5
-            }
+      }
           ];
           charts.income.update();
         }
