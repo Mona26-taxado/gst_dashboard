@@ -9,8 +9,9 @@ from .views import additional_services, generate_qr_for_recharge  # Import the a
 from .admin_views import add_service, view_services
 from .views import custom_logout_view
 from .views import account_settings, CustomPasswordChangeView
+from .payment_views import initiate_upi_payment
 
-__all__ = ['add_service', 'view_services']
+__all__ = ['add_service', 'view_services', 'initiate_upi_payment']
 
 # This file is intentionally empty to make the directory a Python package
 

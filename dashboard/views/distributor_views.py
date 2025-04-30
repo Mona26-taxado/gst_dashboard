@@ -243,7 +243,7 @@ def add_customer(request):
             # Now save the object to the database
             customer.save()
             messages.success(request, "Customer added successfully!")
-            return redirect('distributor_view_customer')  # Redirect after successful save
+            return redirect('distributor_add_billing')  # Redirect after successful save
     else:
         form = AddCustomerForm()
     return render(request, 'distributor_dashboard/add_customer.html', {'form': form})

@@ -17,6 +17,7 @@ from dashboard.views import retailer_views
 from dashboard.views.distributor_views import add_gsk, view_gsk, edit_gsk, delete_gsk, add_customer as distributor_add_customer, delete_customer, distributor_view_transactions, wallet_recharge_view, banking_portal_request
 from .views.views import equipment_store, get_monthly_income_data
 from .views.equipment_views import equipment_billing, equipment_payment, check_payment_status, payment_success, admin_equipment_billing, update_equipment_order_status
+from .views import initiate_upi_payment
 
 
  #edit_customer  Import the function from retailer_views
@@ -87,6 +88,7 @@ urlpatterns = [
     path('retailer/view-billing/<int:billing_id>/', retailer_views.view_billing_details, name='retailer_view_billing_details'),
     path('retailer/edit-billing/<int:billing_id>/', retailer_views.edit_billing, name='retailer_edit_billing'),
     path('dashboard/retailer/view-transactions/', retailer_view_transactions, name='retailer_view_transactions'),
+    path('recharge-plans/', retailer_views.recharge_plans_view, name='recharge_plans'),
 
 
 
@@ -131,5 +133,6 @@ urlpatterns = [
     path('equipment-store/admin-billing/', admin_equipment_billing, name='admin_equipment_billing'),
     path('equipment-store/update-order-status/<int:order_id>/', update_equipment_order_status, name='update_equipment_order_status'),
     path('get-monthly-income-data/', get_monthly_income_data, name='get_monthly_income_data'),
+    path('initiate-upi-payment/', initiate_upi_payment, name='initiate_upi_payment'),
 
 ]

@@ -127,7 +127,7 @@ def add_customer(request):
             # Now save the object to the database
             customer.save()
             messages.success(request, "Customer added successfully!")
-            return redirect('retailer_view_customer')  # Redirect after successful save
+            return redirect('retailer_add_billing')  # Redirect after successful save
     else:
         form = AddCustomerForm()
     return render(request, 'retailer_dashboard/add_customer.html', {'form': form})
@@ -237,8 +237,12 @@ def delete_customer(request, customer_id):
 @role_required(['retailer'])
 def add_billing(request):
     if request.method == 'POST':
-        # Ensure the retailer has a wallet
-        wallet, created = Wallet.objects.get_or_create(user=request.user)
+        # Fetch the logged-in user's wallet
+        try:
+            wallet = Wallet.objects.get(user=request.user)
+        except Wallet.DoesNotExist:
+            messages.error(request, "Wallet not found. Please contact support.")
+            return redirect('retailer_dashboard')
 
         # Fetch the selected service
         service_id = request.POST.get('service')
@@ -248,18 +252,21 @@ def add_billing(request):
             messages.error(request, "Invalid service selected.")
             return redirect('add_billing')
 
-        service_price = service.price if service.price else 0  # Ensure price is valid
+        service_price = service.price
 
-        # Check wallet balance before deducting
+        # Check wallet balance
         if wallet.balance < service_price:
-            messages.error(request, "Insufficient balance. Please recharge your wallet.")
+            messages.error(
+                request,
+                "Insufficient balance to add billing for this service. Please recharge your wallet."
+            )
             return redirect('retailer_add_billing')
 
-        # Deduct balance
+        # Deduct service price from the wallet
         wallet.balance -= service_price
         wallet.save()
 
-        # Log transaction
+        # Log the transaction
         Transaction.objects.create(
             user=request.user,
             amount=service_price,
@@ -268,46 +275,41 @@ def add_billing(request):
             description=f"Service Charge for {service.service_name}",
         )
 
-        # Fetch customer
+        # Create Billing Details
         customer_id = request.POST.get('customer')
+        payment_mode = request.POST.get('payment_mode')
+        payment_status = request.POST.get('payment_status')
+        service_status = 'Pending'
+        ref_no = f"REF-942-{random.randint(100000000, 999999999)}"
+        id_proof = request.FILES.get('id_proof')
+        address_proof = request.FILES.get('address_proof')
+        photo = request.FILES.get('photo')
+
         try:
-            customer = Customer.objects.get(id=customer_id, created_by=request.user)
+            customer = Customer.objects.get(id=customer_id, created_by=request.user)  # Use `created_by` instead of `added_by`
         except Customer.DoesNotExist:
             messages.error(request, "Invalid customer selected.")
             return redirect('add_billing')
 
-        # Create Billing Details
-        billing = BillingDetails.objects.create(
+        BillingDetails.objects.create(
             user=request.user,
-            ref_no=f"REF-942-{random.randint(100000000, 999999999)}",
+            ref_no=ref_no,
             customer=customer,
             service=service,
-            payment_mode=request.POST.get('payment_mode'),
-            payment_status=request.POST.get('payment_status'),
-            service_status='Pending',
-            id_proof=request.FILES.get('id_proof'),
-            address_proof=request.FILES.get('address_proof'),
-            photo=request.FILES.get('photo'),
+            payment_mode=payment_mode,
+            payment_status=payment_status,
+            service_status=service_status,
+            id_proof=id_proof,
+            address_proof=address_proof,
+            photo=photo,
         )
 
-        # ✅ Generate Invoice After Billing ✅
-        Invoice.objects.create(
-            billing=billing,
-            retailer=request.user,
-            invoice_number=str(uuid.uuid4()),  # Unique Invoice Number
-            customer_name=customer.full_name,
-            service_name=service.service_name,
-            original_service_charge=service_price,
-            invoice_date=timezone.now()
-        )
-
-        messages.success(request, "Billing and Invoice added successfully.")
+        messages.success(request, "Billing added successfully.")
         return redirect('retailer_view_billing')
 
-    # Fetch customers created by the retailer
-    customers = Customer.objects.filter(created_by=request.user)
+    # Render the form
+    customers = Customer.objects.filter(created_by=request.user) 
     services = Service.objects.filter(status='active')
-
     return render(request, 'retailer_dashboard/add_billing.html', {
         'customers': customers,
         'services': services,
@@ -552,3 +554,12 @@ def get_services_distribution(request):
         'labels': labels,
         'data': data
     })
+
+
+@role_required(['retailer'])
+@login_required
+def recharge_plans_view(request):
+    """
+    View to display available recharge plans to the retailer.
+    """
+    return render(request, 'recharge_plans.html')

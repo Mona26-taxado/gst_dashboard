@@ -125,10 +125,8 @@
                 </a>
             </div>
     
-            <!-- Add a button to generate a new QR Code -->
-            <form method="GET" action="{% url 'qr_payment' user_id=user_id %}">
-                <button class="generate-btn">Generate New QR Code</button>
-            </form>
+            <!-- Add a button to go to Recharge Plans page -->
+            <a href="{% url 'recharge_plans' %}" class="generate-btn" style="display: inline-block; text-decoration: none;">Recharge Plans</a>
         </div>
     </div>
 </div>
