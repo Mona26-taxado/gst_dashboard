@@ -1,12 +1,12 @@
 {
     "name": "Grahak Sahaayata Kendra",
-    "short_name": "Grahak Sahaayata",
+    "short_name": "GSK",
     "description": "Your trusted GST service provider",
     "start_url": "/",
     "scope": "/",
     "display": "standalone",
-    "background_color": "#ffffff",
-    "theme_color": "#3498db",
+    "background_color": "#0047ab",
+    "theme_color": "#0047ab",
     "icons": [
         {
             "src": "/static/Sahaayata-pay-logo.png",
@@ -33,22 +33,14 @@
             "purpose": "any"
         },
         {
-            "src": "/static/Sahaayata-pay-logo.png",
+            "src": "/static/icon-192x192.png",
             "sizes": "192x192",
-            "type": "image/png",
-            "purpose": "any maskable"
+            "type": "image/png"
         },
         {
-            "src": "/static/Sahaayata-pay-logo.png",
-            "sizes": "384x384",
-            "type": "image/png",
-            "purpose": "any"
-        },
-        {
-            "src": "/static/Sahaayata-pay-logo.png",
+            "src": "/static/icon-512x512.png",
             "sizes": "512x512",
-            "type": "image/png",
-            "purpose": "any maskable"
+            "type": "image/png"
         }
     ]
 } 

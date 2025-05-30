@@ -24,7 +24,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('dashboard/', include('dashboard.urls')),
     path('', auth_views.LoginView.as_view(template_name='login.html'), name='login'),  # Direct login URL
-    path('redirect/', role_based_redirect, name='role_based_redirect'),  # Add the redirect route here
+    path('redirect/', role_based_redirect, name='role_based_redirect'),
+      # Add the redirect route here
 ]
 
 if settings.DEBUG:

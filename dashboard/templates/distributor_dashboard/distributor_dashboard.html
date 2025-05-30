@@ -33,15 +33,6 @@ span.badge.bg-success {
     border-radius: 4px;
 }
 
-.chart-fallback {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 100%;
-    text-align: center;
-    color: #6c7293;
-}
 
 .chart-fallback p {
     margin: 0;
@@ -171,7 +162,7 @@ span.badge.bg-success {
 }
 @media (max-width: 768px) {
   .container-flud {
-    margin-top: 197px;
+    margin-top: 131px;
 }
 }
 </style>
@@ -205,7 +196,7 @@ span.badge.bg-success {
                       </div>
                       <div class="col-5 col-sm-7 col-xl-8 p-0">
                         <h4 class="mb-1 mb-sm-0">Want even more features?</h4>
-                        <p class="mb-0 font-weight-normal d-none d-sm-block">Check out our Pro version with 5 unique layouts!</p>
+                        <p class="mb-0 font-weight-normal d-none d-sm-block">Check out our Pro version with Grahak Sahaayata Kendra!</p>
                       </div>
                       <div class="col-3 col-sm-2 col-xl-2 pl-0 text-center">
                         <span>
@@ -295,7 +286,7 @@ span.badge.bg-success {
               
             </div>
             <!-- Support Design Start -->
-            <a href="tel:+91 7007843082" class="whatsApp"><img src="{% static 'assets/images/customer-service.png'%}" class="whtsap-icon" alt="whtsap-icon"/></a>
+            <a href="tel:+91 9129971644" class="whatsApp"><img src="{% static 'assets/images/customer-service.png'%}" class="whtsap-icon" alt="whtsap-icon"/></a>
             
             <!-- Support Design End -->
             <div class="row">
@@ -306,7 +297,9 @@ span.badge.bg-success {
                     {% if total_services == 0 and total_billings == 0 %}
                         
                     {% else %}
-                    <canvas id="doughnutChart" class="transaction-chart"></canvas>
+                    <div style="position:relative; width:100%; min-height:300px;max-height:420px;">
+                      <canvas id="doughnutChart" class="transaction-chart"></canvas>
+                    </div>
                     {% endif %}
 
                     <div class="stats-container">
@@ -340,23 +333,14 @@ span.badge.bg-success {
                     <div class="d-flex justify-content-between align-items-center mb-4">
                       <h4 class="card-title mb-0">Monthly Performance</h4>
                       <div class="d-flex align-items-center">
-                        <select id="yearSelector" class="form-control bg-dark text-white border-0">
-                          {% for year in year_range %}
-                            <option value="{{ year }}" {% if year == current_year %}selected{% endif %}>{{ year }}</option>
-                          {% endfor %}
-                        </select>
+                        
                       </div>
                     </div>
+                    <!-- Hidden inputs for chart data -->
                     
-                    {% if not yearly_data or yearly_data == '{}' %}
-                        <div class="empty-chart-container">
-                            <i class="mdi mdi-chart-bar empty-chart-icon bar"></i>
-                            <div class="empty-chart-text">No performance data available</div>
-                            <div class="empty-chart-subtext">Select a different year or start recording transactions to see your monthly performance</div>
-                        </div>
-                    {% else %}
-                        <canvas id="barChart"></canvas>
-                    {% endif %}
+                    <div style="position:relative; width:100%; min-height:320px; height:40vw; max-height:420px;">
+                      <canvas id="barChart"></canvas>
+                    </div>
 
                     <!-- Hidden inputs for chart data -->
                     <input type="hidden" id="yearlyData" value="{{ yearly_data|default:'{}' }}">
@@ -466,6 +450,209 @@ span.badge.bg-success {
         </div>
       </div>
     </div>
+
+<!-- Chart.js Implementation -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM Content Loaded');
+    
+    // Debug: Log the data from hidden inputs
+    console.log('Service Distribution Data:', document.getElementById('serviceDistributionData').value);
+    console.log('Yearly Data:', document.getElementById('yearlyData').value);
+
+    // Doughnut Chart (Total Sales Distribution)
+    var doughnutData = JSON.parse(document.getElementById('serviceDistributionData').value || '{}');
+    var colorMap = {
+        'Services': '#ff9800',   // orange for Total Services
+        'Billings': '#00d25b',  // green for Total Billing
+        'Retailers': '#16ff25'  // keep as is if used elsewhere
+    };
+    var backgroundColor = '#2d3748'; // gray for outline
+
+    // Calculate sum of real data
+    var sum = doughnutData.data.reduce((a, b) => a + b, 0);
+    var total = sum > 0 ? sum : 1; // Avoid division by zero
+
+    // Prepare data and colors
+    var filteredLabels = [];
+    var filteredData = [];
+    var filteredColors = [];
+    doughnutData.data.forEach(function(value, idx) {
+        if (value > 0) {
+            var label = doughnutData.labels[idx];
+            filteredLabels.push(label);
+            filteredData.push(value);
+            filteredColors.push(colorMap[label] || '#ccc');
+        }
+    });
+
+    // Add the background segment (the remainder)
+    var remainder = total - filteredData.reduce((a, b) => a + b, 0);
+    if (remainder > 0) {
+        filteredLabels.push(''); // No label for background
+        filteredData.push(remainder);
+        filteredColors.push(backgroundColor);
+    }
+
+    var doughnutCtx = document.getElementById('doughnutChart');
+    if (doughnutCtx) {
+        new Chart(doughnutCtx.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: filteredLabels,
+                datasets: [{
+                    data: filteredData,
+                    backgroundColor: filteredColors,
+                    borderColor: '#fff',
+                    borderWidth: 4,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '65%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#ffffff',
+                            font: { size: 12 },
+                            filter: function(item, chart) {
+                                // Hide the background segment from the legend
+                                return item.text !== '';
+                            },
+                            generateLabels: function(chart) {
+                                const data = chart.data;
+                                if (data.labels.length && data.datasets.length) {
+                                    return data.labels.map(function(label, i) {
+                                        const value = data.datasets[0].data[i];
+                                        if (!label) return null; // skip background
+                                        return {
+                                            text: label + ' (' + value + ')',
+                                            fillStyle: data.datasets[0].backgroundColor[i],
+                                            strokeStyle: data.datasets[0].backgroundColor[i],
+                                            index: i
+                                        };
+                                    }).filter(Boolean);
+                                }
+                                return [];
+                            }
+                        }
+                    },
+                    datalabels: {
+                        color: '#fff',
+                        font: { weight: 'bold', size: 16 },
+                        display: function(context) {
+                            // Only display for real data segments (not background)
+                            var label = context.chart.data.labels[context.dataIndex];
+                            var value = context.dataset.data[context.dataIndex];
+                            return !!label && value > 0;
+                        },
+                        formatter: function(value, ctx) {
+                            var label = ctx.chart.data.labels[ctx.dataIndex];
+                            if (!label || value === 0) return null;
+                            return value;
+                        }
+                    }
+                }
+            },
+            plugins: [ChartDataLabels]
+        });
+    }
+    // Bar Chart (Monthly Performance)
+    var yearlyData = JSON.parse(document.getElementById('yearlyData').value || '{}');
+    console.log('Parsed Yearly Data:', yearlyData);
+    
+    if (yearlyData && yearlyData.labels && yearlyData.data) {
+        var barCtx = document.getElementById('barChart');
+        if (barCtx) {
+            console.log('Initializing Bar Chart');
+            new Chart(barCtx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: yearlyData.labels,
+                    datasets: [{
+                        label: 'Monthly Billing',
+                        data: yearlyData.data,
+                        backgroundColor: '#1976d2',
+                        borderRadius: 12,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { 
+                                color: '#ffffff',
+                                callback: function(value) {
+                                    return '₹' + value;
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        },
+                        x: {
+                            ticks: { color: '#ffffff' },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        }
+                    }
+                }
+            });
+        } else {
+            console.error('Bar Chart canvas not found');
+        }
+    }
+
+    // Year Selector Change Event
+    document.getElementById('yearSelector').addEventListener('change', function() {
+        var selectedYear = this.value;
+        console.log('Year selected:', selectedYear);
+        // You can add AJAX call here to fetch new data for the selected year
+        // and update the charts accordingly
+    });
+});
+</script>
+
+<style>
+.transaction-chart {
+    min-height: 220px !important;
+    height: 24vw !important;
+    max-height: 320px !important;
+    width: 100% !important;
+    background: #191c24;
+    border-radius: 8px;
+    padding: 8px;
+    display: block;
+}
+
+#barChart {
+    min-height: 320px !important;
+    height: 40vw !important;
+    max-height: 420px !important;
+    width: 100% !important;
+    display: block;
+}
+
+@media (max-width: 600px) {
+    .transaction-chart {
+        min-height: 140px !important;
+        height: 40vw !important;
+        max-height: 200px !important;
+        padding: 4px;
+    }
+}
+</style>
 
 {% endblock %}
 

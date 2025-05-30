@@ -8,222 +8,328 @@
     <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
     <link rel="stylesheet" href="{% static 'assets/vendors/mdi/css/materialdesignicons.min.css'%}">
     <link rel="shortcut icon" href="{% static 'assets/images/Sahaayata-pay-logo.png' %}" />
-    <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#3498db"/>
+    <!-- Google Fonts: Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <meta name="theme-color" content="#0d2956"/>
     <link rel="manifest" href="{% static 'manifest.json' %}">
     <link rel="apple-touch-icon" href="{% static 'Sahaayata-pay-logo.png' %}"/>
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="apple-mobile-web-app-title" content="Grahak Sahaayata">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            user-select: none;
-        }
-
         body {
-            font-family: "Poppins", sans-serif;
-            color: white;
-        }
-
-        .bg-img {
-            background: url("https://images.pexels.com/photos/34088/pexels-photo.jpg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940");
-            height: 100vh;
+            font-family: 'Poppins', Arial, sans-serif;
+            background: url({% static "banner_4.jpg" %}) no-repeat center center fixed;
             background-size: cover;
-            background-position: center;
+            min-height: 100vh;
+            margin: 0;
             position: relative;
         }
-
-        .bg-img:after {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 100%;
-            width: 100%;
-            background: rgba(0, 0, 0, 0.7);
+        .bg-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(13,41,86,0.65);
+            z-index: 0;
         }
-
         .content {
             position: absolute;
-            top: 50%;
-            left: 50%;
+            top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            text-align: center;
-            padding: 40px 30px;
-            width: 350px;
-            z-index: 99999;
-            border-radius: 10px;
+            width: 370px;
+            max-width: 400px;
+            min-width: 280px;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 4px 24px 0 rgba(13,41,86,0.22);
+            z-index: 2;
+            padding: 0 32px 32px 32px;
+            border-top: 8px solid #ff9933;
+            text-align: left;
         }
-
-        .content header {
-            color: white;
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 20px;
+        .header {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin-top: -32px;
+            margin-bottom: 16px;
         }
-
+        .ashoka {
+            width: 48px;
+            margin: 0 auto 8px auto;
+            display: block;
+        }
+        .portal-title {
+            color: #0d2956;
+            font-size: 21px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin-bottom: 2px;
+        }
+        .tagline {
+            color: #ff9933;
+            font-size: 15px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
         .field {
             position: relative;
             height: 45px;
-            margin: 15px 0;
+            margin: 15px 0 0 0;
             display: flex;
             align-items: center;
-            background: rgba(255, 255, 255, 0.9);
+            background: #f4f7fa;
             border-radius: 27px;
             padding: 0 10px;
+            border: 1.5px solid #e3eafc;
         }
-
         .field span {
-            color: #222;
+            color: #0d2956;
             font-size: 20px;
             margin-right: 10px;
         }
-
         .field input {
             width: 100%;
             border: none;
             outline: none;
             background: transparent;
             font-size: 16px;
-            color: #222;
+            color: #0d2956;
+            font-family: 'Poppins', Arial, sans-serif;
         }
-
         .field-btn {
-            margin-top: 20px;
+            margin-top: 10px;
         }
-
         .field-btn button {
             width: 100%;
             height: 45px;
-            background: #3498db;
+            background: linear-gradient(90deg, #0d2956 0%, #1976d2 100%);
             border: none;
-            color: white;
+            color: #fff;
             font-size: 18px;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
             border-radius: 27px;
-            transition: background 0.3s ease;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(13, 41, 86, 0.10);
+            letter-spacing: 1px;
         }
-
         .field-btn button:hover {
-            background: #2a80b9;
+            background: linear-gradient(90deg, #1976d2 0%, #0d2956 100%);
+            color: #ff9933;
+            transform: scale(1.03);
+            box-shadow: 0 6px 18px rgba(13, 41, 86, 0.18);
         }
-
-        .pass {
-            margin-top: 10px;
-            text-align: left;
-        }
-
-        .pass a {
-            color: white;
-            text-decoration: none;
-            font-size: 14px;
-        }
-
-        .pass a:hover {
-            text-decoration: underline;
-        }
-
-        #installButton {
-            display: none;
+        .signup-btn {
             margin-top: 15px;
-            padding: 10px 20px;
-            background: #27ae60;
-            border: none;
-            color: white;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            border-radius: 27px;
-            transition: background 0.3s ease;
+            background: linear-gradient(90deg, #ff9933 0%, #1976d2 100%) !important;
+            color: #fff !important;
+            font-weight: 700;
         }
-
-        #installButton:hover {
-            background: #219a52;
+        .signup-btn:hover {
+            background: linear-gradient(90deg, #1976d2 0%, #ff9933 100%) !important;
+            color: #0d2956 !important;
+            box-shadow: 0 5px 15px rgba(255, 153, 51, 0.13) !important;
         }
-
-        #installButton .mdi {
-            margin-right: 8px;
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 20px 0 0 0;
+            color: #0d2956;
+            font-weight: 600;
         }
-
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1.5px dashed #e3eafc;
+        }
+        .divider span {
+            padding: 0 10px;
+            font-size: 15px;
+        }
         .alert {
-            padding: 10px;
-            margin-bottom: 15px;
-            border-radius: 5px;
-            font-size: 14px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            font-size: 15px;
+            position: relative;
+            overflow: hidden;
+            animation: slideIn 0.5s ease-out;
+            box-shadow: 0 4px 15px rgba(255, 153, 51, 0.10);
+            background: linear-gradient(135deg, #ffefc7, #ffe0b2);
+            color: #b71c1c;
+            border-left: 5px solid #ff9933;
         }
+        .alert i {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+        .errorlist {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 15px 0;
+        }
+        .errorlist li {
+            color: #b71c1c;
+            background: #fff3e0;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            animation: fadeIn 0.5s ease-out;
+            box-shadow: 0 4px 15px rgba(255, 153, 51, 0.10);
+        }
+        .errorlist li::before {
+            content: '⚠️';
+            margin-right: 10px;
+            font-size: 16px;
+        }
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .shake { animation: shake 0.5s ease-in-out; }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        @media (max-width: 900px) {
+            .content {
+                width: 80vw;
+                min-width: 0;
+                padding: 0 5vw 32px 5vw;
+            }
+        }
+        @media (max-width: 600px) {
+            .content {
+                width: 98vw;
+                max-width: 400px;
+                min-width: 0;
+                padding: 18px 2vw 24px 2vw;
+                border-radius: 18px;
+                box-shadow: 0 4px 24px 0 rgba(13,41,86,0.22);
+                margin-top: 24px;
+            }
+            .portal-logo {
+                width: 64px !important;
+                height: 64px !important;
+                margin-bottom: 8px !important;
+                margin-top: 8px !important;
+            }
+            .portal-title {
+                font-size: 16px !important;
+                margin-bottom: 4px !important;
+            }
+            .tagline {
+                font-size: 12px !important;
+                margin-bottom: 10px !important;
+            }
+            .field-btn button, .signup-btn, #installButton {
+                font-size: 15px !important;
+                height: 40px !important;
+                margin-top: 10px !important;
+            }
+            .divider {
+                margin: 14px 0 0 0 !important;
+            }
+        }
+        @media (max-width: 400px) {
+    .content {
+        width: 85vw;
+        padding: 0 23px 12px 23px;
+    }
 
-        .alert-danger {
-            background: rgba(231, 76, 60, 0.9);
-            color: white;
+            .portal-title {
+                font-size: 14px !important;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="bg-img">
-        <div class="content">
-            <div>
-                <img src="{% static 'assets/images/Sahaayata-pay-logo.png' %}" alt="logo" style="width: 100px; height: 100px;">
+    <div class="bg-overlay"></div>
+    <div class="content">
+        <div class="header" style="align-items:center;">
+            <img class="portal-logo" src="{% static 'assets/images/Sahaayata-pay-logo.png' %}" alt="Grahak Sahaayata Kendra Logo" style="width:70px;height:70px;margin-bottom:10px;display:block;">
+            <div class="portal-title" style="text-align:center;">
+                <span style="color:#ff9933;">Grahak</span> <span style="color:#1976d2;">Sahaayata</span> <span style="color:#27ae60;">Kendra</span><br>
             </div>
-            <header>Grahak Sahaayata Kendra</header>
-            {% if error %}
-            <div class="alert alert-danger">
-                {{ error }}
+            
+        </div>
+        {% if form.errors %}
+        <div class="alert alert-danger" style="font-size:11px;padding:8px 12px;margin-bottom:12px;">
+            <i class="mdi mdi-alert-circle"></i>
+            Please enter a correct email and password.
+        </div>
+        {% endif %}
+        <form method="post" id="loginForm">
+            {% csrf_token %}
+            <div class="field">
+                <span class="mdi mdi-email"></span>
+                <input type="email" name="username" placeholder="Email" required>
+            </div>
+            {% if form.username.errors %}
+            <div class="errorlist">
+                {% for error in form.username.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
             </div>
             {% endif %}
-            <form method="post">
-                {% csrf_token %}
-                <div class="field">
-                    <span class="mdi mdi-account"></span>
-                    <input type="text" name="username" placeholder="Username" required>
-                </div>
-                <div class="field space">
-                    <span class="mdi mdi-lock"></span>
-                    <input type="password" name="password" placeholder="Password" required>
-                </div>
-                <div class="field-btn">
-                    <button type="submit">Login</button>
-                </div>
-            </form>
-            <button id="installButton" style="display: none;">
-                <span class="mdi mdi-download"></span>Install App
-            </button>
+            <div class="field space">
+                <span class="mdi mdi-lock"></span>
+                <input type="password" name="password" placeholder="Password" required>
+            </div>
+            {% if form.password.errors %}
+            <div class="errorlist">
+                {% for error in form.password.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </div>
+            {% endif %}
+            <div class="field-btn">
+                <button type="submit">Login</button>
+            </div>
+        </form>
+        <div class="divider">
+            <span>or</span>
         </div>
+        <div class="field-btn">
+            <a href="https://grahaksahaayatakendra.com/apply-now.html" style="text-decoration: none;">
+                <button type="button" class="signup-btn">
+                    <span class="mdi mdi-account-plus"></span> Create New Account
+                </button>
+            </a>
+        </div>
+        <button id="installButton" style="display: none; margin-top: 15px; width: 100%; height: 45px; background: linear-gradient(90deg, #0d2956 0%, #1976d2 100%); color: #fff; font-size: 16px; font-weight: 600; border: none; border-radius: 27px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(13, 41, 86, 0.10); display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <span class="mdi mdi-download"></span>Install App
+        </button>
     </div>
-
     <script>
         let deferredPrompt;
         const installBtn = document.getElementById('installButton');
-      
         window.addEventListener('beforeinstallprompt', (e) => {
-          // stop Chrome from auto-showing its banner
           e.preventDefault();
           deferredPrompt = e;
-          // now that we’ve captured the event, show our own button
           installBtn.style.display = 'inline-flex';
         });
-      
         installBtn.addEventListener('click', async () => {
           if (!deferredPrompt) return;
-          // show Chrome’s prompt
           deferredPrompt.prompt();
-          // wait for the user to choose
           const { outcome } = await deferredPrompt.userChoice;
-          console.log('PWA install outcome:', outcome);  // “accepted” or “dismissed”
-          // clear it out and hide our button
+          console.log('PWA install outcome:', outcome);
           deferredPrompt = null;
           installBtn.style.display = 'none';
         });
-      
         window.addEventListener('appinstalled', () => {
-          // the app was installed! hide our button just in case
           installBtn.style.display = 'none';
         });
-      
-        // your existing service-worker registration…
         if ('serviceWorker' in navigator) {
           window.addEventListener('load', () => {
             navigator.serviceWorker
@@ -232,8 +338,14 @@
               .catch(console.error);
           });
         }
-      </script>
-      
+        // Add shake animation to form when there are errors
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('loginForm');
+            if (form && document.querySelector('.alert-danger')) {
+                form.classList.add('shake');
+            }
+        });
+    </script>
 </body>
 </html>
 

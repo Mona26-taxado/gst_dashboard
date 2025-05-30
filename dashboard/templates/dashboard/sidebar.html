@@ -521,6 +521,118 @@
   </li>
   {% endif %}
 
+  {% if user.role == 'demo' %}
+    <ul class="nav">
+      <li class="nav-item profile">
+        <div class="profile-desc">
+          <div class="profile-pic">
+            <div class="count-indicator">
+              <img class="img-xs rounded-circle " src="{% static 'assets/images/faces/9815472.png'%}" alt="">
+              <span class="count bg-success"></span>
+            </div>
+            <div class="profile-name">
+              <h5 class="mb-0 font-weight-normal">{{ user.full_name }}</h5>
+              <span>{{ user.role|default:"User" }}</span>
+            </div>
+          </div>
+        </div>
+      </li>
+      <li class="nav-item nav-category">
+        <span class="nav-link">Navigation</span>
+      </li>
+      <li class="nav-item menu-items">
+        <a class="nav-link" href="{% url 'dashboard_demo' %}" title="Disabled in demo">
+          <span class="menu-icon">
+            <i class="mdi mdi-speedometer"></i>
+          </span>
+          <span class="menu-title">Dashboard</span>
+        </a>
+      </li>
+      <li class="nav-item menu-items">
+        <a class="nav-link" data-toggle="collapse" href="#ui-basic-demo" aria-expanded="false" aria-controls="ui-basic-demo" title="Disabled in demo">
+          <span class="menu-icon">
+            <i class="mdi mdi-laptop"></i>
+          </span>
+          <span class="menu-title">Manage Customer</span>
+          <i class="menu-arrow"></i>
+        </a>
+        <div class="collapse" id="ui-basic-demo">
+          <ul class="nav flex-column sub-menu">
+            <li class="nav-item"> <a class="nav-link" href="#" title="Disabled in demo">Add Customer</a></li>
+            <li class="nav-item"> <a class="nav-link" href="#" title="Disabled in demo">View Customer</a></li>
+          </ul>
+        </div>
+      </li>
+      <li class="nav-item menu-items">
+        <a class="nav-link" data-toggle="collapse" href="#ui-servi-demo" aria-expanded="false" aria-controls="ui-servi-demo" title="Disabled in demo">
+          <span class="menu-icon">
+            <i class="mdi mdi-chart-bar"></i>
+          </span>
+          <span class="menu-title">Manage Billing</span>
+          <i class="menu-arrow"></i>
+        </a>
+        <div class="collapse" id="ui-servi-demo">
+          <ul class="nav flex-column sub-menu">
+            <li class="nav-item"> <a class="nav-link" href="#" title="Disabled in demo">Add Billing</a></li>
+            <li class="nav-item"> <a class="nav-link" href="#" title="Disabled in demo">View Billing</a></li>
+          </ul>
+        </div>
+      </li>
+      <li class="nav-item menu-items">
+        <a class="nav-link" data-toggle="collapse" href="#ui-amoun-demo" aria-expanded="false" aria-controls="ui-amoun-demo" title="Disabled in demo">
+          <span class="menu-icon">
+            <i class="mdi mdi-table-large"></i>
+          </span>
+          <span class="menu-title">Manage Amount</span>
+          <i class="menu-arrow"></i>
+        </a>
+        <div class="collapse" id="ui-amoun-demo">
+          <ul class="nav flex-column sub-menu">
+            <li class="nav-item"> <a class="nav-link" href="#" title="Disabled in demo">Recharge Wallet</a></li>
+            <li class="nav-item"> <a class="nav-link" href="#" title="Disabled in demo">View Transaction</a></li>
+          </ul>
+        </div>
+      </li>
+      <li class="nav-item menu-items">
+        <a class="nav-link" data-toggle="collapse" href="#ui-kit-demo" aria-expanded="false" aria-controls="ui-kit-demo" title="Disabled in demo">
+          <span class="menu-icon">
+            <i class="mdi mdi-file-document-box"></i>
+          </span>
+          <span class="menu-title">Banking Portal</span>
+          <i class="menu-arrow"></i>
+        </a>
+        <div class="collapse" id="ui-kit-demo">
+          <ul class="nav flex-column sub-menu">
+            <li class="nav-item"> <a class="nav-link" href="#" title="Disabled in demo">Banking Portal</a></li>
+          </ul>
+        </div>
+      </li>
+      <li class="nav-item menu-items">
+        <a class="nav-link" href="{% url 'additional_services_demo' %}">
+          <span class="menu-icon">
+            <i class="mdi mdi-security"></i>
+          </span>
+          <span class="menu-title">Additional Services</span>
+        </a>
+      </li>
+      <li class="nav-item menu-items">
+        <a class="nav-link" href="{% url 'equipments_store_demo' %}">
+          <span class="menu-icon">
+            <i class="mdi mdi-store text-success"></i>
+          </span>
+          <span class="menu-title">Equipments Store</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'logout' %}">
+          <i class="mdi mdi-logout"></i>
+          <span class="menu-title">Logout</span>
+        </a>
+      </li>
+    </ul>
+  {% else %}
+    <!-- Normal sidebar items here -->
+  {% endif %}
 
 </ul>
 </nav>

@@ -27,8 +27,25 @@ span.badge.bg-success {
 }
 @media (max-width: 768px) {
   .container-flud {
-    margin-top: 197px;
+    margin-top: 124px;
 }
+}
+canvas#salesDoughnutChart {
+    margin-top: 85px;
+}
+.responsive-chart-container {
+    position: relative;
+    width: 100%;
+    min-height: 250px;
+    height: 40vw;
+    max-height: 400px;
+}
+.responsive-chart-container canvas {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
 }
 </style>
 <div class="container-flud">
@@ -61,7 +78,7 @@ span.badge.bg-success {
                       </div>
                       <div class="col-5 col-sm-7 col-xl-8 p-0">
                         <h4 class="mb-1 mb-sm-0">Want even more features?</h4>
-                        <p class="mb-0 font-weight-normal d-none d-sm-block">Check out our Pro version with 5 unique layouts!</p>
+                        <p class="mb-0 font-weight-normal d-none d-sm-block">Check out our Pro version with Grahak Sahaayata Kendra!</p>
                       </div>
                       <div class="col-3 col-sm-2 col-xl-2 pl-0 text-center">
                         <span>
@@ -148,31 +165,25 @@ span.badge.bg-success {
               
             </div>
             <!-- Support Design Start -->
-            <a href="tel:+91  7007843082" class="whatsApp"><img src="{% static 'assets/images/customer-service.png'%}" class="whtsap-icon" alt="whtsap-icon"/></a>
+            <a href="tel:+91  9129971644" class="whatsApp"><img src="{% static 'assets/images/customer-service.png'%}" class="whtsap-icon" alt="whtsap-icon"/></a>
             
             <!-- Support Design End -->
             <div class="row">
               <div class="col-md-4 grid-margin stretch-card">
                 <div class="card">
                   <div class="card-body">
-                    <h4 class="card-title">Total Sales</h4>
-                    <div style="position: relative; height: 250px; width: 100%;">
-                      <canvas id="doughnutChart"></canvas>
+                    <h4 class="card-title mb-0">Total Sales</h4>
+                    <div style="position: relative; height: 284px; width: 100%;">
+                      <canvas id="salesDoughnutChart"></canvas>
                     </div>
-                    <div class="bg-gray-dark d-flex d-md-block d-xl-flex flex-row py-3 px-4 px-md-3 px-xl-4 rounded mt-3">
-                      <div class="text-md-center text-xl-left">
+                    <div class="d-flex justify-content-between mt-3">
+                      <div>
                         <h6 class="mb-1">Total Services</h6>
+                        <h4 id="retailerTotalServices">{{ total_services }}</h4>
                       </div>
-                      <div class="align-self-center flex-grow text-right text-md-center text-xl-right py-md-2 py-xl-0">
-                        <h6 class="font-weight-bold mb-0">{{ total_services }}</h6>
-                      </div>
-                    </div>
-                    <div class="bg-gray-dark d-flex d-md-block d-xl-flex flex-row py-3 px-4 px-md-3 px-xl-4 rounded mt-3">
-                      <div class="text-md-center text-xl-left">
-                        <h6 class="mb-1">Total Billing</h6>
-                      </div>
-                      <div class="align-self-center flex-grow text-right text-md-center text-xl-right py-md-2 py-xl-0">
-                        <h6 class="font-weight-bold mb-0">{{ total_billings }}</h6>
+                      <div>
+                        <h6 class="mb-1">Total Billings</h6>
+                        <h4 id="retailerTotalBillings">{{ total_billings }}</h4>
                       </div>
                     </div>
                   </div>
@@ -189,10 +200,10 @@ span.badge.bg-success {
                       <h4 class="card-title"><i>Monthly Deductions</i></h4>
                       <h4 class="text-success" id="currentMonthDeductions">₹0</h4>
                     </div>
-                    <div style="position: relative; height: 250px; width: 100%;">
+                    <div class="responsive-chart-container">
                       <canvas id="barChart"></canvas>
                     </div>
-                      </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -303,4 +314,145 @@ span.badge.bg-success {
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="{% static 'assets/js/retailer-dashboard-charts.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    fetch('{% url "retailer_monthly_deductions" %}')
+        .then(response => response.json())
+        .then(data => {
+            var ctx = document.getElementById('barChart').getContext('2d');
+            var barChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Monthly Deductions',
+                        data: data.deductions,
+                        backgroundColor: '#ff6416',
+                        borderRadius: 12,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: true }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: '#1976d2', font: { weight: 'bold' } },
+                            grid: { color: '#e3e8ee' }
+                        },
+                        x: {
+                            ticks: { color: '#1976d2', font: { weight: 'bold' } },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+            // Show current month deduction
+            if (data.deductions.length > 0) {
+                document.getElementById('currentMonthDeductions').textContent = '₹' + data.deductions[data.deductions.length-1];
+            }
+        });
+
+    // Monthly Billing Doughnut Chart
+    fetch('{% url "retailer_monthly_billing" %}')
+        .then(response => response.json())
+        .then(data => {
+            var ctx = document.getElementById('salesDoughnutChart').getContext('2d');
+            var salesDoughnutChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Monthly Billing',
+                        data: data.billing,
+                        backgroundColor: [
+                            '#1976d2', '#16ff25', '#ff6416', '#43a047', '#fbc02d', '#00bcd4'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    cutout: '70%',
+                    plugins: {
+                        legend: { display: true, position: 'bottom' },
+                        tooltip: { enabled: true }
+                    }
+                }
+            });
+        });
+
+  // Get values from Django context
+  const totalServices = parseInt(document.getElementById('retailerTotalServices').textContent) || 0;
+  const totalBillings = parseInt(document.getElementById('retailerTotalBillings').textContent) || 0;
+  const colors = [
+    'rgba(25, 118, 210, 0.85)', // blue for services
+    'rgba(251, 192, 45, 0.85)'  // yellow for billings
+  ];
+  let selectedSegment = 0;
+
+  const ctx = document.getElementById('salesDoughnutChart').getContext('2d');
+  let salesDoughnutChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Total Services', 'Total Billings'],
+      datasets: [{
+        data: [totalServices, totalBillings],
+        backgroundColor: colors,
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      cutout: '70%',
+      plugins: {
+        legend: { display: true, position: 'bottom', labels: { font: { size: 14 } } },
+        tooltip: {
+          enabled: true,
+          callbacks: {
+            label: function(context) {
+              if (context.label === 'Total Services') {
+                return `Total Services: ${totalServices}`;
+              } else if (context.label === 'Total Billings') {
+                return `Total Billings: ${totalBillings}`;
+              }
+              return context.formattedValue;
+            }
+          }
+        }
+      },
+      onHover: (event, chartElement) => {
+        if (chartElement.length > 0) {
+          selectedSegment = chartElement[0].index;
+          salesDoughnutChart.update();
+        }
+      }
+    },
+    plugins: [{
+      afterDraw: function(chart) {
+        const {ctx, chartArea: {width, height}} = chart;
+        ctx.save();
+        ctx.font = 'bold 1.2rem Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = colors[selectedSegment];
+        let label = selectedSegment === 0 ? 'Services' : 'Billings';
+        let value = selectedSegment === 0 ? totalServices : totalBillings;
+        ctx.fillText(label, width / 2, height / 2 - 10);
+        ctx.font = 'bold 1.5rem Arial';
+        ctx.fillText(value, width / 2, height / 2 + 18);
+        ctx.restore();
+      }
+    }]
+  });
+  // Default to Billings if it is nonzero
+  selectedSegment = (totalBillings > 0) ? 1 : 0;
+  salesDoughnutChart.update();
+});
+</script>
 {% endblock %}

@@ -1,95 +1,95 @@
 /* Theme Variables */
 :root[data-theme="light"] {
     /* Base colors */
-    --body-bg: #f8fafc;
-    --body-color: #2d3748;
-    --card-bg: #ffffff;
-    --card-border: #e2e8f0;
+    --body-bg: #f4f8fb;
+    --body-color: #1a202c;
+    --card-bg: #fafdff;
+    --card-border: #d1e3f8;
     
     /* Navigation */
-    --navbar-bg: #ffffff;
-    --sidebar-bg: #ffffff;
-    --content-bg: #ffffff;
-    --sidebar-hover: #edf2f7;
-    --sidebar-active: #ebf4ff;
-    --sidebar-text: #4a5568;
-    --sidebar-active-text: #3182ce;
+    --navbar-bg: #fff;
+    --sidebar-bg: #f6f9fc;
+    --content-bg: #eaf3fb;
+    --sidebar-hover: #e6ffe9; /* light green tint */
+    --sidebar-active: #fff6f0; /* light orange tint */
+    --sidebar-text: #1976d2; /* blue */
+    --sidebar-active-text: #ff6416; /* orange from logo */
     
     /* Forms and inputs */
-    --input-bg: #ffffff;
-    --input-border: #cbd5e0;
-    --input-focus-border: #4299e1;
-    --input-text: #2d3748;
-    --input-placeholder: #a0aec0;
+    --input-bg: #fff;
+    --input-border: #16ff25; /* green from logo */
+    --input-focus-border: #1976d2; /* blue */
+    --input-text: #1a202c;
+    --input-placeholder: #90a4ae;
     
     /* Text colors */
-    --text-muted: #718096;
-    --text-primary: #3182ce;
-    --text-success: #38a169;
-    --text-danger: #e53e3e;
-    --text-warning: #d69e2e;
+    --text-muted: #78909c;
+    --text-primary: #1976d2; /* blue */
+    --text-success: #16ff25;  /* green from logo */
+    --text-danger: #ff6416;   /* orange from logo */
+    --text-warning: #fbc02d;
     
     /* Links and buttons */
-    --link-color: #3182ce;
-    --link-hover: #2c5282;
-    --button-primary-bg: #4299e1;
-    --button-primary-text: #ffffff;
-    --button-secondary-bg: #edf2f7;
-    --button-secondary-text: #4a5568;
+    --link-color: #1976d2;
+    --link-hover: #ff6416;
+    --button-primary-bg: #1976d2;
+    --button-primary-text: #fff;
+    --button-secondary-bg: #16ff25;
+    --button-secondary-text: #fff;
     
     /* Tables */
-    --table-bg: #ffffff;
-    --table-header-bg: #f8fafc;
-    --table-border: #e2e8f0;
-    --table-hover: #f7fafc;
-    --table-stripe: #f9fafb;
+    --table-bg: #fff;
+    --table-header-bg: #e6ffe9; /* light green */
+    --table-border: #d1e3f8;
+    --table-hover: #fff6f0; /* light orange */
+    --table-stripe: #f6f9fc;
     
     /* Dropdowns */
-    --dropdown-bg: #ffffff;
-    --dropdown-link-color: #4a5568;
-    --dropdown-link-hover: #ebf8ff;
-    --dropdown-border: #e2e8f0;
-    --dropdown-shadow: rgba(0, 0, 0, 0.1);
+    --dropdown-bg: #fff;
+    --dropdown-link-color: #1976d2;
+    --dropdown-link-hover: #e6ffe9;
+    --dropdown-border: #d1e3f8;
+    --dropdown-shadow: rgba(25, 118, 210, 0.08);
     
     /* Cards and containers */
-    --card-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-    --container-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    --card-shadow: 0 4px 24px rgba(25, 118, 210, 0.10);
+    --container-shadow: 0 8px 32px rgba(25, 118, 210, 0.10);
     
     /* Charts and data visualization */
-    --chart-grid: #e2e8f0;
-    --chart-text: #4a5568;
-    --chart-line: #4299e1;
+    --chart-grid: #d1e3f8;
+    --chart-text: #1976d2;
+    --chart-line: #16ff25;
 
     /* Main content area */
-    --content-bg: #f8fafc;
-    --content-text: #2d3748;
+    --content-bg: #eaf3fb;
+    --content-text: #1a202c;
 
     /* Icon colors */
-    --icon-muted: #718096;
-    --icon-primary: #4299e1;
-    --icon-success: #48bb78;
-    --icon-warning: #ecc94b;
-    --icon-danger: #f56565;
+    --icon-muted: #90a4ae;
+    --icon-primary: #1976d2;
+    --icon-success: #16ff25;
+    --icon-warning: #fbc02d;
+    --icon-danger: #ff6416;
 
     /* Table specific colors */
-    --table-row-bg: #ffffff;
-    --table-row-hover: #f7fafc;
-    --table-header-bg: #f8fafc;
-    --table-header-color: #4a5568;
-    --table-cell-color: #2d3748;
+    --table-row-bg: #fff;
+    --table-row-hover: #e6ffe9;
+    --table-header-bg: #e6ffe9;
+    --table-header-color: #1976d2;
+    --table-cell-color: #1a202c;
 
     /* Stats card colors */
-    --stats-card-bg: #ffffff;
-    --stats-card-text: #2d3748;
-    --stats-card-value: #1a202c;
-    --stats-card-label: #4a5568;
-    --stats-card-border: #e2e8f0;
-    --stats-card-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-    --stats-card-icon-bg: #ebf8ff;
-    --stats-card-icon-color: #3182ce;
+    --stats-card-bg: #fafdff;
+    --stats-card-text: #1a202c;
+    --stats-card-value: #1976d2;
+    --stats-card-label: #16ff25;
+    --stats-card-border: #d1e3f8;
+    --stats-card-shadow: 0 4px 24px rgba(25, 118, 210, 0.10);
+    --stats-card-icon-bg: #e6ffe9;
+    --stats-card-icon-color: #16ff25;
 
     /* Logo colors */
-    --logo-text: #2d3748;
+    --logo-text: #1976d2;
     --logo-grahak: #16ff25;
     --logo-kendra: #ff6416;
 }
@@ -204,13 +204,15 @@ body {
 /* Card styles */
 .card {
     background-color: var(--stats-card-bg) !important;
-    border: 1px solid var(--stats-card-border) !important;
+    border: 1.5px solid var(--stats-card-border) !important;
     transition: all 0.3s ease !important;
+    border-radius: 1.5rem !important;
 }
 
 .card-body {
     background-color: var(--stats-card-bg) !important;
     color: var(--stats-card-text) !important;
+    border-radius: 1.5rem !important;
 }
 
 /* Form controls */
@@ -345,8 +347,8 @@ a:hover {
 /* Stats cards */
 .stats-card {
     background-color: var(--stats-card-bg) !important;
-    border: 1px solid var(--stats-card-border) !important;
-    border-radius: 0.5rem !important;
+    border: 1.5px solid var(--stats-card-border) !important;
+    border-radius: 1.5rem !important;
     padding: 1.25rem !important;
     margin-bottom: 1rem !important;
     box-shadow: var(--stats-card-shadow) !important;
@@ -751,13 +753,15 @@ footer {
 /* Card styles */
 .card {
     background-color: var(--stats-card-bg) !important;
-    border: 1px solid var(--stats-card-border) !important;
+    border: 1.5px solid var(--stats-card-border) !important;
     transition: all 0.3s ease !important;
+    border-radius: 1.5rem !important;
 }
 
 .card-body {
     background-color: var(--stats-card-bg) !important;
     color: var(--stats-card-text) !important;
+    border-radius: 1.5rem !important;
 }
 
 /* Stats specific styles */

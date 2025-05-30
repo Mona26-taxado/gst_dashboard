@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% block title %}Demo - Dummy Page{% endblock %}
+{% load static %}
+{% block content %}
+<div class="container mt-10">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow-lg demo-card">
+        <div class="card-body text-center">
+          <div class="demo-icon mb-4">
+            <i class="fas fa-info-circle"></i>
+          </div>
+          <h2 class="mb-3 text-primary demo-title">Demo Mode</h2>
+          <p class="lead demo-text">This is a demo page. No real actions can be performed here.</p>
+          <div class="alert alert-info mt-4 demo-alert">
+            <i class="fas fa-lock me-2"></i>
+            All features are disabled in demo mode
+          </div>
+          <div class="demo-features mt-4">
+            <div class="feature-item">
+              <i class="fas fa-check-circle text-success"></i>
+              <span>View Only</span>
+            </div>
+            <div class="feature-item">
+              <i class="fas fa-times-circle text-danger"></i>
+              <span>No Actions</span>
+            </div>
+            <div class="feature-item">
+              <i class="fas fa-info-circle text-info"></i>
+              <span>Demo Data</span>
+            </div>
+          </div>
+          <a href="javascript:history.back()" class="btn btn-primary mt-4 back-button">
+            <i class="fas fa-arrow-left me-2"></i>
+            Go Back
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .demo-card {
+    border: none;
+    border-radius: 15px;
+    overflow: hidden;
+    animation: slideIn 0.5s ease-out;
+  }
+
+  .demo-icon {
+    font-size: 4rem;
+    color: #4e73df;
+    animation: pulse 2s infinite;
+  }
+
+  .demo-title {
+    font-weight: 700;
+    animation: fadeIn 1s ease-out;
+  }
+
+  .demo-text {
+    color: #6c757d;
+    animation: fadeIn 1.2s ease-out;
+  }
+
+  .demo-alert {
+    border-radius: 10px;
+    animation: fadeIn 1.4s ease-out;
+  }
+
+  .demo-features {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+
+  .feature-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    background: #f8f9fc;
+    animation: fadeIn 1.6s ease-out;
+  }
+
+  .back-button {
+    padding: 0.75rem 2rem;
+    border-radius: 25px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    animation: fadeIn 1.8s ease-out;
+  }
+
+  .back-button:hover {
+    transform: translateX(-5px);
+    box-shadow: 0 5px 15px rgba(78, 115, 223, 0.3);
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateY(20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.1);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  [data-theme="dark"] .demo-card {
+    background: #2d3238;
+  }
+
+  [data-theme="dark"] .demo-text {
+    color: #a0aec0;
+  }
+
+  [data-theme="dark"] .feature-item {
+    background: #1e2124;
+  }
+
+  [data-theme="dark"] .demo-alert {
+    background: #1e2124;
+    border-color: #3d4249;
+  }
+</style>
+{% endblock %} 

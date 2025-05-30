@@ -175,5 +175,12 @@ AUTHENTICATION_BACKENDS = [
 
 AUTH_USER_MODEL = 'dashboard.CustomUser'  # Replace 'dashboard' with your app name
 
-
+# Email settings
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtpout.secureserver.net'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'info@grahaksahaayatakendra.com'
+EMAIL_HOST_PASSWORD = 'SAHAAYATA@123'
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = 'info@grahaksahaayatakendra.com'
 

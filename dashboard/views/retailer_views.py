@@ -66,6 +66,9 @@ def retailer_dashboard(request):
     # Count total billings for the retailer
     total_billings = BillingDetails.objects.filter(user=request.user).count()
 
+    # Calculate total sales (sum of all Credit transactions for this user)
+    total_sales = Transaction.objects.filter(user=request.user, transaction_type='Credit').aggregate(total=Sum('amount'))['total'] or 0
+
     billing_details = BillingDetails.objects.filter(user=request.user).order_by('-billing_date')[:7]  # Sort by newest first
     
     # Pass total_services to the context
@@ -75,6 +78,7 @@ def retailer_dashboard(request):
         'wallet_balance': wallet_balance,
         'total_billings': total_billings,  # Include total billings count
         'billing_details': billing_details,  # Include billing details for the retailer
+        'total_sales': total_sales,  # Add total sales to context
     }
     return render(request, 'retailer_dashboard/retailer_dashboard.html', context)
 
@@ -495,36 +499,31 @@ def banking_portal_request(request):
 @login_required
 @role_required(['retailer'])
 def get_retailer_monthly_deductions(request):
-    """Get monthly wallet deductions data for the retailer dashboard."""
+    user = request.user
+    from django.utils import timezone
+    from datetime import timedelta
+    from django.db.models import Sum
+    import calendar
+    
     today = timezone.now()
-    current_year = today.year
-    current_month = today.month
-    
-    # Get all months in the current year up to current month
-    months_data = []
-    labels = []
-    
-    for month in range(1, current_month + 1):
-        # Get total deductions for this month
-        monthly_deductions = Transaction.objects.filter(
-            user=request.user,
-            transaction_type="Debit",
-            created_at__year=current_year,
+    monthly_labels = []
+    monthly_deductions = []
+    for i in range(5, -1, -1):
+        month_date = today - timedelta(days=i*30)
+        month = month_date.month
+        year = month_date.year
+        label = month_date.strftime('%b %Y')
+        monthly_labels.append(label)
+        month_deduction = Transaction.objects.filter(
+            user=user,
+            transaction_type='Debit',
+            created_at__year=year,
             created_at__month=month
-        ).aggregate(
-            total=Sum('amount')
-        )['total'] or 0
-        
-        # Format month name
-        month_name = calendar.month_abbr[month]
-        
-        months_data.append(float(monthly_deductions))
-        labels.append(f"{month_name} {current_year}")
-
+        ).aggregate(total=Sum('amount'))['total'] or 0
+        monthly_deductions.append(float(month_deduction))
     return JsonResponse({
-        'labels': labels,
-        'data': months_data,
-        'current_month_deductions': float(months_data[-1]) if months_data else 0
+        'labels': monthly_labels,
+        'deductions': monthly_deductions
     })
 
 
@@ -563,3 +562,61 @@ def recharge_plans_view(request):
     View to display available recharge plans to the retailer.
     """
     return render(request, 'recharge_plans.html')
+
+
+@login_required
+@role_required(['retailer'])
+def get_retailer_monthly_sales(request):
+    user = request.user
+    from django.utils import timezone
+    from datetime import timedelta
+    from django.db.models import Sum
+
+    today = timezone.now()
+    monthly_labels = []
+    monthly_sales = []
+    for i in range(5, -1, -1):
+        month_date = today - timedelta(days=i*30)
+        month = month_date.month
+        year = month_date.year
+        label = month_date.strftime('%b %Y')
+        monthly_labels.append(label)
+        # Sum of all Credit transactions for this month
+        month_sales = Transaction.objects.filter(
+            user=user,
+            transaction_type='Credit',
+            created_at__year=year,
+            created_at__month=month
+        ).aggregate(total=Sum('amount'))['total'] or 0
+        monthly_sales.append(float(month_sales))
+    return JsonResponse({
+        'labels': monthly_labels,
+        'sales': monthly_sales
+    })
+
+
+@login_required
+@role_required(['retailer'])
+def get_retailer_monthly_billing(request):
+    user = request.user
+    from django.utils import timezone
+    from datetime import timedelta
+    today = timezone.now()
+    monthly_labels = []
+    monthly_billing = []
+    for i in range(5, -1, -1):
+        month_date = today - timedelta(days=i*30)
+        month = month_date.month
+        year = month_date.year
+        label = month_date.strftime('%b %Y')
+        monthly_labels.append(label)
+        count = BillingDetails.objects.filter(
+            user=user,
+            billing_date__year=year,
+            billing_date__month=month
+        ).count()
+        monthly_billing.append(count)
+    return JsonResponse({
+        'labels': monthly_labels,
+        'billing': monthly_billing
+    })

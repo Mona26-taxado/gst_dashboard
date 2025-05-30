@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% block title %}Demo - Total Services{% endblock %}
+{% load static %}
+{% block content %}
+<div class="container mt-10">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Demo: Total Services</h2>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-dark table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>S NO</th>
+                    <th>Service Name</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>Apply</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for service in page_obj %}
+                <tr>
+                    <td>{{ start_index|add:forloop.counter0 }}</td>
+                    <td>{{ service.service_name }}</td>
+                    <td>{{ service.price }}</td>
+                    <td>
+                        <span>{{ service.status }}</span>
+                    </td>
+                    <td>
+                        <a href="{% url 'dummy_page' %}" class="btn btn-success btn-sm">Apply Now</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5">No services available</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination Controls -->
+    <nav>
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+            </li>
+            {% endif %}
+
+            <!-- Always Show First Page -->
+            <li class="page-item {% if page_obj.number == 1 %}active{% endif %}">
+                <a class="page-link" href="?page=1">1</a>
+            </li>
+
+            <!-- Ellipsis Before Nearby Pages -->
+            {% if page_obj.number > 3 %}
+            <li class="page-item disabled"><span class="page-link">...</span></li>
+            {% endif %}
+
+            <!-- Nearby Pages -->
+            {% for page_num in page_obj.paginator.page_range %}
+                {% if page_num >= page_obj.number|add:-1 and page_num <= page_obj.number|add:1 and page_num != 1 and page_num != page_obj.paginator.num_pages %}
+                <li class="page-item {% if page_num == page_obj.number %}active{% endif %}">
+                    <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+                </li>
+                {% endif %}
+            {% endfor %}
+
+            <!-- Ellipsis After Nearby Pages -->
+            {% if page_obj.number < page_obj.paginator.num_pages|add:-2 %}
+            <li class="page-item disabled"><span class="page-link">...</span></li>
+            {% endif %}
+
+            <!-- Always Show Last Page -->
+            {% if page_obj.paginator.num_pages > 1 %}
+            <li class="page-item {% if page_obj.number == page_obj.paginator.num_pages %}active{% endif %}">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a>
+            </li>
+            {% endif %}
+
+            <!-- Next Page -->
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
+<style>
+    .table thead th {
+        vertical-align: middle;
+        text-align: center;
+    }
+    .table td, .table th {
+        text-align: center;
+    }
+    .btn-success {
+        font-weight: 600;
+        border-radius: 20px;
+        padding: 0.4rem 1.2rem;
+    }
+    .badge.bg-success {
+        font-size: 1em;
+        border-radius: 10px;
+        padding: 0.5em 1em;
+    }
+    .container.mt-10 {
+        margin-top: 1rem !important;
+    }
+  @media (max-width: 768px) {
+    .container.mt-10 {
+        margin-top: 5rem !important;
+    }
+  }
+</style>
+{% endblock %}
