@@ -12,7 +12,8 @@ from django.http import JsonResponse
 from decimal import Decimal
 from django.core.paginator import Paginator
 from datetime import datetime
-from django.db.models import Sum
+import json
+from django.db.models import Sum, F
 from django.http import HttpResponseForbidden, HttpResponse
 from dashboard.models import CustomUser
 import qrcode
@@ -69,8 +70,53 @@ def distributor_dashboard(request):
     total_billings = BillingDetails.objects.filter(user=request.user).count()
 
     billing_details = BillingDetails.objects.filter(user=request.user).order_by('-billing_date')[:7]  # Sort by newest first
+
+    # Count total retailers referred by this distributor
+    total_retailers = CustomUser.objects.filter(referred_by=request.user, role='retailer').count()
     
+    # Get current month's data
+    current_month = timezone.now().month
+    current_year = timezone.now().year
+    monthly_services = Service.objects.filter(
+        billing_date__month=current_month,
+        billing_date__year=current_year
+    ).count()
     
+    monthly_billing = BillingDetails.objects.filter(
+        user=request.user,
+        billing_date__month=current_month,
+        billing_date__year=current_year
+    ).aggregate(total=Sum(F('service__price')))['total'] or 0
+
+    # Prepare data for doughnut chart (Total Sales Distribution)
+    service_distribution = {
+        'labels': ['Services', 'Billings', 'Retailers'],
+        'data': [total_services, total_billings, total_retailers]
+    }
+
+    # Prepare data for bar chart (Monthly Performance)
+    yearly_data = {
+        'labels': [],
+        'data': []
+    }
+    
+    # Get last 6 months data
+    for i in range(5, -1, -1):
+        month_date = timezone.now() - timedelta(days=i*30)
+        month_name = month_date.strftime('%b')
+        yearly_data['labels'].append(month_name)
+        
+        # Get billing amount for this month
+        month_billing = BillingDetails.objects.filter(
+            billing_date__month=month_date.month,
+            billing_date__year=month_date.year
+        ).aggregate(total=Sum(F('service__price')))['total'] or 0
+        
+        yearly_data['data'].append(float(month_billing))
+
+    # Get year range for selector
+    year_range = range(current_year-2, current_year+1)
+
     # Pass total_services to the context
     context = {
         'notifications': notifications,
@@ -78,8 +124,29 @@ def distributor_dashboard(request):
         'wallet_balance': wallet_balance,
         'total_billings': total_billings,  # Include total billings count
         'billing_details': billing_details,  # Include billing details for the retailer
+        'total_retailers': total_retailers,  # Add total retailers to context
+        'monthly_services': monthly_services,
+        'monthly_billing': monthly_billing,
+        'yearly_data': json.dumps(yearly_data),
+        'service_distribution': json.dumps(service_distribution),
+        'year_range': year_range,
+        'current_year': current_year,
     }
+    print('DASHBOARD CONTEXT:', context)  # Debug print
     return render(request, 'distributor_dashboard/distributor_dashboard.html', context)
+
+
+
+
+def pin_entry(request):
+    """
+    View for managing PIN entry.
+    """
+    return render(request, 'pin_entry.html')
+
+
+
+
 
 
 
@@ -347,7 +414,7 @@ def add_billing(request):
             wallet = Wallet.objects.get(user=request.user)
         except Wallet.DoesNotExist:
             messages.error(request, "Wallet not found. Please contact support.")
-            return redirect('distributor_dashboard')
+            return redirect('distributor_dashboard/add_billing.html')
 
         # Fetch the selected service
         service_id = request.POST.get('service')
@@ -365,7 +432,7 @@ def add_billing(request):
                 request,
                 "Insufficient balance to add billing for this service. Please recharge your wallet."
             )
-            return redirect('add_billing')
+            return redirect('distributor_dashboard/add_billing.html')
 
         # Deduct service price from the wallet
         wallet.balance -= service_price
@@ -648,7 +715,7 @@ def get_distributor_dashboard_data(request):
         billing_date__year=current_year,
         billing_date__month=current_month
     ).aggregate(
-        total_amount=Sum('amount'),
+        total_amount=Sum('price'),
         total_billings=Count('id')
     )
 
@@ -657,7 +724,7 @@ def get_distributor_dashboard_data(request):
         user=request.user,
         billing_date__year=current_year
     ).aggregate(
-        total_amount=Sum('amount'),
+        total_amount=Sum('price'),
         total_billings=Count('id')
     )
 
@@ -683,7 +750,7 @@ def get_distributor_dashboard_data(request):
             billing_date__year=year,
             billing_date__month=month
         ).aggregate(
-            total=Sum('amount')
+            total=Sum('price')
         )['total'] or 0
         
         month_name = target_date.strftime('%b-%Y')
@@ -714,4 +781,54 @@ def get_distributor_dashboard_data(request):
             'labels': labels,
             'data': months_data
         }
+    })
+
+@login_required
+@role_required(['distributor'])
+def get_distributor_monthly_billing(request):
+    user = request.user
+    today = timezone.now()
+    monthly_labels = []
+    monthly_billing = []
+    retailers = CustomUser.objects.filter(referred_by=user, role='retailer')
+    for i in range(5, -1, -1):
+        month_date = today - timedelta(days=i*30)
+        month = month_date.month
+        year = month_date.year
+        label = month_date.strftime('%b %Y')
+        monthly_labels.append(label)
+        count = BillingDetails.objects.filter(
+            user__in=retailers,
+            billing_date__year=year,
+            billing_date__month=month
+        ).count()
+        monthly_billing.append(count)
+    return JsonResponse({
+        'labels': monthly_labels,
+        'billing': monthly_billing
+    })
+
+@login_required
+@role_required(['distributor'])
+def get_distributor_monthly_deductions(request):
+    user = request.user
+    today = timezone.now()
+    monthly_labels = []
+    monthly_deductions = []
+    for i in range(5, -1, -1):
+        month_date = today - timedelta(days=i*30)
+        month = month_date.month
+        year = month_date.year
+        label = month_date.strftime('%b %Y')
+        monthly_labels.append(label)
+        month_deduction = Transaction.objects.filter(
+            user=user,
+            transaction_type='Debit',
+            created_at__year=year,
+            created_at__month=month
+        ).aggregate(total=Sum('amount'))['total'] or 0
+        monthly_deductions.append(float(month_deduction))
+    return JsonResponse({
+        'labels': monthly_labels,
+        'deductions': monthly_deductions
     })

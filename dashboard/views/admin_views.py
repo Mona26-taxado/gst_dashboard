@@ -100,7 +100,7 @@ def add_gsk(request):
 
 
 
-#Pagination helps split large datasets into smaller, manageable chunks. Django’s Paginator makes this easy.
+#Pagination helps split large datasets into smaller, manageable chunks. Django's Paginator makes this easy.
 
 
 @login_required
@@ -719,6 +719,22 @@ def manage_access_requests(request):
         'start_index': start_index,
         'search_query': search_query,  # Pass the search query to the template
     })
+
+
+@login_required
+@role_required(['admin'])
+def change_demo_password(request):
+    if request.method == 'POST':
+        new_password = request.POST.get('new_password')
+        User = get_user_model()
+        try:
+            demo_user = User.objects.get(role='demo')
+            demo_user.set_password(new_password)
+            demo_user.save()
+            messages.success(request, 'Demo user password changed successfully!')
+        except User.DoesNotExist:
+            messages.error(request, 'Demo user not found.')
+    return redirect('admin_dashboard')
 
 
 

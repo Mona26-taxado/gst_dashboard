@@ -15,9 +15,10 @@ from dashboard.views import admin_views, retailer_views
 from dashboard.views.retailer_views import add_customer as retailer_add_customer, delete_customer as retailer_delete_customer, retailer_view_transactions, wallet_recharge_view, banking_portal_request # Correct import statement
 from dashboard.views import retailer_views
 from dashboard.views.distributor_views import add_gsk, view_gsk, edit_gsk, delete_gsk, add_customer as distributor_add_customer, delete_customer, distributor_view_transactions, wallet_recharge_view, banking_portal_request
-from .views.views import equipment_store, get_monthly_income_data
+from .views.views import equipment_store, get_monthly_income_data, custom_login_view, dashboard, additional_services_demo, equipments_store_demo, total_services_demo, dummy_page
 from .views.equipment_views import equipment_billing, equipment_payment, check_payment_status, payment_success, admin_equipment_billing, update_equipment_order_status
 from .views import initiate_upi_payment
+from dashboard.views.admin_views import change_demo_password
 
 
  #edit_customer  Import the function from retailer_views
@@ -28,7 +29,7 @@ from .views import initiate_upi_payment
 urlpatterns = [
     
     path('redirect/', role_based_redirect, name='role_based_redirect'),
-    path('', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
+    path('', custom_login_view, name='login'),
 
     path('logout/', custom_logout_view, name='logout'),
     path('password-change/', PasswordChangeView.as_view(template_name='password_change.html'), name='password_change'),
@@ -89,6 +90,7 @@ urlpatterns = [
     path('retailer/edit-billing/<int:billing_id>/', retailer_views.edit_billing, name='retailer_edit_billing'),
     path('dashboard/retailer/view-transactions/', retailer_view_transactions, name='retailer_view_transactions'),
     path('recharge-plans/', retailer_views.recharge_plans_view, name='recharge_plans'),
+    path('retailer/monthly-billing/', retailer_views.get_retailer_monthly_billing, name='retailer_monthly_billing'),
 
 
 
@@ -112,6 +114,8 @@ urlpatterns = [
     path('distributor/view-billing/<int:billing_id>/', distributor_views.view_billing_details, name='distributor_view_billing_details'),
     path('dashboard/distributor/view-transactions/', distributor_view_transactions, name='distributor_view_transactions'),
     path('distributor/transfer-money/', distributor_views.transfer_money, name='transfer_money'),
+    path('distributor/monthly-billing/', distributor_views.get_distributor_monthly_billing, name='distributor_monthly_billing'),
+    path('distributor/monthly-deductions/', distributor_views.get_distributor_monthly_deductions, name='distributor_monthly_deductions'),
 
 
 
@@ -132,7 +136,17 @@ urlpatterns = [
     path('equipment-store/payment/success/<int:order_id>/', payment_success, name='payment_success'),
     path('equipment-store/admin-billing/', admin_equipment_billing, name='admin_equipment_billing'),
     path('equipment-store/update-order-status/<int:order_id>/', update_equipment_order_status, name='update_equipment_order_status'),
-    path('get-monthly-income-data/', get_monthly_income_data, name='get_monthly_income_data'),
+   
     path('initiate-upi-payment/', initiate_upi_payment, name='initiate_upi_payment'),
+
+    path('dashboard/demo/', dashboard, name='dashboard_demo'),
+    path('demo/additional-services/', additional_services_demo, name='additional_services_demo'),
+    path('demo/equipments-store/', equipments_store_demo, name='equipments_store_demo'),
+    path('demo/total-services/', total_services_demo, name='total_services_demo'),
+    path('demo/dummy/', dummy_page, name='dummy_page'),
+
+    path('admin/change-demo-password/', change_demo_password, name='change_demo_password'),
+
+    path('get-monthly-income-data/', get_monthly_income_data, name='get_monthly_income_data'),
 
 ]

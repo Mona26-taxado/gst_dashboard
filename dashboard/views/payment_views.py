@@ -99,9 +99,22 @@ def initiate_upi_payment(request):
         amount = request.POST.get('amount')
         plan_id = request.POST.get('plan_id')
         
-        # Generate UPI payment link
+        # Generate UPI payment link with proper encoding
         upi_id = "9336323478@okbizaxis"
-        upi_link = f"upi://pay?pa={upi_id}&pn=Grahak%20Sahaayata%20Kendra&am={amount}&tn=Recharge%20Plan%20{plan_id}"
+        merchant_name = "Grahak Sahaayata Kendra"
+        transaction_note = f"Recharge Plan {plan_id}"
+        
+        # Format amount to have 2 decimal places
+        formatted_amount = f"{float(amount):.2f}"
+        
+        # Create UPI link with proper encoding
+        upi_link = (
+            f"upi://pay?pa={upi_id}"
+            f"&pn={merchant_name}"
+            f"&am={formatted_amount}"
+            f"&tn={transaction_note}"
+            f"&cu=INR"
+        )
         
         # Generate QR code
         qr = qrcode.QRCode(version=1, box_size=10, border=5)

@@ -5,12 +5,18 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from dashboard.utils import role_required, generate_qr
 from django.contrib import messages
-from dashboard.models import Notification, CustomUser, Equipment, EquipmentOrder, Service
+from dashboard.models import Notification, CustomUser, Equipment, EquipmentOrder, Service, Transaction, BillingDetails
 from django.contrib.auth import logout
 from dashboard.forms import UserUpdateForm
 from django.http import HttpResponseForbidden, HttpResponse, JsonResponse
 from django.utils import timezone
 from datetime import datetime, timedelta
+import random
+from django.core.mail import send_mail
+from django.conf import settings
+from django.core.paginator import Paginator
+from django.contrib.auth import get_user_model
+import string
 
 
 
@@ -78,23 +84,110 @@ def admin_dashboard(request):
 
 
 
-def login_view(request):
-    error = None  # Initialize the error variable
+def generate_otp():
+    return ''.join([str(random.randint(0, 9)) for _ in range(6)])
+
+def send_otp_email(user, otp):
+    from datetime import datetime
+    subject = 'Your OTP for Grahak Sahaayata Kendra Login'
+    html_message = f"""
+    <div style='font-family: Arial, sans-serif; background: #181c24; padding: 30px;'>
+      <div style='max-width: 500px; margin: auto;'>
+        <div style='background: #232a36; border-radius: 16px; box-shadow: 0 2px 16px #10131a; padding: 0; overflow: hidden;'>
+          <div style='background: #232a36; padding: 30px 30px 10px 30px; text-align: center;'>
+            <h2 style='color: #4fd1c5; letter-spacing: 2px; margin-bottom: 0;'>Grahak Sahaayata Kendra</h2>
+          </div>
+          <div style='padding: 20px 30px 30px 30px;'>
+            <p style='font-size: 16px; color: #e0e0e0; margin-top: 0;'>Dear {getattr(user, 'full_name', 'GSK')},</p>
+            <p style='font-size: 16px; color: #e0e0e0;'>Your One Time Password (OTP) for login is:</p>
+            <div style='display: flex; justify-content: center; margin: 30px 0;'>
+              <div style='background: #181c24; border: 2px dashed #4fd1c5; border-radius: 12px; padding: 18px 40px; box-shadow: 0 2px 8px #10131a;'>
+                <span style='font-size: 36px; letter-spacing: 10px; color: #4fd1c5; font-weight: bold;'>{otp}</span>
+              </div>
+            </div>
+            <p style='font-size: 15px; color: #b0b0b0;'>This OTP is valid for <b>10 minutes</b>. Please do not share it with anyone.</p>
+          </div>
+          <div style='background: #181c24; padding: 16px; border-radius: 0 0 16px 16px;'>
+            <p style='font-size: 13px; color: #555; text-align: center; margin: 0;'>&copy; {datetime.now().year} Grahak Sahaayata Kendra. All rights reserved.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    """
+    from_email = 'GSK <' + settings.DEFAULT_FROM_EMAIL + '>'
+    recipient_list = [user.email]
+    send_mail(subject, '', from_email, recipient_list, html_message=html_message)
+
+def otp_verification(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
+    if request.method == 'POST':
+        entered_otp = request.POST.get('otp')
+        try:
+            otp_obj = OTP.objects.filter(user=request.user, is_verified=False).latest('created_at')
+            if otp_obj.is_valid():
+                if otp_obj.otp == entered_otp:
+                    otp_obj.is_verified = True
+                    otp_obj.save()
+                    return redirect('role_based_redirect')
+                else:
+                    messages.error(request, 'Invalid OTP. Please try again.')
+            else:
+                messages.error(request, 'OTP has expired. Please request a new one.')
+        except OTP.DoesNotExist:
+            messages.error(request, 'No OTP found. Please request a new one.')
+    
+    return render(request, 'otp_verification.html')
+
+def resend_otp(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
+    # Generate new OTP
+    new_otp = generate_otp()
+    
+    # Save OTP to database
+    OTP.objects.create(user=request.user, otp=new_otp)
+    
+    # Send OTP via email
+    send_otp_email(request.user, new_otp)
+    
+    messages.success(request, 'New OTP has been sent to your email.')
+    return redirect('otp_verification')
+
+def demo_session_check(request):
+    if request.user.role == 'demo':
+        now = timezone.now().timestamp()
+        if not request.session.get('demo_start'):
+            request.session['demo_start'] = now
+        elif now - request.session['demo_start'] > 20*60:
+            # Change the demo user's password to a random value
+            User = get_user_model()
+            demo_user = User.objects.get(pk=request.user.pk)
+            random_password = ''.join(random.choices(string.ascii_letters + string.digits, k=16))
+            demo_user.set_password(random_password)
+            demo_user.save()
+            logout(request)
+            return redirect('login')
+    return None
+
+def custom_login_view(request):
+    error = None
     if request.method == "POST":
         username = request.POST.get("username")
         password = request.POST.get("password")
-
-        # Authenticate user
         user = authenticate(request, username=username, password=password)
         if user is not None:
-            login(request, user)  # Log the user in if authentication succeeds
-            return redirect("dashboard")  # Redirect to your post-login page
+            # If demo user, reset demo_start
+            if hasattr(user, 'role') and user.role == 'demo':
+                now = timezone.now().timestamp()
+                request.session['demo_start'] = now
+            login(request, user)
+            return redirect('redirect')  # or your dashboard URL
         else:
-            error = "Invalid username or password!"  # Set error message if authentication fails
-            print(f"Error: {error}")  # Debugging
-
-    # Render login page with error message
-    print(f"Rendering login page. Error: {error}")  # Debugging
+            error = "Invalid username or password. Please try again."
+            print("DEBUG: Error set in view")  # Debug print
     return render(request, "login.html", {"error": error})
 
 
@@ -113,6 +206,8 @@ def role_based_redirect(request):
         return redirect('distributor_dashboard')
     elif user.role == 'master_distributor':
         return redirect('master_distributor_dashboard')
+    elif user.role == 'demo':
+        return redirect('dashboard_demo')
     else:
         return redirect('not_authorized')
 
@@ -297,7 +392,7 @@ def get_dashboard_data(request):
             status='paid'
         ).count()
         
-        month_name = target_date.strftime('%b-%Y')
+        month_name = target_date.strftime('%b %Y')
         months_data.append(float(bills_count))  # Keep for backward compatibility if needed
         labels.append(month_name)
         services_data.append(services_count)
@@ -323,35 +418,147 @@ def get_dashboard_data(request):
 def get_monthly_income_data(request):
     today = timezone.now()
     labels = []
-    centers_data = []
-    bills_data = []
+    new_retailers = []
+    new_distributors = []
+    wallet_credits = []
+    total_billings = []
+
+    # Get admin users (assuming role='admin')
+    admin_users = CustomUser.objects.filter(role='admin').values_list('id', flat=True)
 
     for i in range(5, -1, -1):
         target_date = today - timedelta(days=i*30)
         month = target_date.month
         year = target_date.year
 
-        # Count centers added this month
-        centers_count = CustomUser.objects.filter(
-            role='center',
+        # New Retailers
+        retailers_count = CustomUser.objects.filter(
+            role='retailer',
             date_joined__year=year,
             date_joined__month=month
         ).count()
+        new_retailers.append(retailers_count)
 
-        # Count bills this month
-        bills_count = EquipmentOrder.objects.filter(
-            order_date__year=year,
-            order_date__month=month,
-            status='paid'
+        # New Distributors
+        distributors_count = CustomUser.objects.filter(
+            role='distributor',
+            date_joined__year=year,
+            date_joined__month=month
         ).count()
+        new_distributors.append(distributors_count)
 
-        month_name = target_date.strftime('%b-%Y')
-        labels.append(month_name)
-        centers_data.append(centers_count)
-        bills_data.append(bills_count)
-    
+        # Wallet credits (all users)
+        credits = Transaction.objects.filter(
+            transaction_type='Credit',
+            created_at__year=year,
+            created_at__month=month
+        ).aggregate(total=Sum('amount'))['total'] or 0
+        wallet_credits.append(float(credits))
+
+        # Total billings
+        billings = BillingDetails.objects.filter(
+            billing_date__year=year,
+            billing_date__month=month
+        ).count()
+        total_billings.append(billings)
+
+        labels.append(target_date.strftime('%b %Y'))
+
     return JsonResponse({
         'labels': labels,
-        'total_centers': centers_data,
-        'total_bills': bills_data,
+        'new_retailers': new_retailers,
+        'new_distributors': new_distributors,
+        'wallet_credits': wallet_credits,
+        'total_billings': total_billings,
+        'this_month': {
+            'new_retailers': new_retailers[-1],
+            'new_distributors': new_distributors[-1],
+            'wallet_credits': wallet_credits[-1],
+            'total_billings': total_billings[-1],
+        }
     })
+
+@login_required
+def dashboard(request):
+    user = request.user
+    # Demo session expiry check
+    demo_expiry = demo_session_check(request)
+    if demo_expiry:
+        return demo_expiry
+    if user.role == 'retailer':
+        return redirect('retailer_dashboard')
+    elif user.role == 'distributor':
+        return redirect('distributor_dashboard')
+    elif user.role == 'master_distributor':
+        return redirect('master_distributor_dashboard')
+    elif user.role == 'demo':
+        from dashboard.models import BillingDetails, Service, Transaction, Notification
+        total_services = Service.objects.count()
+        total_billings = BillingDetails.objects.count()
+        wallet_balance = 0  # Set to 0 or a demo value
+        billing_details = BillingDetails.objects.all()[:5]
+        notifications = Notification.objects.all()[:5]
+        # Dummy data for charts
+        demo_bar_labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']
+        demo_bar_data = [12, 19, 3, 5, 2, 3]
+        demo_doughnut_labels = ['Total Services', 'Total Billings']
+        demo_doughnut_data = [25, 15]
+        context = {
+            'total_services': total_services,
+            'total_billings': total_billings,
+            'wallet_balance': wallet_balance,
+            'billing_details': billing_details,
+            'notifications': notifications,
+            'demo_bar_labels': demo_bar_labels,
+            'demo_bar_data': demo_bar_data,
+            'demo_doughnut_labels': demo_doughnut_labels,
+            'demo_doughnut_data': demo_doughnut_data,
+        }
+        return render(request, 'dashboard_demo.html', context)
+    else:
+        return render(request, 'not_authorized.html')
+
+# Example: Block form submissions for demo users
+def some_form_view(request):
+    if request.user.role == 'demo' and request.method == 'POST':
+        return HttpResponseForbidden('Demo users cannot submit forms.')
+    # ... rest of your form logic ...
+
+# Example: Block add user for demo users
+def add_user_view(request):
+    if request.user.role == 'demo':
+        return HttpResponseForbidden('Demo users cannot add users.')
+    # ... rest of your add user logic ...
+
+@login_required
+def additional_services_demo(request):
+    if request.user.role != 'demo':
+        return render(request, 'not_authorized.html')
+    return render(request, 'demo_pages/additional_services_demo.html')
+
+@login_required
+def equipments_store_demo(request):
+    if request.user.role != 'demo':
+        return render(request, 'not_authorized.html')
+    return render(request, 'demo_pages/equipments_store_demo.html')
+
+@login_required
+def total_services_demo(request):
+    if request.user.role != 'demo':
+        return render(request, 'not_authorized.html')
+    services_list = Service.objects.all().order_by('service_name')  # Order alphabetically by name
+    paginator = Paginator(services_list, 10)  # Show 10 services per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    start_index = page_obj.start_index()
+    return render(
+        request,
+        'demo_pages/total_services_demo.html',
+        {'page_obj': page_obj, 'start_index': start_index}
+    )
+
+@login_required
+def dummy_page(request):
+    if request.user.role != 'demo':
+        return render(request, 'not_authorized.html')
+    return render(request, 'demo_pages/dummy_page.html')

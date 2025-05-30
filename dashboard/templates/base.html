@@ -52,29 +52,16 @@
     <script src="{% static 'assets/vendors/js/vendor.bundle.base.js'%}"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- endinject -->
-    <!-- Plugin js for this page -->
-    <script src="{% static 'assets/js/chart.js'%}"></script>
-    <script src="{% static 'assets/vendors/chart.js/Chart.min.js'%}"></script>
     <script src="{% static 'assets/vendors/progressbar.js/progressbar.min.js'%}"></script>
     <script src="{% static 'assets/vendors/jvectormap/jquery-jvectormap.min.js'%}"></script>
     <script src="{% static 'assets/vendors/jvectormap/jquery-jvectormap-world-mill-en.js'%}"></script>
     <script src="{% static 'assets/vendors/owl-carousel-2/owl.carousel.min.js'%}"></script>
-    <!-- End plugin js for this page -->
-    <!-- inject:js -->
-    <script src="https://www.gstatic.com/charts/loader.js"></script>
-
     <script src="{% static 'assets/js/off-canvas.js'%}"></script>
     <script src="{% static 'assets/js/hoverable-collapse.js'%}"></script>
     <script src="{% static 'assets/js/misc.js'%}"></script>
     <script src="{% static 'assets/js/settings.js'%}"></script>
     <script src="{% static 'assets/js/todolist.js'%}"></script>
     <script src="{% static 'service-worker.js'%}"></script>
-    <!-- endinject -->
-    <!-- Custom js for this page -->
-    <script src="{% static 'assets/js/dashboard.js'%}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 
     <script>
       if ('serviceWorker' in navigator) {
@@ -102,26 +89,27 @@
       let deferredInstallPrompt;
 
 window.addEventListener('beforeinstallprompt', e => {
-  // Prevent Chrome’s mini-infobar from appearing
+  // Prevent Chrome's mini-infobar from appearing
   e.preventDefault();
   // Stash the event so you can trigger it later.
   deferredInstallPrompt = e;
-  // Show your “Install” button
-  document.querySelector('#btn-install').style.display = 'block';
+  // Show your "Install" button
+  const btnInstall = document.querySelector('#btn-install');
+  if (btnInstall) {
+    btnInstall.style.display = 'block';
+  }
 });
 
-document.querySelector('#btn-install').addEventListener('click', async () => {
-  // Hide your button:
-  document.querySelector('#btn-install').style.display = 'none';
-  // Show the install prompt
-  deferredInstallPrompt.prompt();
-  // Wait for the user to respond
-  const { outcome } = await deferredInstallPrompt.userChoice;
-  console.log('User response to the install prompt:', outcome);
-  // Clear the saved prompt since it can only be used once
-  deferredInstallPrompt = null;
-});
-
+const btnInstall = document.querySelector('#btn-install');
+if (btnInstall) {
+  btnInstall.addEventListener('click', async () => {
+    btnInstall.style.display = 'none';
+    deferredInstallPrompt.prompt();
+    const { outcome } = await deferredInstallPrompt.userChoice;
+    console.log('User response to the install prompt:', outcome);
+    deferredInstallPrompt = null;
+  });
+}
     </script>
 
     {% block extra_js %}{% endblock %}

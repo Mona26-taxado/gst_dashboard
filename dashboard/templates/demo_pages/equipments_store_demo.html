@@ -1,0 +1,300 @@
+{% extends 'base.html' %}
+{% block title %}Demo - Equipments Store{% endblock %}
+{% load static %}
+{% block content %}
+<div class="container mt-10">
+    <div class="store-header">
+        <h2>Equipment Store</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard_demo' %}">Dashboard</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Equipment Store</li>
+            </ol>
+        </nav>
+    </div>
+
+    <div class="filters">
+        <input type="text" class="form-control filter-input" placeholder="Search equipment...">
+        <select class="form-control filter-input">
+            <option value="">All Categories</option>
+            <option value="printers">Printers</option>
+            <option value="biometric">Biometric Devices</option>
+            <option value="computers">Computer Systems</option>
+            <option value="pos">POS Devices</option>
+        </select>
+        <select class="form-control filter-input">
+            <option value="">Sort By</option>
+            <option value="price-low">Price: Low to High</option>
+            <option value="price-high">Price: High to Low</option>
+            <option value="name">Name</option>
+        </select>
+    </div>
+
+    <div class="product-grid">
+        <!-- Thermal Printer -->
+        <div class="product-card">
+            <img src="{% static 'assets/images/equipment/61UcYnJ4maL._AC_UF1000,1000_QL80_.jpg' %}" alt="Thermal Printer" class="product-image">
+            <div class="product-info">
+                <h3 class="product-name">High-Speed Thermal Printer</h3>
+                <p class="product-description">Professional thermal printer with auto-cutter, USB & LAN ports. Perfect for high-volume receipt printing.</p>
+                <div class="product-price">₹8,999</div>
+                <div class="product-stock stock-available">In Stock</div>
+                <a href="{% url 'dummy_page' %}?quantity=1" class="btn btn-purchase">Buy Now</a>
+            </div>
+        </div>
+
+        <!-- Mantra L1 Fingerprint -->
+        <div class="product-card">
+            <img src="{% static 'assets/images/equipment/images (1).jpg' %}" alt="Mantra L1" class="product-image">
+            <div class="product-info">
+                <h3 class="product-name">Mantra L1 Fingerprint Scanner</h3>
+                <p class="product-description">UIDAI certified fingerprint scanner for Aadhaar authentication. High-quality optical sensor with 500 DPI resolution.</p>
+                <div class="product-price">₹2,999</div>
+                <div class="product-stock stock-available">In Stock</div>
+                <a href="{% url 'dummy_page' %}?quantity=1" class="btn btn-purchase">Buy Now</a>
+            </div>
+        </div>
+
+        <!-- Morpho Fingerprint -->
+        <div class="product-card">
+            <img src="{% static 'assets/images/equipment/81OPh-DqD-L._SL1500_ (2)-1273x1500.jpg' %}" alt="Morpho Scanner" class="product-image">
+            <div class="product-info">
+                <h3 class="product-name">Morpho Fingerprint Scanner</h3>
+                <p class="product-description">Advanced biometric scanner with FBI PIV certification. Superior image quality and fake finger detection.</p>
+                <div class="product-price">₹6,499</div>
+                <div class="product-stock stock-low">Low Stock</div>
+                <a href="{% url 'dummy_page' %}?quantity=1" class="btn btn-purchase">Buy Now</a>
+            </div>
+        </div>
+
+        <!-- Desktop System -->
+        <div class="product-card">
+            <img src="{% static 'assets/images/equipment/61jcRY5n-OL.jpg' %}" alt="Desktop System" class="product-image">
+            <div class="product-info">
+                <h3 class="product-name">Complete Desktop System</h3>
+                <p class="product-description">Full desktop setup including CPU, monitor, keyboard, and mouse. Intel Core i3, 8GB RAM, 256GB SSD.</p>
+                <div class="product-price">₹35,999</div>
+                <div class="product-stock stock-available">In Stock</div>
+                <a href="{% url 'dummy_page' %}?quantity=1" class="btn btn-purchase">Buy Now</a>
+            </div>
+        </div>
+
+        <!-- Monitor -->
+        <div class="product-card">
+            <img src="{% static 'assets/images/equipment/monitor.jpg' %}" alt="Monitor" class="product-image">
+            <div class="product-info">
+                <h3 class="product-name">21.5" LED Monitor</h3>
+                <p class="product-description">Full HD LED monitor with HDMI and VGA ports. Anti-glare screen with excellent color accuracy.</p>
+                <div class="product-price">₹8,499</div>
+                <div class="product-stock stock-available">In Stock</div>
+                <a href="{% url 'dummy_page' %}?quantity=1" class="btn btn-purchase">Buy Now</a>
+            </div>
+        </div>
+
+        <!-- CPU -->
+        <div class="product-card">
+            <img src="{% static 'assets/images/equipment/V7Q76EA_3.jpg' %}" alt="CPU" class="product-image">
+            <div class="product-info">
+                <h3 class="product-name">Business CPU</h3>
+                <p class="product-description">Intel Core i3 processor, 8GB RAM, 256GB SSD, Windows 11 Pro. Perfect for business applications.</p>
+                <div class="product-price">₹20,999</div>
+                <div class="product-stock stock-available">In Stock</div>
+                <a href="{% url 'dummy_page' %}?quantity=1" class="btn btn-purchase">Buy Now</a>
+            </div>
+        </div>
+
+        <!-- Swipe Machine -->
+        <div class="product-card">
+            <img src="{% static 'assets/images/equipment/41WyHWKXWNL._AC_UF1000,1000_QL80_.jpg' %}" alt="Swipe Machine" class="product-image">
+            <div class="product-info">
+                <h3 class="product-name">POS Swipe Machine</h3>
+                <p class="product-description">Wireless POS terminal with 4G connectivity. Supports all major cards and UPI payments.</p>
+                <div class="product-price">₹12,999</div>
+                <div class="product-stock stock-available">In Stock</div>
+                <a href="{% url 'dummy_page' %}?quantity=1" class="btn btn-purchase">Buy Now</a>
+            </div>
+        </div>
+
+        <!-- Keyboard -->
+        <div class="product-card">
+            <img src="{% static 'assets/images/equipment/keyboard.jpg' %}" alt="Keyboard" class="product-image">
+            <div class="product-info">
+                <h3 class="product-name">Professional USB Keyboard</h3>
+                <p class="product-description">Ergonomic wired keyboard with numeric keypad. Spill-resistant design with quiet keys and palm rest.</p>
+                <div class="product-price">₹999</div>
+                <div class="product-stock stock-available">In Stock</div>
+                <a href="{% url 'dummy_page' %}?quantity=1" class="btn btn-purchase">Buy Now</a>
+            </div>
+        </div>
+
+        <!-- Mouse -->
+        <div class="product-card">
+            <img src="{% static 'assets/images/equipment/mouse.jpg' %}" alt="Mouse" class="product-image">
+            <div class="product-info">
+                <h3 class="product-name">Optical USB Mouse</h3>
+                <p class="product-description">High-precision optical mouse with 1200 DPI. Comfortable grip with smooth tracking and responsive buttons.</p>
+                <div class="product-price">₹499</div>
+                <div class="product-stock stock-available">In Stock</div>
+                <a href="{% url 'dummy_page' %}?quantity=1" class="btn btn-purchase">Buy Now</a>
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+<style>
+    .equipment-store {
+        padding-top: 5rem;
+    }
+
+    .store-header {
+        margin-bottom: 2rem;
+    }
+
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+        padding: 1rem 0;
+    }
+
+    .product-card {
+        border-radius: 1rem;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    [data-theme="light"] .product-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+    }
+
+    [data-theme="dark"] .product-card {
+        background: #2d3238;
+        border: 1px solid #3d4249;
+    }
+
+    .product-card:hover {
+        transform: translateY(-5px);
+    }
+
+    [data-theme="light"] .product-card:hover {
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+
+    [data-theme="dark"] .product-card:hover {
+        box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+    }
+
+    .product-image {
+        width: 100%;
+        object-fit: contain;
+        padding: 1rem;
+        background: #f8f9fa;
+    }
+
+    [data-theme="dark"] .product-image {
+        background: #1e2124;
+    }
+
+    .product-info {
+        padding: 1.5rem;
+    }
+
+    .product-name {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    [data-theme="light"] .product-name {
+        color: #2d3748;
+    }
+
+    [data-theme="dark"] .product-name {
+        color: #ffffff;
+    }
+
+    .product-description {
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+        line-height: 1.5;
+    }
+
+    [data-theme="light"] .product-description {
+        color: #4a5568;
+    }
+
+    [data-theme="dark"] .product-description {
+        color: #a0aec0;
+    }
+
+    .product-price {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #00d25b;
+        margin-bottom: 1rem;
+    }
+
+    .product-stock {
+        font-size: 0.875rem;
+        margin-bottom: 1rem;
+    }
+
+    .stock-available {
+        color: #00d25b;
+    }
+
+    .stock-low {
+        color: #ffab00;
+    }
+
+    .stock-out {
+        color: #fc424a;
+    }
+
+    .btn-purchase {
+        width: 100%;
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        background: #00d25b;
+        color: white !important;
+        border: none;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+    }
+
+    .btn-purchase:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 210, 91, 0.3);
+        color: white;
+        text-decoration: none;
+    }
+
+    .filters {
+        margin-bottom: 2rem;
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-input {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    [data-theme="light"] .filter-input {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+    }
+
+    [data-theme="dark"] .filter-input {
+        background: #2d3238;
+        border: 1px solid #3d4249;
+        color: #ffffff;
+    }
+</style>
+{% endblock %} 

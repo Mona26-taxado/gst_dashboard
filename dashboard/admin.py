@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import CustomUser
+from .models import Equipment
 
 # Register your models here.
 
@@ -12,5 +13,7 @@ class CustomUserAdmin(admin.ModelAdmin):
 
 
 
+
+admin.site.register(Equipment)
 
 
