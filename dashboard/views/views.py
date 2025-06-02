@@ -562,3 +562,12 @@ def dummy_page(request):
     if request.user.role != 'demo':
         return render(request, 'not_authorized.html')
     return render(request, 'demo_pages/dummy_page.html')
+
+
+@role_required(['retailer', 'distributor', 'master_distributor'])
+@login_required
+def recharge_plans_view(request):
+    """
+    View to display available recharge plans to the retailer, distributor, and master distributor.
+    """
+    return render(request, 'recharge_plans.html')

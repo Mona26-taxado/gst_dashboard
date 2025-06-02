@@ -19,6 +19,7 @@ from .views.views import equipment_store, get_monthly_income_data, custom_login_
 from .views.equipment_views import equipment_billing, equipment_payment, check_payment_status, payment_success, admin_equipment_billing, update_equipment_order_status
 from .views import initiate_upi_payment
 from dashboard.views.admin_views import change_demo_password
+from dashboard.views.views import recharge_plans_view
 
 
  #edit_customer  Import the function from retailer_views
@@ -89,7 +90,7 @@ urlpatterns = [
     path('retailer/view-billing/<int:billing_id>/', retailer_views.view_billing_details, name='retailer_view_billing_details'),
     path('retailer/edit-billing/<int:billing_id>/', retailer_views.edit_billing, name='retailer_edit_billing'),
     path('dashboard/retailer/view-transactions/', retailer_view_transactions, name='retailer_view_transactions'),
-    path('recharge-plans/', retailer_views.recharge_plans_view, name='recharge_plans'),
+    path('recharge-plans/', recharge_plans_view, name='recharge_plans'),
     path('retailer/monthly-billing/', retailer_views.get_retailer_monthly_billing, name='retailer_monthly_billing'),
 
 

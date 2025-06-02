@@ -832,3 +832,4 @@ def get_distributor_monthly_deductions(request):
         'labels': monthly_labels,
         'deductions': monthly_deductions
     })
+

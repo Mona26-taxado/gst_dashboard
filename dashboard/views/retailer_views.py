@@ -555,13 +555,7 @@ def get_services_distribution(request):
     })
 
 
-@role_required(['retailer'])
-@login_required
-def recharge_plans_view(request):
-    """
-    View to display available recharge plans to the retailer.
-    """
-    return render(request, 'recharge_plans.html')
+
 
 
 @login_required

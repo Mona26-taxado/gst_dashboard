@@ -8,6 +8,7 @@ from django.http import JsonResponse
 from .models import Equipment, EquipmentOrder, Service
 from django.db.models import Count, Sum
 
+
 @login_required
 def equipment_billing(request, equipment_id):
     equipment = get_object_or_404(Equipment, id=equipment_id)
