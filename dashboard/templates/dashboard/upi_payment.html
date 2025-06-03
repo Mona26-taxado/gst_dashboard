@@ -14,12 +14,12 @@
                     <p>Plan ID: {{ plan_id }}</p>
                     
                     <div class="mb-4">
-                        <img src="data:image/png;base64,{{ qr_code }}" alt="UPI QR Code" style="width: 300px; height: 300px;">
+                        <img src="data:image/png;base64,{{ qr_code }}" alt="UPI QR Code" style="width: 266px; height: 266px;">
                     </div>
                     
                     <p class="mb-3">Scan the QR code or click the button below to pay</p>
                     
-                    <a href="{{ upi_link|urlencode }}" class="btn btn-primary">
+                    <a href="{{ upi_link }}" class="btn btn-primary">
                         <i class="fas fa-wallet"></i> Pay with UPI
                     </a>
                     
