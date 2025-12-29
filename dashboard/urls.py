@@ -12,14 +12,14 @@ from .views.admin_views import add_gsk as admin_add_gsk, view_gsk as admin_view_
 from dashboard.views.admin_views import manage_notifications, delete_notification, delete_service_billing, manage_access_requests
 from dashboard.views.admin_views import add_service, edit_service, delete_service # Import the necessary views
 from dashboard.views import admin_views, retailer_views
-from dashboard.views.retailer_views import add_customer as retailer_add_customer, delete_customer as retailer_delete_customer, retailer_view_transactions, wallet_recharge_view, banking_portal_request # Correct import statement
+from dashboard.views.retailer_views import add_customer as retailer_add_customer, delete_customer as retailer_delete_customer, retailer_view_transactions, wallet_recharge_view, retailer_2_wallet_recharge_view, retailer_2_view_transactions, banking_portal_request # Correct import statement
 from dashboard.views import retailer_views
 from dashboard.views.distributor_views import add_gsk, view_gsk, edit_gsk, delete_gsk, add_customer as distributor_add_customer, delete_customer, distributor_view_transactions, wallet_recharge_view, banking_portal_request
 from .views.views import equipment_store, get_monthly_income_data, custom_login_view, dashboard, additional_services_demo, equipments_store_demo, total_services_demo, dummy_page
 from .views.equipment_views import equipment_billing, equipment_payment, check_payment_status, payment_success, admin_equipment_billing, update_equipment_order_status
 from .views import initiate_upi_payment
 from dashboard.views.admin_views import change_demo_password
-from dashboard.views.views import recharge_plans_view
+from dashboard.views.views import recharge_plans_view, retailer_2_login_view, refresh_captcha
 
 
  #edit_customer  Import the function from retailer_views
@@ -42,30 +42,30 @@ urlpatterns = [
     path('not-authorized/', not_authorized_view, name='not_authorized'),
     path('qr-payment/<int:user_id>/', generate_qr_for_recharge, name='qr_payment'),
 
-    path('admin/dashboard/', admin_views.admin_dashboard, name='admin_dashboard'),
-    path('admin/add-gsk/', admin_add_gsk, name='admin_add_gsk'),
-    path('admin/view-gsk/', admin_view_gsk, name='admin_view_gsk'),
+    path('admin-dashboard/', admin_views.admin_dashboard, name='admin_dashboard'),
+    path('admin-add-gsk/', admin_add_gsk, name='admin_add_gsk'),
+    path('admin-view-gsk/', admin_view_gsk, name='admin_view_gsk'),
     path('edit-gsk/<int:gsk_id>/', admin_views.edit_gsk, name='edit_gsk'),
-    path('admin/delete-gsk/<int:user_id>/', admin_views.delete_gsk, name='delete_gsk'),
+    path('admin-delete-gsk/<int:user_id>/', admin_views.delete_gsk, name='delete_gsk'),
     # Admin URLs
-    path('admin/view-billing/<int:billing_id>/', admin_views.view_billing_details, name='admin_view_billing_details'),
+    path('admin-view-billing/<int:billing_id>/', admin_views.view_billing_details, name='admin_view_billing_details'),
     path('delete-service/<int:service_id>/', delete_service, name='delete_service'),
     # Existing URL patterns
-    path("admin/add-money/", add_or_deduct_money, name="add_or_deduct_money"),
+    path("admin-add-money/", add_or_deduct_money, name="add_or_deduct_money"),
 
-    path("admin/view-transactions/", admin_view_transactions, name="view_transactions"),
+    path("admin-view-transactions/", admin_view_transactions, name="view_transactions"),
 
 
      # Admin URLs
-    path('admin/add-service/', add_service, name='add_service'),
-    path('admin/view-services/', admin_views.view_services, name='view_services'),
-    path('admin/edit-service/<int:service_id>/', edit_service, name='edit_service'),
+    path('admin-add-service/', add_service, name='add_service'),
+    path('admin-view-services/', admin_views.view_services, name='view_services'),
+    path('admin-edit-service/<int:service_id>/', edit_service, name='edit_service'),
     path('service-billing/', service_billing, name='service_billing'),
     path('delete-service-billing/<int:billing_id>/', delete_service_billing, name='delete_service_billing'),
     # Other URLs...
     path('notifications/manage/', manage_notifications, name='manage_notifications'),
     path('notifications/delete/<int:notification_id>/', delete_notification, name='delete_notification'),
-    path('admin/manage-access-requests/', manage_access_requests, name='manage_access_requests'),
+    path('admin-manage-access-requests/', manage_access_requests, name='manage_access_requests'),
 
     
 
@@ -146,8 +146,54 @@ urlpatterns = [
     path('demo/total-services/', total_services_demo, name='total_services_demo'),
     path('demo/dummy/', dummy_page, name='dummy_page'),
 
-    path('admin/change-demo-password/', change_demo_password, name='change_demo_password'),
+    path('admin-change-demo-password/', change_demo_password, name='change_demo_password'),
+
+    # CSC 2.0 Admin URLs
+    path('admin-csc/services/', admin_views.csc_services_list, name='csc_services_list'),
+    path('admin-csc/services/add/', admin_views.csc_add_service, name='csc_add_service'),
+    path('admin-csc/services/edit/<int:service_id>/', admin_views.csc_edit_service, name='csc_edit_service'),
+    path('admin-csc/services/delete/<int:service_id>/', admin_views.csc_delete_service, name='csc_delete_service'),
+    path('admin-csc/requests/', admin_views.csc_service_requests, name='csc_service_requests'),
+    path('admin-csc/requests/update-status/<int:request_id>/', admin_views.csc_update_request_status, name='csc_update_request_status'),
+
+    # CSC 2.0 Retailer 2.0 URLs
+    path('retailer2/csc/services/', retailer_views.csc_services_view, name='csc_services_view'),
+    path('retailer2/csc/services/<int:service_id>/', retailer_views.csc_service_detail, name='csc_service_detail'),
+    path('retailer2/csc/services/<int:service_id>/request/', retailer_views.csc_request_service, name='csc_request_service'),
+    path('retailer2/csc/my-requests/', retailer_views.csc_my_requests, name='csc_my_requests'),
 
     path('get-monthly-income-data/', get_monthly_income_data, name='get_monthly_income_data'),
+
+    # Retailer 2.0 URLs
+    path('retailer2/dashboard/', retailer_views.retailer_2_dashboard, name='retailer_2_dashboard'),
+    path('retailer2/wallet-recharge/', retailer_views.retailer_2_wallet_recharge_view, name='retailer_2_wallet_recharge'),
+    path('retailer2/view-transactions/', retailer_views.retailer_2_view_transactions, name='retailer_2_view_transactions'),
+    
+    # Distributor 2.0 URLs
+    path('distributor2/dashboard/', distributor_views.distributor_dashboard, name='distributor_2_dashboard'),
+    path('distributor2/wallet-recharge/', wallet_recharge_view, name='distributor_2_wallet_recharge'),
+    path('distributor2/view-transactions/', distributor_view_transactions, name='distributor_2_view_transactions'),
+
+    # Custom Login URLs for new roles
+    path('retailer2/login/', retailer_2_login_view, name='retailer_2_login'),
+    path('distributor2/login/', retailer_2_login_view, name='distributor_2_login'),
+    path('refresh-captcha/', refresh_captcha, name='refresh_captcha'),
+
+    # Retailer 2.0 Customer Management URLs
+    path('retailer2/add-customer/', retailer_views.retailer_2_add_customer, name='retailer_2_add_customer'),
+    path('retailer2/view-customer/', retailer_views.retailer_2_view_customer, name='retailer_2_view_customer'),
+    path('retailer2/edit-customer/<int:customer_id>/', retailer_views.retailer_2_edit_customer, name='retailer_2_edit_customer'),
+    path('retailer2/delete-customer/<int:customer_id>/', retailer_views.retailer_2_delete_customer, name='retailer_2_delete_customer'),
+    
+    # Retailer 2.0 Profile Management URLs
+    path('retailer2/edit-profile/', retailer_views.retailer_2_edit_profile, name='retailer_2_edit_profile'),
+    path('retailer2/settings/', retailer_views.retailer_2_settings, name='retailer_2_settings'),
+    
+    # Retailer 2.0 Billing Management URLs
+    path('retailer2/add-billing/', retailer_views.retailer_2_add_billing, name='retailer_2_add_billing'),
+    path('retailer2/view-billing/', retailer_views.retailer_2_view_billing, name='retailer_2_view_billing'),
+    path('retailer2/view-billing/<int:billing_id>/', retailer_views.retailer_2_view_billing_details, name='retailer_2_view_billing_details'),
+    path('retailer2/edit-billing/<int:billing_id>/', retailer_views.retailer_2_edit_billing, name='retailer_2_edit_billing'),
+    path('retailer2/delete-billing/<int:billing_id>/', retailer_views.retailer_2_delete_billing, name='retailer_2_delete_billing'),
 
 ]

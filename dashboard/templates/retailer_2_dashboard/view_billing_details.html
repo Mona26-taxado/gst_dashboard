@@ -1,0 +1,1363 @@
+{% extends 'retailer_2_dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Billing Details - Retailer 2.0{% endblock %}
+
+{% block content %}
+<div class="container mt-10">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2 class="card-titles mb-0">Billing Details</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{% url 'retailer_2_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'retailer_2_view_billing' %}">Billing</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Billing Details</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="card-body">
+            <!-- Billing Header -->
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <div class="d-flex flex-column">
+                        <div class="mb-2">
+                            <strong>Billing ID:</strong> 
+                            <span class="text-primary">{{ billing.ref_no }}</span>
+                        </div>
+                        <div>
+                            <strong>Date:</strong> 
+                            <span class="text-muted">{{ billing.billing_date|date:"F d, Y" }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 text-end">
+                    {% if billing.payment_status == 'Paid' %}
+                        <span class="badge badge-primary fs-6">{{ billing.payment_status }}</span>
+                    {% elif billing.payment_status == 'Unpaid' %}
+                        <span class="badge badge-danger fs-6">{{ billing.payment_status }}</span>
+                    {% else %}
+                        <span class="badge badge-secondary fs-6">{{ billing.payment_status }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Customer Information -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h4 class="card-title mb-3">
+                        <i class="mdi mdi-account-circle text-primary"></i>
+                        Customer Information
+                    </h4>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Full Name:</label>
+                            <p class="form-control-plaintext">{{ billing.customer.full_name }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Mobile:</label>
+                            <p class="form-control-plaintext">{{ billing.customer.mobile }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Email:</label>
+                            <p class="form-control-plaintext">{{ billing.customer.email|default:"Not provided" }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Address:</label>
+                            <p class="form-control-plaintext">{{ billing.customer.address }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Location:</label>
+                            <p class="form-control-plaintext">{{ billing.customer.city }}, {{ billing.customer.state }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">PIN Code:</label>
+                            <p class="form-control-plaintext">{{ billing.customer.pin_code|default:"Not provided" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Service Information -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h4 class="card-title mb-3">
+                        <i class="mdi mdi-cog text-success"></i>
+                        Service Information
+                    </h4>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Service Name:</label>
+                            <p class="form-control-plaintext">{{ billing.service.service_name }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Wallet Deduction:</label>
+                            <p class="form-control-plaintext text-success fw-bold">₹{{ billing.service.wallet_deduction }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Service Status:</label>
+                            <p class="form-control-plaintext">
+                                {% if billing.service_status == 'Pending' %}
+                                    <span class="badge badge-danger">{{ billing.service_status }}</span>
+                                {% elif billing.service_status == 'Processing' %}
+                                    <span class="badge badge-warning">{{ billing.service_status }}</span>
+                                {% elif billing.service_status == 'Complete' %}
+                                    <span class="badge badge-success">{{ billing.service_status }}</span>
+                                {% else %}
+                                    <span class="badge badge-secondary">{{ billing.service_status }}</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Payment Status:</label>
+                            <p class="form-control-plaintext">
+                                {% if billing.payment_status == 'Paid' %}
+                                    <span class="badge badge-primary">{{ billing.payment_status }}</span>
+                                {% elif billing.payment_status == 'Unpaid' %}
+                                    <span class="badge badge-danger">{{ billing.payment_status }}</span>
+                                {% else %}
+                                    <span class="badge badge-secondary">{{ billing.payment_status }}</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Information -->
+            {% if billing.notes %}
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h4 class="card-title mb-3">
+                        <i class="mdi mdi-note-text text-info"></i>
+                        Additional Notes
+                    </h4>
+                    <div class="alert alert-info">
+                        {{ billing.notes }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Service Notes -->
+            {% if billing.service_notes %}
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h4 class="card-title mb-3">
+                        <i class="mdi mdi-note-outline text-warning"></i>
+                        Service Notes
+                    </h4>
+                    <div class="alert alert-warning">
+                        {{ billing.service_notes }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Actions -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'retailer_2_edit_billing' billing.id %}" class="btn btn-primary">
+                            <i class="mdi mdi-pencil"></i> Edit Billing
+                        </a>
+                        <a href="{% url 'retailer_2_view_billing' %}" class="btn btn-secondary">
+                            <i class="mdi mdi-arrow-left"></i> Back to Billing
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card-title {
+        color: #495057;
+        font-weight: 600;
+        border-bottom: 2px solid #e9ecef;
+        padding-bottom: 0.5rem;
+    }
+    
+    .form-control-plaintext {
+        color: #6c757d;
+        font-weight: 500;
+    }
+    
+    .badge {
+        font-size: 0.75rem;
+        padding: 0.375rem 0.75rem;
+    }
+    
+    .alert {
+        border-radius: 0.375rem;
+        border: 1px solid transparent;
+    }
+    
+    .btn {
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s ease;
+    }
+    
+    .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .gap-2 {
+        gap: 0.5rem !important;
+    }
+    
+    @media (max-width: 768px) {
+        .d-flex.gap-2 {
+            flex-direction: column;
+        }
+        
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %} 
+{% load static %}
+
+{% block title %}Billing Details - Retailer 2.0{% endblock %}
+
+{% block content %}
+<div class="container mt-10">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2 class="card-titles mb-0">Billing Details</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{% url 'retailer_2_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'retailer_2_view_billing' %}">Billing</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Billing Details</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="card-body">
+            <!-- Billing Header -->
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <div class="d-flex flex-column">
+                        <div class="mb-2">
+                            <strong>Billing ID:</strong> 
+                            <span class="text-primary">{{ billing.ref_no }}</span>
+                        </div>
+                        <div>
+                            <strong>Date:</strong> 
+                            <span class="text-muted">{{ billing.billing_date|date:"F d, Y" }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 text-end">
+                    {% if billing.payment_status == 'Paid' %}
+                        <span class="badge badge-primary fs-6">{{ billing.payment_status }}</span>
+                    {% elif billing.payment_status == 'Unpaid' %}
+                        <span class="badge badge-danger fs-6">{{ billing.payment_status }}</span>
+                    {% else %}
+                        <span class="badge badge-secondary fs-6">{{ billing.payment_status }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Customer Information -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h4 class="card-title mb-3">
+                        <i class="mdi mdi-account-circle text-primary"></i>
+                        Customer Information
+                    </h4>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Full Name:</label>
+                            <p class="form-control-plaintext">{{ billing.customer.full_name }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Mobile:</label>
+                            <p class="form-control-plaintext">{{ billing.customer.mobile }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Email:</label>
+                            <p class="form-control-plaintext">{{ billing.customer.email|default:"Not provided" }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Address:</label>
+                            <p class="form-control-plaintext">{{ billing.customer.address }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Location:</label>
+                            <p class="form-control-plaintext">{{ billing.customer.city }}, {{ billing.customer.state }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">PIN Code:</label>
+                            <p class="form-control-plaintext">{{ billing.customer.pin_code|default:"Not provided" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Service Information -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h4 class="card-title mb-3">
+                        <i class="mdi mdi-cog text-success"></i>
+                        Service Information
+                    </h4>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Service Name:</label>
+                            <p class="form-control-plaintext">{{ billing.service.service_name }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Wallet Deduction:</label>
+                            <p class="form-control-plaintext text-success fw-bold">₹{{ billing.service.wallet_deduction }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Service Status:</label>
+                            <p class="form-control-plaintext">
+                                {% if billing.service_status == 'Pending' %}
+                                    <span class="badge badge-danger">{{ billing.service_status }}</span>
+                                {% elif billing.service_status == 'Processing' %}
+                                    <span class="badge badge-warning">{{ billing.service_status }}</span>
+                                {% elif billing.service_status == 'Complete' %}
+                                    <span class="badge badge-success">{{ billing.service_status }}</span>
+                                {% else %}
+                                    <span class="badge badge-secondary">{{ billing.service_status }}</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Payment Status:</label>
+                            <p class="form-control-plaintext">
+                                {% if billing.payment_status == 'Paid' %}
+                                    <span class="badge badge-primary">{{ billing.payment_status }}</span>
+                                {% elif billing.payment_status == 'Unpaid' %}
+                                    <span class="badge badge-danger">{{ billing.payment_status }}</span>
+                                {% else %}
+                                    <span class="badge badge-secondary">{{ billing.payment_status }}</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Information -->
+            {% if billing.notes %}
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h4 class="card-title mb-3">
+                        <i class="mdi mdi-note-text text-info"></i>
+                        Additional Notes
+                    </h4>
+                    <div class="alert alert-info">
+                        {{ billing.notes }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Service Notes -->
+            {% if billing.service_notes %}
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h4 class="card-title mb-3">
+                        <i class="mdi mdi-note-outline text-warning"></i>
+                        Service Notes
+                    </h4>
+                    <div class="alert alert-warning">
+                        {{ billing.service_notes }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Actions -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'retailer_2_edit_billing' billing.id %}" class="btn btn-primary">
+                            <i class="mdi mdi-pencil"></i> Edit Billing
+                        </a>
+                        <a href="{% url 'retailer_2_view_billing' %}" class="btn btn-secondary">
+                            <i class="mdi mdi-arrow-left"></i> Back to Billing
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card-title {
+        color: #495057;
+        font-weight: 600;
+        border-bottom: 2px solid #e9ecef;
+        padding-bottom: 0.5rem;
+    }
+    
+    .form-control-plaintext {
+        color: #6c757d;
+        font-weight: 500;
+    }
+    
+    .badge {
+        font-size: 0.75rem;
+        padding: 0.375rem 0.75rem;
+    }
+    
+    .alert {
+        border-radius: 0.375rem;
+        border: 1px solid transparent;
+    }
+    
+    .btn {
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s ease;
+    }
+    
+    .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .gap-2 {
+        gap: 0.5rem !important;
+    }
+    
+    @media (max-width: 768px) {
+        .d-flex.gap-2 {
+            flex-direction: column;
+        }
+        
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %} 
+{% load static %}
+
+{% block title %}Billing Details - Retailer 2.0{% endblock %}
+
+{% block content %}
+<div class="container mt-10">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2 class="card-titles mb-0">Billing Details</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{% url 'retailer_2_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'retailer_2_view_billing' %}">Billing</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Billing Details</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="card-body">
+            <!-- Billing Header -->
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <div class="d-flex flex-column">
+                        <div class="mb-2">
+                            <strong>Billing ID:</strong> 
+                            <span class="text-primary">{{ billing.ref_no }}</span>
+                        </div>
+                        <div>
+                            <strong>Date:</strong> 
+                            <span class="text-muted">{{ billing.billing_date|date:"F d, Y" }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 text-end">
+                    {% if billing.payment_status == 'Paid' %}
+                        <span class="badge badge-primary fs-6">{{ billing.payment_status }}</span>
+                    {% elif billing.payment_status == 'Unpaid' %}
+                        <span class="badge badge-danger fs-6">{{ billing.payment_status }}</span>
+                    {% else %}
+                        <span class="badge badge-secondary fs-6">{{ billing.payment_status }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Customer Information -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h4 class="card-title mb-3">
+                        <i class="mdi mdi-account-circle text-primary"></i>
+                        Customer Information
+                    </h4>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Full Name:</label>
+                            <p class="form-control-plaintext">{{ billing.customer.full_name }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Mobile:</label>
+                            <p class="form-control-plaintext">{{ billing.customer.mobile }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Email:</label>
+                            <p class="form-control-plaintext">{{ billing.customer.email|default:"Not provided" }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Address:</label>
+                            <p class="form-control-plaintext">{{ billing.customer.address }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Location:</label>
+                            <p class="form-control-plaintext">{{ billing.customer.city }}, {{ billing.customer.state }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">PIN Code:</label>
+                            <p class="form-control-plaintext">{{ billing.customer.pin_code|default:"Not provided" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Service Information -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h4 class="card-title mb-3">
+                        <i class="mdi mdi-cog text-success"></i>
+                        Service Information
+                    </h4>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Service Name:</label>
+                            <p class="form-control-plaintext">{{ billing.service.service_name }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Wallet Deduction:</label>
+                            <p class="form-control-plaintext text-success fw-bold">₹{{ billing.service.wallet_deduction }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Service Status:</label>
+                            <p class="form-control-plaintext">
+                                {% if billing.service_status == 'Pending' %}
+                                    <span class="badge badge-danger">{{ billing.service_status }}</span>
+                                {% elif billing.service_status == 'Processing' %}
+                                    <span class="badge badge-warning">{{ billing.service_status }}</span>
+                                {% elif billing.service_status == 'Complete' %}
+                                    <span class="badge badge-success">{{ billing.service_status }}</span>
+                                {% else %}
+                                    <span class="badge badge-secondary">{{ billing.service_status }}</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Payment Status:</label>
+                            <p class="form-control-plaintext">
+                                {% if billing.payment_status == 'Paid' %}
+                                    <span class="badge badge-primary">{{ billing.payment_status }}</span>
+                                {% elif billing.payment_status == 'Unpaid' %}
+                                    <span class="badge badge-danger">{{ billing.payment_status }}</span>
+                                {% else %}
+                                    <span class="badge badge-secondary">{{ billing.payment_status }}</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Information -->
+            {% if billing.notes %}
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h4 class="card-title mb-3">
+                        <i class="mdi mdi-note-text text-info"></i>
+                        Additional Notes
+                    </h4>
+                    <div class="alert alert-info">
+                        {{ billing.notes }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Service Notes -->
+            {% if billing.service_notes %}
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h4 class="card-title mb-3">
+                        <i class="mdi mdi-note-outline text-warning"></i>
+                        Service Notes
+                    </h4>
+                    <div class="alert alert-warning">
+                        {{ billing.service_notes }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Actions -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'retailer_2_edit_billing' billing.id %}" class="btn btn-primary">
+                            <i class="mdi mdi-pencil"></i> Edit Billing
+                        </a>
+                        <a href="{% url 'retailer_2_view_billing' %}" class="btn btn-secondary">
+                            <i class="mdi mdi-arrow-left"></i> Back to Billing
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card-title {
+        color: #495057;
+        font-weight: 600;
+        border-bottom: 2px solid #e9ecef;
+        padding-bottom: 0.5rem;
+    }
+    
+    .form-control-plaintext {
+        color: #6c757d;
+        font-weight: 500;
+    }
+    
+    .badge {
+        font-size: 0.75rem;
+        padding: 0.375rem 0.75rem;
+    }
+    
+    .alert {
+        border-radius: 0.375rem;
+        border: 1px solid transparent;
+    }
+    
+    .btn {
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s ease;
+    }
+    
+    .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .gap-2 {
+        gap: 0.5rem !important;
+    }
+    
+    @media (max-width: 768px) {
+        .d-flex.gap-2 {
+            flex-direction: column;
+        }
+        
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %} 
+{% load static %}
+
+{% block title %}Billing Details - Retailer 2.0{% endblock %}
+
+{% block content %}
+<div class="container mt-10">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2 class="card-titles mb-0">Billing Details</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{% url 'retailer_2_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'retailer_2_view_billing' %}">Billing</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Billing Details</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="card-body">
+            <!-- Billing Header -->
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <div class="d-flex flex-column">
+                        <div class="mb-2">
+                            <strong>Billing ID:</strong> 
+                            <span class="text-primary">{{ billing.ref_no }}</span>
+                        </div>
+                        <div>
+                            <strong>Date:</strong> 
+                            <span class="text-muted">{{ billing.billing_date|date:"F d, Y" }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 text-end">
+                    {% if billing.payment_status == 'Paid' %}
+                        <span class="badge badge-primary fs-6">{{ billing.payment_status }}</span>
+                    {% elif billing.payment_status == 'Unpaid' %}
+                        <span class="badge badge-danger fs-6">{{ billing.payment_status }}</span>
+                    {% else %}
+                        <span class="badge badge-secondary fs-6">{{ billing.payment_status }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Customer Information -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h4 class="card-title mb-3">
+                        <i class="mdi mdi-account-circle text-primary"></i>
+                        Customer Information
+                    </h4>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Full Name:</label>
+                            <p class="form-control-plaintext">{{ billing.customer.full_name }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Mobile:</label>
+                            <p class="form-control-plaintext">{{ billing.customer.mobile }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Email:</label>
+                            <p class="form-control-plaintext">{{ billing.customer.email|default:"Not provided" }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Address:</label>
+                            <p class="form-control-plaintext">{{ billing.customer.address }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Location:</label>
+                            <p class="form-control-plaintext">{{ billing.customer.city }}, {{ billing.customer.state }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">PIN Code:</label>
+                            <p class="form-control-plaintext">{{ billing.customer.pin_code|default:"Not provided" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Service Information -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h4 class="card-title mb-3">
+                        <i class="mdi mdi-cog text-success"></i>
+                        Service Information
+                    </h4>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Service Name:</label>
+                            <p class="form-control-plaintext">{{ billing.service.service_name }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Wallet Deduction:</label>
+                            <p class="form-control-plaintext text-success fw-bold">₹{{ billing.service.wallet_deduction }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Service Status:</label>
+                            <p class="form-control-plaintext">
+                                {% if billing.service_status == 'Pending' %}
+                                    <span class="badge badge-danger">{{ billing.service_status }}</span>
+                                {% elif billing.service_status == 'Processing' %}
+                                    <span class="badge badge-warning">{{ billing.service_status }}</span>
+                                {% elif billing.service_status == 'Complete' %}
+                                    <span class="badge badge-success">{{ billing.service_status }}</span>
+                                {% else %}
+                                    <span class="badge badge-secondary">{{ billing.service_status }}</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Payment Status:</label>
+                            <p class="form-control-plaintext">
+                                {% if billing.payment_status == 'Paid' %}
+                                    <span class="badge badge-primary">{{ billing.payment_status }}</span>
+                                {% elif billing.payment_status == 'Unpaid' %}
+                                    <span class="badge badge-danger">{{ billing.payment_status }}</span>
+                                {% else %}
+                                    <span class="badge badge-secondary">{{ billing.payment_status }}</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Information -->
+            {% if billing.notes %}
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h4 class="card-title mb-3">
+                        <i class="mdi mdi-note-text text-info"></i>
+                        Additional Notes
+                    </h4>
+                    <div class="alert alert-info">
+                        {{ billing.notes }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Service Notes -->
+            {% if billing.service_notes %}
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h4 class="card-title mb-3">
+                        <i class="mdi mdi-note-outline text-warning"></i>
+                        Service Notes
+                    </h4>
+                    <div class="alert alert-warning">
+                        {{ billing.service_notes }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Actions -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'retailer_2_edit_billing' billing.id %}" class="btn btn-primary">
+                            <i class="mdi mdi-pencil"></i> Edit Billing
+                        </a>
+                        <a href="{% url 'retailer_2_view_billing' %}" class="btn btn-secondary">
+                            <i class="mdi mdi-arrow-left"></i> Back to Billing
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card-title {
+        color: #495057;
+        font-weight: 600;
+        border-bottom: 2px solid #e9ecef;
+        padding-bottom: 0.5rem;
+    }
+    
+    .form-control-plaintext {
+        color: #6c757d;
+        font-weight: 500;
+    }
+    
+    .badge {
+        font-size: 0.75rem;
+        padding: 0.375rem 0.75rem;
+    }
+    
+    .alert {
+        border-radius: 0.375rem;
+        border: 1px solid transparent;
+    }
+    
+    .btn {
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s ease;
+    }
+    
+    .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .gap-2 {
+        gap: 0.5rem !important;
+    }
+    
+    @media (max-width: 768px) {
+        .d-flex.gap-2 {
+            flex-direction: column;
+        }
+        
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %} 
+{% load static %}
+
+{% block title %}Billing Details - Retailer 2.0{% endblock %}
+
+{% block content %}
+<div class="container mt-10">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2 class="card-titles mb-0">Billing Details</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{% url 'retailer_2_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'retailer_2_view_billing' %}">Billing</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Billing Details</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="card-body">
+            <!-- Billing Header -->
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <div class="d-flex flex-column">
+                        <div class="mb-2">
+                            <strong>Billing ID:</strong> 
+                            <span class="text-primary">{{ billing.ref_no }}</span>
+                        </div>
+                        <div>
+                            <strong>Date:</strong> 
+                            <span class="text-muted">{{ billing.billing_date|date:"F d, Y" }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 text-end">
+                    {% if billing.payment_status == 'Paid' %}
+                        <span class="badge badge-primary fs-6">{{ billing.payment_status }}</span>
+                    {% elif billing.payment_status == 'Unpaid' %}
+                        <span class="badge badge-danger fs-6">{{ billing.payment_status }}</span>
+                    {% else %}
+                        <span class="badge badge-secondary fs-6">{{ billing.payment_status }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Customer Information -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h4 class="card-title mb-3">
+                        <i class="mdi mdi-account-circle text-primary"></i>
+                        Customer Information
+                    </h4>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Full Name:</label>
+                            <p class="form-control-plaintext">{{ billing.customer.full_name }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Mobile:</label>
+                            <p class="form-control-plaintext">{{ billing.customer.mobile }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Email:</label>
+                            <p class="form-control-plaintext">{{ billing.customer.email|default:"Not provided" }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Address:</label>
+                            <p class="form-control-plaintext">{{ billing.customer.address }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Location:</label>
+                            <p class="form-control-plaintext">{{ billing.customer.city }}, {{ billing.customer.state }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">PIN Code:</label>
+                            <p class="form-control-plaintext">{{ billing.customer.pin_code|default:"Not provided" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Service Information -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h4 class="card-title mb-3">
+                        <i class="mdi mdi-cog text-success"></i>
+                        Service Information
+                    </h4>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Service Name:</label>
+                            <p class="form-control-plaintext">{{ billing.service.service_name }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Wallet Deduction:</label>
+                            <p class="form-control-plaintext text-success fw-bold">₹{{ billing.service.wallet_deduction }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Service Status:</label>
+                            <p class="form-control-plaintext">
+                                {% if billing.service_status == 'Pending' %}
+                                    <span class="badge badge-danger">{{ billing.service_status }}</span>
+                                {% elif billing.service_status == 'Processing' %}
+                                    <span class="badge badge-warning">{{ billing.service_status }}</span>
+                                {% elif billing.service_status == 'Complete' %}
+                                    <span class="badge badge-success">{{ billing.service_status }}</span>
+                                {% else %}
+                                    <span class="badge badge-secondary">{{ billing.service_status }}</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Payment Status:</label>
+                            <p class="form-control-plaintext">
+                                {% if billing.payment_status == 'Paid' %}
+                                    <span class="badge badge-primary">{{ billing.payment_status }}</span>
+                                {% elif billing.payment_status == 'Unpaid' %}
+                                    <span class="badge badge-danger">{{ billing.payment_status }}</span>
+                                {% else %}
+                                    <span class="badge badge-secondary">{{ billing.payment_status }}</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Information -->
+            {% if billing.notes %}
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h4 class="card-title mb-3">
+                        <i class="mdi mdi-note-text text-info"></i>
+                        Additional Notes
+                    </h4>
+                    <div class="alert alert-info">
+                        {{ billing.notes }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Service Notes -->
+            {% if billing.service_notes %}
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h4 class="card-title mb-3">
+                        <i class="mdi mdi-note-outline text-warning"></i>
+                        Service Notes
+                    </h4>
+                    <div class="alert alert-warning">
+                        {{ billing.service_notes }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Actions -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'retailer_2_edit_billing' billing.id %}" class="btn btn-primary">
+                            <i class="mdi mdi-pencil"></i> Edit Billing
+                        </a>
+                        <a href="{% url 'retailer_2_view_billing' %}" class="btn btn-secondary">
+                            <i class="mdi mdi-arrow-left"></i> Back to Billing
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card-title {
+        color: #495057;
+        font-weight: 600;
+        border-bottom: 2px solid #e9ecef;
+        padding-bottom: 0.5rem;
+    }
+    
+    .form-control-plaintext {
+        color: #6c757d;
+        font-weight: 500;
+    }
+    
+    .badge {
+        font-size: 0.75rem;
+        padding: 0.375rem 0.75rem;
+    }
+    
+    .alert {
+        border-radius: 0.375rem;
+        border: 1px solid transparent;
+    }
+    
+    .btn {
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s ease;
+    }
+    
+    .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .gap-2 {
+        gap: 0.5rem !important;
+    }
+    
+    @media (max-width: 768px) {
+        .d-flex.gap-2 {
+            flex-direction: column;
+        }
+        
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %} 
+{% load static %}
+
+{% block title %}Billing Details - Retailer 2.0{% endblock %}
+
+{% block content %}
+<div class="container mt-10">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2 class="card-titles mb-0">Billing Details</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{% url 'retailer_2_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'retailer_2_view_billing' %}">Billing</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Billing Details</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="card-body">
+            <!-- Billing Header -->
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <div class="d-flex flex-column">
+                        <div class="mb-2">
+                            <strong>Billing ID:</strong> 
+                            <span class="text-primary">{{ billing.ref_no }}</span>
+                        </div>
+                        <div>
+                            <strong>Date:</strong> 
+                            <span class="text-muted">{{ billing.billing_date|date:"F d, Y" }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 text-end">
+                    {% if billing.payment_status == 'Paid' %}
+                        <span class="badge badge-primary fs-6">{{ billing.payment_status }}</span>
+                    {% elif billing.payment_status == 'Unpaid' %}
+                        <span class="badge badge-danger fs-6">{{ billing.payment_status }}</span>
+                    {% else %}
+                        <span class="badge badge-secondary fs-6">{{ billing.payment_status }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Customer Information -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h4 class="card-title mb-3">
+                        <i class="mdi mdi-account-circle text-primary"></i>
+                        Customer Information
+                    </h4>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Full Name:</label>
+                            <p class="form-control-plaintext">{{ billing.customer.full_name }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Mobile:</label>
+                            <p class="form-control-plaintext">{{ billing.customer.mobile }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Email:</label>
+                            <p class="form-control-plaintext">{{ billing.customer.email|default:"Not provided" }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Address:</label>
+                            <p class="form-control-plaintext">{{ billing.customer.address }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Location:</label>
+                            <p class="form-control-plaintext">{{ billing.customer.city }}, {{ billing.customer.state }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">PIN Code:</label>
+                            <p class="form-control-plaintext">{{ billing.customer.pin_code|default:"Not provided" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Service Information -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h4 class="card-title mb-3">
+                        <i class="mdi mdi-cog text-success"></i>
+                        Service Information
+                    </h4>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Service Name:</label>
+                            <p class="form-control-plaintext">{{ billing.service.service_name }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Wallet Deduction:</label>
+                            <p class="form-control-plaintext text-success fw-bold">₹{{ billing.service.wallet_deduction }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Service Status:</label>
+                            <p class="form-control-plaintext">
+                                {% if billing.service_status == 'Pending' %}
+                                    <span class="badge badge-danger">{{ billing.service_status }}</span>
+                                {% elif billing.service_status == 'Processing' %}
+                                    <span class="badge badge-warning">{{ billing.service_status }}</span>
+                                {% elif billing.service_status == 'Complete' %}
+                                    <span class="badge badge-success">{{ billing.service_status }}</span>
+                                {% else %}
+                                    <span class="badge badge-secondary">{{ billing.service_status }}</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Payment Status:</label>
+                            <p class="form-control-plaintext">
+                                {% if billing.payment_status == 'Paid' %}
+                                    <span class="badge badge-primary">{{ billing.payment_status }}</span>
+                                {% elif billing.payment_status == 'Unpaid' %}
+                                    <span class="badge badge-danger">{{ billing.payment_status }}</span>
+                                {% else %}
+                                    <span class="badge badge-secondary">{{ billing.payment_status }}</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Information -->
+            {% if billing.notes %}
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h4 class="card-title mb-3">
+                        <i class="mdi mdi-note-text text-info"></i>
+                        Additional Notes
+                    </h4>
+                    <div class="alert alert-info">
+                        {{ billing.notes }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Service Notes -->
+            {% if billing.service_notes %}
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h4 class="card-title mb-3">
+                        <i class="mdi mdi-note-outline text-warning"></i>
+                        Service Notes
+                    </h4>
+                    <div class="alert alert-warning">
+                        {{ billing.service_notes }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Actions -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'retailer_2_edit_billing' billing.id %}" class="btn btn-primary">
+                            <i class="mdi mdi-pencil"></i> Edit Billing
+                        </a>
+                        <a href="{% url 'retailer_2_view_billing' %}" class="btn btn-secondary">
+                            <i class="mdi mdi-arrow-left"></i> Back to Billing
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card-title {
+        color: #495057;
+        font-weight: 600;
+        border-bottom: 2px solid #e9ecef;
+        padding-bottom: 0.5rem;
+    }
+    
+    .form-control-plaintext {
+        color: #6c757d;
+        font-weight: 500;
+    }
+    
+    .badge {
+        font-size: 0.75rem;
+        padding: 0.375rem 0.75rem;
+    }
+    
+    .alert {
+        border-radius: 0.375rem;
+        border: 1px solid transparent;
+    }
+    
+    .btn {
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s ease;
+    }
+    
+    .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .gap-2 {
+        gap: 0.5rem !important;
+    }
+    
+    @media (max-width: 768px) {
+        .d-flex.gap-2 {
+            flex-direction: column;
+        }
+        
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %} 

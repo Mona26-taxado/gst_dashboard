@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-10">
+    <div class="row">
+        <div class="col-12 grid-margin stretch-card">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="card-title">{{ title }}</h4>
+                        <a href="{% url 'csc_services_list' %}" class="btn btn-secondary">
+                            <i class="mdi mdi-arrow-left"></i> Back to Services
+                        </a>
+                    </div>
+                    
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.service_name.id_for_label }}">Service Name *</label>
+                                    {{ form.service_name }}
+                                    {% if form.service_name.errors %}
+                                        <div class="text-danger">{{ form.service_name.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.price.id_for_label }}">Service Price (₹) *</label>
+                                    {{ form.price }}
+                                    <small class="form-text text-muted">Price of the service</small>
+                                    {% if form.price.errors %}
+                                        <div class="text-danger">{{ form.price.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.wallet_deduction.id_for_label }}">Wallet Deduction (₹)</label>
+                                    {{ form.wallet_deduction }}
+                                    <small class="form-text text-muted">Amount to be deducted from retailer's wallet</small>
+                                    {% if form.wallet_deduction.errors %}
+                                        <div class="text-danger">{{ form.wallet_deduction.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.is_active.id_for_label }}">Status</label>
+                                    <div class="form-check">
+                                        {{ form.is_active }}
+                                        <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                            Active
+                                        </label>
+                                    </div>
+                                    {% if form.is_active.errors %}
+                                        <div class="text-danger">{{ form.is_active.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.description.id_for_label }}">Description</label>
+                            {{ form.description }}
+                            <small class="form-text text-muted">Brief description of the service</small>
+                            {% if form.description.errors %}
+                                <div class="text-danger">{{ form.description.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.service_icon.id_for_label }}">Service Icon</label>
+                                    {{ form.service_icon }}
+                                    <small class="form-text text-muted">Material Design Icon class (e.g., mdi mdi-account)</small>
+                                    {% if form.service_icon.errors %}
+                                        <div class="text-danger">{{ form.service_icon.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.service_color.id_for_label }}">Service Color</label>
+                                    {{ form.service_color }}
+                                    <small class="form-text text-muted">Color for the service card</small>
+                                    {% if form.service_color.errors %}
+                                        <div class="text-danger">{{ form.service_color.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.required_documents.id_for_label }}">Required Documents</label>
+                            {{ form.required_documents }}
+                            <small class="form-text text-muted">List of documents required for this service (separated by commas)</small>
+                            {% if form.required_documents.errors %}
+                                <div class="text-danger">{{ form.required_documents.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.service_image.id_for_label }}">Service Image</label>
+                            {{ form.service_image }}
+                            <small class="form-text text-muted">Upload an image for the service card (optional)</small>
+                            {% if form.service_image.errors %}
+                                <div class="text-danger">{{ form.service_image.errors }}</div>
+                            {% endif %}
+                            {% if service.service_image %}
+                                <div class="mt-2">
+                                    <img src="{{ service.service_image.url }}" alt="Current service image" style="max-width: 200px; max-height: 200px;" class="img-thumbnail">
+                                    <p class="text-muted small">Current image</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.external_link.id_for_label }}">External Link (Optional)</label>
+                            {{ form.external_link }}
+                            <small class="form-text text-muted">External link for the service (optional)</small>
+                            {% if form.external_link.errors %}
+                                <div class="text-danger">{{ form.external_link.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="mdi mdi-content-save"></i> Save Service
+                            </button>
+                            <a href="{% url 'csc_services_list' %}" class="btn btn-secondary">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

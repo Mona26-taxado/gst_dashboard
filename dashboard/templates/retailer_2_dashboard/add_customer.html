@@ -1,0 +1,359 @@
+{% extends 'retailer_2_dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Add Customer - Retailer 2.0{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Simple and Clean Add Customer Page Styles */
+    .customer-form-container {
+        background: #f8f9fa;
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+
+    .form-card {
+        background: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e9ecef;
+        overflow: hidden;
+    }
+
+    .card-header {
+        background: #ffffff;
+        color: #333;
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .card-title {
+        font-size: 1.75rem;
+        font-weight: 600;
+        margin: 0;
+        color: #333;
+    }
+
+    .card-subtitle {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+
+    .breadcrumb {
+        background: #f8f9fa;
+        border-radius: 6px;
+        padding: 0.5rem 1rem;
+        border: 1px solid #e9ecef;
+    }
+
+    .breadcrumb-item a {
+        color: #495057;
+        text-decoration: none;
+        font-size: 0.85rem;
+    }
+
+    .breadcrumb-item a:hover {
+        color: #333;
+    }
+
+    .breadcrumb-item.active {
+        color: #6c757d;
+        font-weight: 500;
+    }
+
+    .card-body {
+        padding: 2rem;
+        background: #ffffff;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        font-weight: 500;
+        color: #495057;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-label i {
+        color: #6c757d;
+        font-size: 0.85rem;
+    }
+
+    .form-control {
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+        background: #ffffff;
+    }
+
+    .form-control:focus {
+        border-color: #80bdff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        outline: none;
+    }
+
+    .form-control::placeholder {
+        color: #adb5bd;
+    }
+
+    .form-select {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236c757d' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 0.75rem center;
+        background-repeat: no-repeat;
+        background-size: 1.5em 1.5em;
+    }
+
+    .submit-btn {
+        background: #007bff;
+        border: none;
+        border-radius: 6px;
+        padding: 0.75rem 2rem;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: white;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+    .submit-btn:hover {
+        background: #0056b3;
+        transform: translateY(-1px);
+    }
+
+    .submit-btn:active {
+        transform: translateY(0);
+    }
+
+    .alert {
+        border-radius: 6px;
+        border: 1px solid;
+        padding: 0.75rem 1rem;
+        margin-top: 1rem;
+        font-size: 0.9rem;
+    }
+
+    .alert-success {
+        background: #d4edda;
+        border-color: #c3e6cb;
+        color: #155724;
+    }
+
+    .alert-error {
+        background: #f8d7da;
+        border-color: #f5c6cb;
+        color: #721c24;
+    }
+
+    .alert-warning {
+        background: #fff3cd;
+        border-color: #ffeaa7;
+        color: #856404;
+    }
+
+    .alert-info {
+        background: #d1ecf1;
+        border-color: #bee5eb;
+        color: #0c5460;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        .card-title {
+            font-size: 1.5rem;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 1rem 2rem;
+        }
+    }
+
+    /* Enhanced textarea styling */
+    textarea.form-control {
+        min-height: 80px;
+        resize: vertical;
+    }
+
+    /* Custom select styling */
+    select.form-control {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236c757d' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 0.75rem center;
+        background-repeat: no-repeat;
+        background-size: 1.5em 1.5em;
+        padding-right: 2.5rem;
+    }
+
+    /* Simple hover effect for form groups */
+    .form-group:hover .form-label {
+        color: #333;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="customer-form-container">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="form-card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="card-title">Add Customer</h2>
+                            <p class="card-subtitle mb-0">Create a new customer profile</p>
+                        </div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{% url 'retailer_2_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'retailer_2_view_customer' %}">Manage Customer</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Add Customer</li>
+                </ol>
+            </nav>
+        </div>
+                    
+        <div class="card-body">
+            <form method="POST" action="{% url 'retailer_2_add_customer' %}">
+                {% csrf_token %}
+                <div class="row">
+                    <!-- Full Name -->
+                                <div class="form-group col-md-6 col-lg-4">
+                                    <label for="full_name" class="form-label">
+                                        <i class="fa-solid fa-user"></i>
+                                        Full Name
+                                    </label>
+                                    <input type="text" name="full_name" id="full_name" class="form-control" placeholder="Enter full name" required>
+                    </div>
+    
+                    <!-- Gender -->
+                                <div class="form-group col-md-6 col-lg-4">
+                                    <label for="gender" class="form-label">
+                                        <i class="fa-solid fa-venus-mars"></i>
+                                        Gender
+                                    </label>
+                                    <select name="gender" id="gender" class="form-control" required>
+                            <option value="">--Select Gender--</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+    
+                    <!-- DOB -->
+                                <div class="form-group col-md-6 col-lg-4">
+                                    <label for="date_of_birth" class="form-label">
+                                        <i class="fa-solid fa-calendar"></i>
+                                        Date of Birth
+                                    </label>
+                                    <input type="date" name="date_of_birth" id="date_of_birth" class="form-control">
+                    </div>
+
+                    <!-- Mobile Number -->
+                                <div class="form-group col-md-6 col-lg-4">
+                                    <label for="mobile" class="form-label">
+                                        <i class="fa-solid fa-phone"></i>
+                                        Mobile Number
+                                    </label>
+                                    <input type="text" name="mobile" id="mobile" class="form-control" placeholder="Enter mobile number" required>
+                    </div>
+    
+                    <!-- State -->
+                                <div class="form-group col-md-6 col-lg-4">
+                                    <label for="state" class="form-label">
+                                        <i class="fa-solid fa-map"></i>
+                                        State
+                                    </label>
+                                    <input type="text" name="state" id="state" class="form-control" placeholder="Enter state">
+                    </div>
+    
+                    <!-- City -->
+                                <div class="form-group col-md-6 col-lg-4">
+                                    <label for="city" class="form-label">
+                                        <i class="fa-solid fa-city"></i>
+                                        City
+                                    </label>
+                                    <input type="text" name="city" id="city" class="form-control" placeholder="Enter city">
+                    </div>
+    
+                    <!-- Email -->
+                                <div class="form-group col-md-6 col-lg-4">
+                                    <label for="email" class="form-label">
+                                        <i class="fa-solid fa-envelope"></i>
+                                        Email
+                                    </label>
+                                    <input type="email" name="email" id="email" class="form-control" placeholder="Enter email">
+                                </div>
+                            </div>
+                
+                            <!-- Address - Full Width -->
+                            <div class="row">
+                                <div class="form-group col-12">
+                                    <label for="address" class="form-label">
+                                        <i class="fa-solid fa-map-marker-alt"></i>
+                                        Address
+                                    </label>
+                                    <textarea name="address" id="address" class="form-control" placeholder="Enter address" rows="3"></textarea>
+                    </div>
+                </div>
+    
+                <!-- Submit Button -->
+                            <div class="form-group mt-4">
+                                <button type="submit" class="submit-btn">
+                                    <i class="fa-solid fa-plus me-2"></i>
+                                    Add Customer
+                                </button>
+                </div>
+            </form>
+            
+            {% if messages %}
+                        <div class="mt-4">
+        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">
+                                <i class="fa-solid fa-info-circle me-2"></i>
+                                {{ message }}
+                            </div>
+        {% endfor %}
+                        </div>
+    {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Simple form validation
+    const form = document.querySelector('form');
+    const submitBtn = document.querySelector('.submit-btn');
+    
+    form.addEventListener('submit', function() {
+        // Add loading state
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Adding Customer...';
+        submitBtn.disabled = true;
+        
+        // Re-enable after 3 seconds (fallback)
+        setTimeout(() => {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }, 3000);
+    });
+});
+</script>
+
+{% endblock %} 

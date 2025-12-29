@@ -1,9 +1,7 @@
 from django import forms
 from dashboard.models import CustomUser
-from .models import Service
-from .models import Customer
+from .models import Service, Customer, CSCService, CSCServiceDocument, CSCServiceRequest, Retailer2BillingDetails, BillingDetails
 from django.contrib.auth.hashers import make_password
-from .models import BillingDetails
 
 
 
@@ -41,7 +39,7 @@ class AddGSKForm(forms.ModelForm):
 
     def clean_role(self):
         role = self.cleaned_data.get('role')
-        if role not in ['retailer', 'distributor', 'master_distributor']:
+        if role not in ['retailer', 'distributor', 'master_distributor', 'retailer_2', 'distributor_2']:
             raise forms.ValidationError("Invalid role selected.")
         return role
 
@@ -71,24 +69,6 @@ class AddCustomerForm(forms.ModelForm):
 
 
 
-class BillingDetailsForm(forms.ModelForm):
-    class Meta:
-        model = BillingDetails
-        fields = [
-            'customer', 'service', 'payment_mode', 
-            'payment_status', 'service_status', 'id_proof', 
-            'address_proof', 'pan_card', 'banking', 
-            'photo', 'others', 'service_notes'
-        ]
-        widgets = {
-            'ref_no': forms.TextInput(attrs={'readonly': 'readonly'}),
-            'billing_date': forms.DateInput(attrs={'readonly': 'readonly'}),
-        }
-
-
-
-
-
 class UserUpdateForm(forms.ModelForm):
     class Meta:
         model = CustomUser
@@ -106,4 +86,235 @@ class UserUpdateForm(forms.ModelForm):
         super(UserUpdateForm, self).__init__(*args, **kwargs)
         if user is not None and user.is_staff:
             self.fields.pop('email')
+
+# CSC 2.0 Forms
+class CSCServiceForm(forms.ModelForm):
+    class Meta:
+        model = CSCService
+        fields = ['service_name', 'description', 'price', 'wallet_deduction', 'required_documents', 'service_icon', 'service_color', 'service_image', 'external_link', 'is_active']
+        widgets = {
+            'service_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'price': forms.NumberInput(attrs={'class': 'form-control'}),
+            'wallet_deduction': forms.NumberInput(attrs={'class': 'form-control'}),
+            'required_documents': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'service_icon': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'mdi mdi-account'}),
+            'service_color': forms.TextInput(attrs={'class': 'form-control', 'type': 'color'}),
+            'service_image': forms.FileInput(attrs={'class': 'form-control'}),
+            'external_link': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://example.com'}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+class CSCServiceDocumentForm(forms.ModelForm):
+    class Meta:
+        model = CSCServiceDocument
+        fields = ['document_name', 'is_required', 'description']
+        widgets = {
+            'document_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'is_required': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+        }
+
+class CSCServiceRequestForm(forms.ModelForm):
+    class Meta:
+        model = CSCServiceRequest
+        fields = ['service', 'customer_name', 'customer_mobile', 'notes']
+        widgets = {
+            'service': forms.Select(attrs={'class': 'form-control'}),
+            'customer_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'customer_mobile': forms.TextInput(attrs={'class': 'form-control'}),
+            'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        }
+
+# Old Billing Forms (for non-Retailer 2.0 users)
+class BillingDetailsForm(forms.ModelForm):
+    class Meta:
+        model = BillingDetails
+        exclude = ['user', 'ref_no', 'invoice_id', 'billing_date', 'admin_completed_file']
+
+class BillingForm(forms.ModelForm):
+    class Meta:
+        model = BillingDetails
+        exclude = ['user', 'ref_no', 'invoice_id', 'billing_date', 'admin_completed_file']
+
+# Retailer 2.0 Billing Form
+class Retailer2BillingForm(forms.ModelForm):
+    class Meta:
+        model = Retailer2BillingDetails
+        exclude = ['user', 'ref_no', 'invoice_id', 'billing_date', 'admin_completed_file']
+
+        widgets = {
+            'document_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'is_required': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+        }
+
+class CSCServiceRequestForm(forms.ModelForm):
+    class Meta:
+        model = CSCServiceRequest
+        fields = ['service', 'customer_name', 'customer_mobile', 'notes']
+        widgets = {
+            'service': forms.Select(attrs={'class': 'form-control'}),
+            'customer_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'customer_mobile': forms.TextInput(attrs={'class': 'form-control'}),
+            'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        }
+
+# Old Billing Forms (for non-Retailer 2.0 users)
+class BillingDetailsForm(forms.ModelForm):
+    class Meta:
+        model = BillingDetails
+        exclude = ['user', 'ref_no', 'invoice_id', 'billing_date', 'admin_completed_file']
+
+class BillingForm(forms.ModelForm):
+    class Meta:
+        model = BillingDetails
+        exclude = ['user', 'ref_no', 'invoice_id', 'billing_date', 'admin_completed_file']
+
+# Retailer 2.0 Billing Form
+class Retailer2BillingForm(forms.ModelForm):
+    class Meta:
+        model = Retailer2BillingDetails
+        exclude = ['user', 'ref_no', 'invoice_id', 'billing_date', 'admin_completed_file']
+
+
+        widgets = {
+            'document_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'is_required': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+        }
+
+class CSCServiceRequestForm(forms.ModelForm):
+    class Meta:
+        model = CSCServiceRequest
+        fields = ['service', 'customer_name', 'customer_mobile', 'notes']
+        widgets = {
+            'service': forms.Select(attrs={'class': 'form-control'}),
+            'customer_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'customer_mobile': forms.TextInput(attrs={'class': 'form-control'}),
+            'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        }
+
+# Old Billing Forms (for non-Retailer 2.0 users)
+class BillingDetailsForm(forms.ModelForm):
+    class Meta:
+        model = BillingDetails
+        exclude = ['user', 'ref_no', 'invoice_id', 'billing_date', 'admin_completed_file']
+
+class BillingForm(forms.ModelForm):
+    class Meta:
+        model = BillingDetails
+        exclude = ['user', 'ref_no', 'invoice_id', 'billing_date', 'admin_completed_file']
+
+# Retailer 2.0 Billing Form
+class Retailer2BillingForm(forms.ModelForm):
+    class Meta:
+        model = Retailer2BillingDetails
+        exclude = ['user', 'ref_no', 'invoice_id', 'billing_date', 'admin_completed_file']
+
+
+        widgets = {
+            'document_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'is_required': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+        }
+
+class CSCServiceRequestForm(forms.ModelForm):
+    class Meta:
+        model = CSCServiceRequest
+        fields = ['service', 'customer_name', 'customer_mobile', 'notes']
+        widgets = {
+            'service': forms.Select(attrs={'class': 'form-control'}),
+            'customer_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'customer_mobile': forms.TextInput(attrs={'class': 'form-control'}),
+            'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        }
+
+# Old Billing Forms (for non-Retailer 2.0 users)
+class BillingDetailsForm(forms.ModelForm):
+    class Meta:
+        model = BillingDetails
+        exclude = ['user', 'ref_no', 'invoice_id', 'billing_date', 'admin_completed_file']
+
+class BillingForm(forms.ModelForm):
+    class Meta:
+        model = BillingDetails
+        exclude = ['user', 'ref_no', 'invoice_id', 'billing_date', 'admin_completed_file']
+
+# Retailer 2.0 Billing Form
+class Retailer2BillingForm(forms.ModelForm):
+    class Meta:
+        model = Retailer2BillingDetails
+        exclude = ['user', 'ref_no', 'invoice_id', 'billing_date', 'admin_completed_file']
+
+
+        widgets = {
+            'document_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'is_required': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+        }
+
+class CSCServiceRequestForm(forms.ModelForm):
+    class Meta:
+        model = CSCServiceRequest
+        fields = ['service', 'customer_name', 'customer_mobile', 'notes']
+        widgets = {
+            'service': forms.Select(attrs={'class': 'form-control'}),
+            'customer_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'customer_mobile': forms.TextInput(attrs={'class': 'form-control'}),
+            'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        }
+
+# Old Billing Forms (for non-Retailer 2.0 users)
+class BillingDetailsForm(forms.ModelForm):
+    class Meta:
+        model = BillingDetails
+        exclude = ['user', 'ref_no', 'invoice_id', 'billing_date', 'admin_completed_file']
+
+class BillingForm(forms.ModelForm):
+    class Meta:
+        model = BillingDetails
+        exclude = ['user', 'ref_no', 'invoice_id', 'billing_date', 'admin_completed_file']
+
+# Retailer 2.0 Billing Form
+class Retailer2BillingForm(forms.ModelForm):
+    class Meta:
+        model = Retailer2BillingDetails
+        exclude = ['user', 'ref_no', 'invoice_id', 'billing_date', 'admin_completed_file']
+
+
+        widgets = {
+            'document_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'is_required': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+        }
+
+class CSCServiceRequestForm(forms.ModelForm):
+    class Meta:
+        model = CSCServiceRequest
+        fields = ['service', 'customer_name', 'customer_mobile', 'notes']
+        widgets = {
+            'service': forms.Select(attrs={'class': 'form-control'}),
+            'customer_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'customer_mobile': forms.TextInput(attrs={'class': 'form-control'}),
+            'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        }
+
+# Old Billing Forms (for non-Retailer 2.0 users)
+class BillingDetailsForm(forms.ModelForm):
+    class Meta:
+        model = BillingDetails
+        exclude = ['user', 'ref_no', 'invoice_id', 'billing_date', 'admin_completed_file']
+
+class BillingForm(forms.ModelForm):
+    class Meta:
+        model = BillingDetails
+        exclude = ['user', 'ref_no', 'invoice_id', 'billing_date', 'admin_completed_file']
+
+# Retailer 2.0 Billing Form
+class Retailer2BillingForm(forms.ModelForm):
+    class Meta:
+        model = Retailer2BillingDetails
+        exclude = ['user', 'ref_no', 'invoice_id', 'billing_date', 'admin_completed_file']
+
 

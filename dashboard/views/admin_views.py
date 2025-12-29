@@ -14,7 +14,7 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 import random
 from django.db import IntegrityError
-from dashboard.models import Service, BillingDetails, Wallet, Transaction
+from dashboard.models import Service, BillingDetails, Wallet, Transaction, Retailer2BillingDetails
 from django.contrib.auth.models import Group
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -24,6 +24,9 @@ from django.db.models.signals import pre_delete
 from django.db import IntegrityError
 from django.contrib.auth.hashers import make_password
 from django.core.exceptions import PermissionDenied
+from dashboard.models import CSCService, CSCServiceRequest
+from dashboard.forms import CSCServiceForm
+from django.http import Http404
 
 
 
@@ -44,10 +47,19 @@ def admin_dashboard(request):
 def admin_dashboard(request):
     # Count all relevant GSK entries
     
-    total_bills = BillingDetails.objects.count()
-    total_centers = CustomUser.objects.filter(role__in=['retailer', 'distributor', 'master_distributor']).count()
+    total_bills = BillingDetails.objects.count() + Retailer2BillingDetails.objects.count()
+    total_centers = CustomUser.objects.filter(role__in=['retailer', 'distributor', 'master_distributor', 'retailer_2', 'distributor_2']).count()
     total_services = Service.objects.count()
-    billing_details = BillingDetails.objects.all().order_by('-id')[:7]
+    
+    # Get recent billing details from both models
+    recent_regular_billing = BillingDetails.objects.all().order_by('-id')[:5]
+    recent_retailer2_billing = Retailer2BillingDetails.objects.all().order_by('-id')[:5]
+    
+    # Combine and sort by creation date
+    combined_recent_billing = list(recent_regular_billing) + list(recent_retailer2_billing)
+    combined_recent_billing.sort(key=lambda x: x.billing_date, reverse=True)
+    billing_details = combined_recent_billing[:7]
+    
     # Add more stats as needed
 
     
@@ -67,7 +79,7 @@ def admin_dashboard(request):
 @login_required
 @role_required(['admin'])
 def add_gsk(request):
-    distributors = CustomUser.objects.filter(role__in=['distributor', 'master_distributor'], is_active=True)
+    distributors = CustomUser.objects.filter(role__in=['distributor', 'master_distributor', 'distributor_2'], is_active=True)
 
     if request.method == 'POST':
         form = AddGSKForm(request.POST)
@@ -108,8 +120,8 @@ def add_gsk(request):
 def view_gsk(request):
     search_query = request.GET.get('search', '')
     
-    # Fetch all relevant GSK users
-    gsk_list = CustomUser.objects.filter(role__in=['retailer', 'distributor', 'master_distributor']).order_by('-created_at')
+    # Fetch all relevant GSK users including new 2.0 roles
+    gsk_list = CustomUser.objects.filter(role__in=['retailer', 'distributor', 'master_distributor', 'retailer_2', 'distributor_2']).order_by('-created_at')
     if search_query:
         # Apply search filters
         gsk_list = gsk_list.filter(
@@ -150,6 +162,8 @@ def view_gsk(request):
 @role_required(['admin'])
 def edit_gsk(request, gsk_id):
     user = get_object_or_404(CustomUser, id=gsk_id)
+    distributors = CustomUser.objects.filter(role__in=['distributor', 'master_distributor', 'distributor_2'], is_active=True)
+    
     if request.method == 'POST':
         form = AddGSKForm(request.POST, instance=user)
         if form.is_valid():
@@ -159,7 +173,7 @@ def edit_gsk(request, gsk_id):
     else:
         form = AddGSKForm(instance=user)
 
-    return render(request, 'admin_dashboard/edit_gsk.html', {'form': form, 'gsk': user})
+    return render(request, 'admin_dashboard/edit_gsk.html', {'form': form, 'gsk': user, 'distributors': distributors})
 
 
 
@@ -450,22 +464,49 @@ def service_billing(request):
         # Handle Service Status Update
         billing_id = request.POST.get('billing_id')
         service_status = request.POST.get('service_status')
+        billing_type = request.POST.get('billing_type', 'regular')  # Add billing type
 
-        billing = BillingDetails.objects.get(id=billing_id)
+        if billing_type == 'retailer2':
+            billing = Retailer2BillingDetails.objects.get(id=billing_id)
+        else:
+            billing = BillingDetails.objects.get(id=billing_id)
+        
         billing.service_status = service_status
         billing.save()
 
         return redirect('service_billing')  # Refresh the page after update
 
-    # Fetch all billing details and filter only by Ref No
-    billing_details = BillingDetails.objects.all()
+    # Fetch all billing details from both models
+    regular_billing = BillingDetails.objects.all()
+    retailer2_billing = Retailer2BillingDetails.objects.all()
+    
+    # Apply search filter if provided
     if search_query:
-        billing_details = billing_details.filter(ref_no__icontains=search_query)
-
-    billing_details = billing_details.order_by('-id')
+        regular_billing = regular_billing.filter(ref_no__icontains=search_query)
+        retailer2_billing = retailer2_billing.filter(ref_no__icontains=search_query)
+    
+    # Order by billing_date (most recent first)
+    regular_billing = regular_billing.order_by('-billing_date')
+    retailer2_billing = retailer2_billing.order_by('-billing_date')
+    
+    # Combine the querysets and add a type identifier
+    combined_billing = []
+    
+    # Add regular billing with type identifier
+    for billing in regular_billing:
+        billing.billing_type = 'regular'
+        combined_billing.append(billing)
+    
+    # Add retailer2 billing with type identifier
+    for billing in retailer2_billing:
+        billing.billing_type = 'retailer2'
+        combined_billing.append(billing)
+    
+    # Sort combined list by billing_date (most recent first)
+    combined_billing.sort(key=lambda x: x.billing_date, reverse=True)
 
     # Add pagination
-    paginator = Paginator(billing_details, 10)  # Show 10 items per page
+    paginator = Paginator(combined_billing, 10)  # Show 10 items per page
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
 
@@ -495,7 +536,16 @@ def update_service_status(request, billing_id):
 
 @login_required
 def view_billing_details(request, billing_id):
-    billing_details = get_object_or_404(BillingDetails, id=billing_id)
+    # Try to get billing details from both models
+    try:
+        billing_details = get_object_or_404(BillingDetails, id=billing_id)
+        billing_type = 'regular'
+    except:
+        try:
+            billing_details = get_object_or_404(Retailer2BillingDetails, id=billing_id)
+            billing_type = 'retailer2'
+        except:
+            raise Http404("Billing details not found")
 
     # Check user roles for access control
     if request.user.role not in ['admin', 'retailer', 'distributor']:
@@ -519,6 +569,7 @@ def view_billing_details(request, billing_id):
 
     return render(request, 'admin_dashboard/view_billing_details.html', {
         'billing_details': billing_details,
+        'billing_type': billing_type,
     })
 
 
@@ -528,14 +579,21 @@ def view_billing_details(request, billing_id):
 
 # Delete Service
 def delete_service_billing(request, billing_id):
-    # Fetch the billing entry
-    billing_entry = get_object_or_404(BillingDetails, id=billing_id)
+    # Try to get billing entry from both models
+    try:
+        billing_entry = get_object_or_404(BillingDetails, id=billing_id)
+        billing_type = 'regular'
+        service_price = billing_entry.service.price
+    except:
+        try:
+            billing_entry = get_object_or_404(Retailer2BillingDetails, id=billing_id)
+            billing_type = 'retailer2'
+            service_price = billing_entry.service.wallet_deduction
+        except:
+            raise Http404("Billing entry not found")
 
     # Fetch the wallet associated with the user
     wallet = Wallet.objects.get(user=billing_entry.user)
-
-    # Get the service price from the billing entry
-    service_price = billing_entry.service.price
 
     # Add the service price back to the user's wallet
     wallet.balance += service_price
@@ -627,8 +685,10 @@ def add_or_deduct_money(request):
 
         return redirect("view_transactions")
 
-    # Fetch all users for the dropdown in the template
-    users = User.objects.filter(is_staff=False)  # Adjust filters as needed
+    # Fetch all users for the dropdown in the template (including new 2.0 roles)
+    users = User.objects.filter(
+        role__in=['retailer', 'distributor', 'master_distributor', 'retailer_2', 'distributor_2']
+    ).exclude(role='admin').order_by('full_name')
     return render(request, "admin_dashboard/add_money.html", {"users": users})
 
 
@@ -735,6 +795,794 @@ def change_demo_password(request):
         except User.DoesNotExist:
             messages.error(request, 'Demo user not found.')
     return redirect('admin_dashboard')
+
+
+
+
+# CSC 2.0 Admin Views
+@login_required
+@role_required(['admin'])
+def csc_services_list(request):
+    """List all CSC services"""
+    services = CSCService.objects.all().order_by('-created_at')
+    context = {
+        'services': services,
+    }
+    return render(request, 'admin_dashboard/csc_services_list.html', context)
+
+@login_required
+@role_required(['admin'])
+def csc_add_service(request):
+    """Add a new CSC service"""
+    if request.method == 'POST':
+        form = CSCServiceForm(request.POST, request.FILES)
+        if form.is_valid():
+            service = form.save()
+            messages.success(request, "CSC service added successfully.")
+            return redirect('csc_services_list')
+        else:
+            print("Form errors:", form.errors)
+            messages.error(request, "Please correct the errors below.")
+    else:
+        form = CSCServiceForm()
+    
+    context = {
+        'form': form,
+        'title': 'Add CSC Service'
+    }
+    return render(request, 'admin_dashboard/csc_service_form.html', context)
+
+@login_required
+@role_required(['admin'])
+def csc_edit_service(request, service_id):
+    """Edit an existing CSC service"""
+    service = get_object_or_404(CSCService, id=service_id)
+    
+    if request.method == 'POST':
+        form = CSCServiceForm(request.POST, request.FILES, instance=service)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "CSC service updated successfully.")
+            return redirect('csc_services_list')
+    else:
+        form = CSCServiceForm(instance=service)
+    
+    context = {
+        'form': form,
+        'service': service,
+        'title': 'Edit CSC Service'
+    }
+    return render(request, 'admin_dashboard/csc_service_form.html', context)
+
+@login_required
+@role_required(['admin'])
+def csc_delete_service(request, service_id):
+    """Delete a CSC service"""
+    service = get_object_or_404(CSCService, id=service_id)
+    service_name = service.service_name
+    service.delete()
+    messages.success(request, f"CSC service '{service_name}' deleted successfully.")
+    return redirect('csc_services_list')
+
+@login_required
+@role_required(['admin'])
+def csc_service_requests(request):
+    """View all CSC service requests"""
+    requests = CSCServiceRequest.objects.all().order_by('-created_at')
+    
+    # Add search functionality
+    search_query = request.GET.get('search', '')
+    if search_query:
+        requests = requests.filter(
+            Q(customer_name__icontains=search_query) |
+            Q(service__service_name__icontains=search_query) |
+            Q(retailer__full_name__icontains=search_query)
+        )
+    
+    # Add status filter
+    status_filter = request.GET.get('status', '')
+    if status_filter:
+        requests = requests.filter(status=status_filter)
+    
+    context = {
+        'requests': requests,
+        'search_query': search_query,
+        'status_filter': status_filter,
+    }
+    return render(request, 'admin_dashboard/csc_service_requests.html', context)
+
+@login_required
+@role_required(['admin'])
+def csc_update_request_status(request, request_id):
+    """Update the status of a CSC service request"""
+    service_request = get_object_or_404(CSCServiceRequest, id=request_id)
+    
+    if request.method == 'POST':
+        new_status = request.POST.get('status')
+        if new_status in dict(CSCServiceRequest.STATUS_CHOICES):
+            service_request.status = new_status
+            service_request.save()
+            messages.success(request, f"Request status updated to {new_status}.")
+        else:
+            messages.error(request, "Invalid status selected.")
+    
+    return redirect('csc_service_requests')
+
+
+
+
+    # Get the search query from the GET request
+    search_query = request.GET.get('search', '')
+
+    # Fetch all access requests and apply a search filter if the query exists
+    access_requests_list = BankingPortalAccessRequest.objects.all().order_by('-created_at')
+    if search_query:
+        access_requests_list = access_requests_list.filter(
+            Q(user__username__icontains=search_query) |  # Assuming you are filtering by username
+            Q(user__email__icontains=search_query)  # Add other filters as needed
+        )
+
+    # Paginate the access requests
+    paginator = Paginator(access_requests_list, 10)  # 10 items per page
+    page_number = request.GET.get('page', 1)
+    access_requests = paginator.get_page(page_number)
+
+    # Calculate the global starting index for the current page
+    start_index = access_requests.start_index()
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        request_id = request.POST.get('request_id')
+        access_request = get_object_or_404(BankingPortalAccessRequest, id=request_id)
+
+        if action == 'activate':
+            access_request.is_active = True
+            access_request.save()
+            messages.success(request, f"Access granted to {access_request.user.username}.")
+        elif action == 'deactivate':
+            access_request.is_active = False
+            access_request.save()
+            messages.warning(request, f"Access revoked for {access_request.user.username}.")
+
+        return redirect('manage_access_requests')
+
+    return render(request, 'admin_dashboard/manage_access_requests.html', {
+        'access_requests': access_requests,
+        'start_index': start_index,
+        'search_query': search_query,  # Pass the search query to the template
+    })
+
+
+@login_required
+@role_required(['admin'])
+def change_demo_password(request):
+    if request.method == 'POST':
+        new_password = request.POST.get('new_password')
+        User = get_user_model()
+        try:
+            demo_user = User.objects.get(role='demo')
+            demo_user.set_password(new_password)
+            demo_user.save()
+            messages.success(request, 'Demo user password changed successfully!')
+        except User.DoesNotExist:
+            messages.error(request, 'Demo user not found.')
+    return redirect('admin_dashboard')
+
+
+
+
+# CSC 2.0 Admin Views
+@login_required
+@role_required(['admin'])
+def csc_services_list(request):
+    """List all CSC services"""
+    services = CSCService.objects.all().order_by('service_name')
+    context = {
+        'services': services,
+    }
+    return render(request, 'admin_dashboard/csc_services_list.html', context)
+
+@login_required
+@role_required(['admin'])
+def csc_add_service(request):
+    """Add a new CSC service"""
+    if request.method == 'POST':
+        form = CSCServiceForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "CSC service added successfully.")
+            return redirect('csc_services_list')
+    else:
+        form = CSCServiceForm()
+    
+    context = {
+        'form': form,
+        'title': 'Add CSC Service'
+    }
+    return render(request, 'admin_dashboard/csc_service_form.html', context)
+
+@login_required
+@role_required(['admin'])
+def csc_edit_service(request, service_id):
+    """Edit an existing CSC service"""
+    service = get_object_or_404(CSCService, id=service_id)
+    
+    if request.method == 'POST':
+        form = CSCServiceForm(request.POST, request.FILES, instance=service)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "CSC service updated successfully.")
+            return redirect('csc_services_list')
+    else:
+        form = CSCServiceForm(instance=service)
+    
+    context = {
+        'form': form,
+        'service': service,
+        'title': 'Edit CSC Service'
+    }
+    return render(request, 'admin_dashboard/csc_service_form.html', context)
+
+@login_required
+@role_required(['admin'])
+def csc_delete_service(request, service_id):
+    """Delete a CSC service"""
+    service = get_object_or_404(CSCService, id=service_id)
+    service_name = service.service_name
+    service.delete()
+    messages.success(request, f"CSC service '{service_name}' deleted successfully.")
+    return redirect('csc_services_list')
+
+@login_required
+@role_required(['admin'])
+def csc_service_requests(request):
+    """View all CSC service requests"""
+    requests = CSCServiceRequest.objects.all().order_by('-created_at')
+    
+    # Add search functionality
+    search_query = request.GET.get('search', '')
+    if search_query:
+        requests = requests.filter(
+            Q(customer_name__icontains=search_query) |
+            Q(service__service_name__icontains=search_query) |
+            Q(retailer__full_name__icontains=search_query)
+        )
+    
+    # Add status filter
+    status_filter = request.GET.get('status', '')
+    if status_filter:
+        requests = requests.filter(status=status_filter)
+    
+    context = {
+        'requests': requests,
+        'search_query': search_query,
+        'status_filter': status_filter,
+    }
+    return render(request, 'admin_dashboard/csc_service_requests.html', context)
+
+@login_required
+@role_required(['admin'])
+def csc_update_request_status(request, request_id):
+    """Update the status of a CSC service request"""
+    service_request = get_object_or_404(CSCServiceRequest, id=request_id)
+    
+    if request.method == 'POST':
+        new_status = request.POST.get('status')
+        if new_status in dict(CSCServiceRequest.STATUS_CHOICES):
+            service_request.status = new_status
+            service_request.save()
+            messages.success(request, f"Request status updated to {new_status}.")
+        else:
+            messages.error(request, "Invalid status selected.")
+    
+    return redirect('csc_service_requests')
+
+
+
+
+    # Get the search query from the GET request
+    search_query = request.GET.get('search', '')
+
+    # Fetch all access requests and apply a search filter if the query exists
+    access_requests_list = BankingPortalAccessRequest.objects.all().order_by('-created_at')
+    if search_query:
+        access_requests_list = access_requests_list.filter(
+            Q(user__username__icontains=search_query) |  # Assuming you are filtering by username
+            Q(user__email__icontains=search_query)  # Add other filters as needed
+        )
+
+    # Paginate the access requests
+    paginator = Paginator(access_requests_list, 10)  # 10 items per page
+    page_number = request.GET.get('page', 1)
+    access_requests = paginator.get_page(page_number)
+
+    # Calculate the global starting index for the current page
+    start_index = access_requests.start_index()
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        request_id = request.POST.get('request_id')
+        access_request = get_object_or_404(BankingPortalAccessRequest, id=request_id)
+
+        if action == 'activate':
+            access_request.is_active = True
+            access_request.save()
+            messages.success(request, f"Access granted to {access_request.user.username}.")
+        elif action == 'deactivate':
+            access_request.is_active = False
+            access_request.save()
+            messages.warning(request, f"Access revoked for {access_request.user.username}.")
+
+        return redirect('manage_access_requests')
+
+    return render(request, 'admin_dashboard/manage_access_requests.html', {
+        'access_requests': access_requests,
+        'start_index': start_index,
+        'search_query': search_query,  # Pass the search query to the template
+    })
+
+
+@login_required
+@role_required(['admin'])
+def change_demo_password(request):
+    if request.method == 'POST':
+        new_password = request.POST.get('new_password')
+        User = get_user_model()
+        try:
+            demo_user = User.objects.get(role='demo')
+            demo_user.set_password(new_password)
+            demo_user.save()
+            messages.success(request, 'Demo user password changed successfully!')
+        except User.DoesNotExist:
+            messages.error(request, 'Demo user not found.')
+    return redirect('admin_dashboard')
+
+
+
+
+# CSC 2.0 Admin Views
+@login_required
+@role_required(['admin'])
+def csc_services_list(request):
+    """List all CSC services"""
+    services = CSCService.objects.all().order_by('-created_at')
+    context = {
+        'services': services,
+    }
+    return render(request, 'admin_dashboard/csc_services_list.html', context)
+
+@login_required
+@role_required(['admin'])
+def csc_add_service(request):
+    """Add a new CSC service"""
+    if request.method == 'POST':
+        form = CSCServiceForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "CSC service added successfully.")
+            return redirect('csc_services_list')
+    else:
+        form = CSCServiceForm()
+    
+    context = {
+        'form': form,
+        'title': 'Add CSC Service'
+    }
+    return render(request, 'admin_dashboard/csc_service_form.html', context)
+
+@login_required
+@role_required(['admin'])
+def csc_edit_service(request, service_id):
+    """Edit an existing CSC service"""
+    service = get_object_or_404(CSCService, id=service_id)
+    
+    if request.method == 'POST':
+        form = CSCServiceForm(request.POST, request.FILES, instance=service)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "CSC service updated successfully.")
+            return redirect('csc_services_list')
+    else:
+        form = CSCServiceForm(instance=service)
+    
+    context = {
+        'form': form,
+        'service': service,
+        'title': 'Edit CSC Service'
+    }
+    return render(request, 'admin_dashboard/csc_service_form.html', context)
+
+@login_required
+@role_required(['admin'])
+def csc_delete_service(request, service_id):
+    """Delete a CSC service"""
+    service = get_object_or_404(CSCService, id=service_id)
+    service_name = service.service_name
+    service.delete()
+    messages.success(request, f"CSC service '{service_name}' deleted successfully.")
+    return redirect('csc_services_list')
+
+@login_required
+@role_required(['admin'])
+def csc_service_requests(request):
+    """View all CSC service requests"""
+    requests = CSCServiceRequest.objects.all().order_by('-created_at')
+    
+    # Add search functionality
+    search_query = request.GET.get('search', '')
+    if search_query:
+        requests = requests.filter(
+            Q(customer_name__icontains=search_query) |
+            Q(service__service_name__icontains=search_query) |
+            Q(retailer__full_name__icontains=search_query)
+        )
+    
+    # Add status filter
+    status_filter = request.GET.get('status', '')
+    if status_filter:
+        requests = requests.filter(status=status_filter)
+    
+    context = {
+        'requests': requests,
+        'search_query': search_query,
+        'status_filter': status_filter,
+    }
+    return render(request, 'admin_dashboard/csc_service_requests.html', context)
+
+@login_required
+@role_required(['admin'])
+def csc_update_request_status(request, request_id):
+    """Update the status of a CSC service request"""
+    service_request = get_object_or_404(CSCServiceRequest, id=request_id)
+    
+    if request.method == 'POST':
+        new_status = request.POST.get('status')
+        if new_status in dict(CSCServiceRequest.STATUS_CHOICES):
+            service_request.status = new_status
+            service_request.save()
+            messages.success(request, f"Request status updated to {new_status}.")
+        else:
+            messages.error(request, "Invalid status selected.")
+    
+    return redirect('csc_service_requests')
+
+
+
+
+    # Get the search query from the GET request
+    search_query = request.GET.get('search', '')
+
+    # Fetch all access requests and apply a search filter if the query exists
+    access_requests_list = BankingPortalAccessRequest.objects.all().order_by('-created_at')
+    if search_query:
+        access_requests_list = access_requests_list.filter(
+            Q(user__username__icontains=search_query) |  # Assuming you are filtering by username
+            Q(user__email__icontains=search_query)  # Add other filters as needed
+        )
+
+    # Paginate the access requests
+    paginator = Paginator(access_requests_list, 10)  # 10 items per page
+    page_number = request.GET.get('page', 1)
+    access_requests = paginator.get_page(page_number)
+
+    # Calculate the global starting index for the current page
+    start_index = access_requests.start_index()
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        request_id = request.POST.get('request_id')
+        access_request = get_object_or_404(BankingPortalAccessRequest, id=request_id)
+
+        if action == 'activate':
+            access_request.is_active = True
+            access_request.save()
+            messages.success(request, f"Access granted to {access_request.user.username}.")
+        elif action == 'deactivate':
+            access_request.is_active = False
+            access_request.save()
+            messages.warning(request, f"Access revoked for {access_request.user.username}.")
+
+        return redirect('manage_access_requests')
+
+    return render(request, 'admin_dashboard/manage_access_requests.html', {
+        'access_requests': access_requests,
+        'start_index': start_index,
+        'search_query': search_query,  # Pass the search query to the template
+    })
+
+
+@login_required
+@role_required(['admin'])
+def change_demo_password(request):
+    if request.method == 'POST':
+        new_password = request.POST.get('new_password')
+        User = get_user_model()
+        try:
+            demo_user = User.objects.get(role='demo')
+            demo_user.set_password(new_password)
+            demo_user.save()
+            messages.success(request, 'Demo user password changed successfully!')
+        except User.DoesNotExist:
+            messages.error(request, 'Demo user not found.')
+    return redirect('admin_dashboard')
+
+
+
+
+# CSC 2.0 Admin Views
+@login_required
+@role_required(['admin'])
+def csc_services_list(request):
+    """List all CSC services"""
+    services = CSCService.objects.all().order_by('-created_at')
+    context = {
+        'services': services,
+    }
+    return render(request, 'admin_dashboard/csc_services_list.html', context)
+
+@login_required
+@role_required(['admin'])
+def csc_add_service(request):
+    """Add a new CSC service"""
+    if request.method == 'POST':
+        form = CSCServiceForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "CSC service added successfully.")
+            return redirect('csc_services_list')
+    else:
+        form = CSCServiceForm()
+    
+    context = {
+        'form': form,
+        'title': 'Add CSC Service'
+    }
+    return render(request, 'admin_dashboard/csc_service_form.html', context)
+
+@login_required
+@role_required(['admin'])
+def csc_edit_service(request, service_id):
+    """Edit an existing CSC service"""
+    service = get_object_or_404(CSCService, id=service_id)
+    
+    if request.method == 'POST':
+        form = CSCServiceForm(request.POST, request.FILES, instance=service)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "CSC service updated successfully.")
+            return redirect('csc_services_list')
+    else:
+        form = CSCServiceForm(instance=service)
+    
+    context = {
+        'form': form,
+        'service': service,
+        'title': 'Edit CSC Service'
+    }
+    return render(request, 'admin_dashboard/csc_service_form.html', context)
+
+@login_required
+@role_required(['admin'])
+def csc_delete_service(request, service_id):
+    """Delete a CSC service"""
+    service = get_object_or_404(CSCService, id=service_id)
+    service_name = service.service_name
+    service.delete()
+    messages.success(request, f"CSC service '{service_name}' deleted successfully.")
+    return redirect('csc_services_list')
+
+@login_required
+@role_required(['admin'])
+def csc_service_requests(request):
+    """View all CSC service requests"""
+    requests = CSCServiceRequest.objects.all().order_by('-created_at')
+    
+    # Add search functionality
+    search_query = request.GET.get('search', '')
+    if search_query:
+        requests = requests.filter(
+            Q(customer_name__icontains=search_query) |
+            Q(service__service_name__icontains=search_query) |
+            Q(retailer__full_name__icontains=search_query)
+        )
+    
+    # Add status filter
+    status_filter = request.GET.get('status', '')
+    if status_filter:
+        requests = requests.filter(status=status_filter)
+    
+    context = {
+        'requests': requests,
+        'search_query': search_query,
+        'status_filter': status_filter,
+    }
+    return render(request, 'admin_dashboard/csc_service_requests.html', context)
+
+@login_required
+@role_required(['admin'])
+def csc_update_request_status(request, request_id):
+    """Update the status of a CSC service request"""
+    service_request = get_object_or_404(CSCServiceRequest, id=request_id)
+    
+    if request.method == 'POST':
+        new_status = request.POST.get('status')
+        if new_status in dict(CSCServiceRequest.STATUS_CHOICES):
+            service_request.status = new_status
+            service_request.save()
+            messages.success(request, f"Request status updated to {new_status}.")
+        else:
+            messages.error(request, "Invalid status selected.")
+    
+    return redirect('csc_service_requests')
+
+
+
+
+    # Get the search query from the GET request
+    search_query = request.GET.get('search', '')
+
+    # Fetch all access requests and apply a search filter if the query exists
+    access_requests_list = BankingPortalAccessRequest.objects.all().order_by('-created_at')
+    if search_query:
+        access_requests_list = access_requests_list.filter(
+            Q(user__username__icontains=search_query) |  # Assuming you are filtering by username
+            Q(user__email__icontains=search_query)  # Add other filters as needed
+        )
+
+    # Paginate the access requests
+    paginator = Paginator(access_requests_list, 10)  # 10 items per page
+    page_number = request.GET.get('page', 1)
+    access_requests = paginator.get_page(page_number)
+
+    # Calculate the global starting index for the current page
+    start_index = access_requests.start_index()
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        request_id = request.POST.get('request_id')
+        access_request = get_object_or_404(BankingPortalAccessRequest, id=request_id)
+
+        if action == 'activate':
+            access_request.is_active = True
+            access_request.save()
+            messages.success(request, f"Access granted to {access_request.user.username}.")
+        elif action == 'deactivate':
+            access_request.is_active = False
+            access_request.save()
+            messages.warning(request, f"Access revoked for {access_request.user.username}.")
+
+        return redirect('manage_access_requests')
+
+    return render(request, 'admin_dashboard/manage_access_requests.html', {
+        'access_requests': access_requests,
+        'start_index': start_index,
+        'search_query': search_query,  # Pass the search query to the template
+    })
+
+
+@login_required
+@role_required(['admin'])
+def change_demo_password(request):
+    if request.method == 'POST':
+        new_password = request.POST.get('new_password')
+        User = get_user_model()
+        try:
+            demo_user = User.objects.get(role='demo')
+            demo_user.set_password(new_password)
+            demo_user.save()
+            messages.success(request, 'Demo user password changed successfully!')
+        except User.DoesNotExist:
+            messages.error(request, 'Demo user not found.')
+    return redirect('admin_dashboard')
+
+
+
+
+# CSC 2.0 Admin Views
+@login_required
+@role_required(['admin'])
+def csc_services_list(request):
+    """List all CSC services"""
+    services = CSCService.objects.all().order_by('-created_at')
+    context = {
+        'services': services,
+    }
+    return render(request, 'admin_dashboard/csc_services_list.html', context)
+
+@login_required
+@role_required(['admin'])
+def csc_add_service(request):
+    """Add a new CSC service"""
+    if request.method == 'POST':
+        form = CSCServiceForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "CSC service added successfully.")
+            return redirect('csc_services_list')
+    else:
+        form = CSCServiceForm()
+    
+    context = {
+        'form': form,
+        'title': 'Add CSC Service'
+    }
+    return render(request, 'admin_dashboard/csc_service_form.html', context)
+
+@login_required
+@role_required(['admin'])
+def csc_edit_service(request, service_id):
+    """Edit an existing CSC service"""
+    service = get_object_or_404(CSCService, id=service_id)
+    
+    if request.method == 'POST':
+        form = CSCServiceForm(request.POST, request.FILES, instance=service)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "CSC service updated successfully.")
+            return redirect('csc_services_list')
+    else:
+        form = CSCServiceForm(instance=service)
+    
+    context = {
+        'form': form,
+        'service': service,
+        'title': 'Edit CSC Service'
+    }
+    return render(request, 'admin_dashboard/csc_service_form.html', context)
+
+@login_required
+@role_required(['admin'])
+def csc_delete_service(request, service_id):
+    """Delete a CSC service"""
+    service = get_object_or_404(CSCService, id=service_id)
+    service_name = service.service_name
+    service.delete()
+    messages.success(request, f"CSC service '{service_name}' deleted successfully.")
+    return redirect('csc_services_list')
+
+@login_required
+@role_required(['admin'])
+def csc_service_requests(request):
+    """View all CSC service requests"""
+    requests = CSCServiceRequest.objects.all().order_by('-created_at')
+    
+    # Add search functionality
+    search_query = request.GET.get('search', '')
+    if search_query:
+        requests = requests.filter(
+            Q(customer_name__icontains=search_query) |
+            Q(service__service_name__icontains=search_query) |
+            Q(retailer__full_name__icontains=search_query)
+        )
+    
+    # Add status filter
+    status_filter = request.GET.get('status', '')
+    if status_filter:
+        requests = requests.filter(status=status_filter)
+    
+    context = {
+        'requests': requests,
+        'search_query': search_query,
+        'status_filter': status_filter,
+    }
+    return render(request, 'admin_dashboard/csc_service_requests.html', context)
+
+@login_required
+@role_required(['admin'])
+def csc_update_request_status(request, request_id):
+    """Update the status of a CSC service request"""
+    service_request = get_object_or_404(CSCServiceRequest, id=request_id)
+    
+    if request.method == 'POST':
+        new_status = request.POST.get('status')
+        if new_status in dict(CSCServiceRequest.STATUS_CHOICES):
+            service_request.status = new_status
+            service_request.save()
+            messages.success(request, f"Request status updated to {new_status}.")
+        else:
+            messages.error(request, "Invalid status selected.")
+    
+    return redirect('csc_service_requests')
 
 
 

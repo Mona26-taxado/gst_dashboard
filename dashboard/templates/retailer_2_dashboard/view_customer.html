@@ -1,0 +1,545 @@
+{% extends 'retailer_2_dashboard/base.html' %}
+{% load static %}
+
+{% block title %}View Customer - Retailer 2.0{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Professional View Customer Page Styles */
+    .customer-view-container {
+        background: #f8f9fa;
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+
+    .view-card {
+        background: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e9ecef;
+        overflow: hidden;
+    }
+
+    .card-header {
+        background: #ffffff;
+        color: #333;
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .card-title {
+        font-size: 1.75rem;
+        font-weight: 600;
+        margin: 0;
+        color: #333;
+    }
+
+    .card-subtitle {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+
+    .breadcrumb {
+        background: #f8f9fa;
+        border-radius: 6px;
+        padding: 0.5rem 1rem;
+        border: 1px solid #e9ecef;
+    }
+
+    .breadcrumb-item a {
+        color: #495057;
+        text-decoration: none;
+        font-size: 0.85rem;
+    }
+
+    .breadcrumb-item a:hover {
+        color: #333;
+    }
+
+    .breadcrumb-item.active {
+        color: #6c757d;
+        font-weight: 500;
+    }
+
+    .card-body {
+        padding: 2rem;
+        background: #ffffff;
+    }
+
+    /* Search Section */
+    .search-section {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border: 1px solid #e9ecef;
+    }
+
+    .search-form {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .search-input {
+        flex: 1;
+        min-width: 300px;
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+    }
+
+    .search-input:focus {
+        border-color: #80bdff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        outline: none;
+    }
+
+    .search-btn {
+        background: #007bff;
+        border: none;
+        border-radius: 6px;
+        padding: 0.75rem 1.5rem;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: white;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .search-btn:hover {
+        background: #0056b3;
+        transform: translateY(-1px);
+    }
+
+    /* Table Styles */
+    .table-container {
+        background: #ffffff;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .table {
+        margin-bottom: 0;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .table thead th {
+        background: #f8f9fa;
+        border: none;
+        padding: 1rem;
+        font-weight: 600;
+        color: #495057;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid #e9ecef;
+    }
+
+    .table tbody td {
+        padding: 1rem;
+        border: none;
+        border-bottom: 1px solid #f1f3f4;
+        vertical-align: middle;
+        font-size: 0.9rem;
+        color: #495057;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f8f9fa;
+        transition: background-color 0.2s ease;
+    }
+
+    .table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .btn-edit {
+        background: #ffc107;
+        border: none;
+        border-radius: 4px;
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: #212529;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .btn-edit:hover {
+        background: #e0a800;
+        color: #212529;
+        transform: translateY(-1px);
+        text-decoration: none;
+    }
+
+    .btn-delete {
+        background: #dc3545;
+        border: none;
+        border-radius: 4px;
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: white;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .btn-delete:hover {
+        background: #c82333;
+        color: white;
+        transform: translateY(-1px);
+        text-decoration: none;
+    }
+
+    /* Pagination */
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+
+.pagination {
+    display: flex;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        gap: 0.25rem;
+    }
+
+    .page-item {
+        margin: 0;
+    }
+
+    .page-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border: 1px solid #dee2e6;
+        background: #ffffff;
+    color: #007bff;
+    text-decoration: none;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+
+    .page-link:hover {
+        background: #e9ecef;
+        border-color: #adb5bd;
+        color: #0056b3;
+        text-decoration: none;
+    }
+
+    .page-item.active .page-link {
+        background: #007bff;
+        border-color: #007bff;
+    color: white;
+    }
+
+    .page-item.disabled .page-link {
+        color: #6c757d;
+        pointer-events: none;
+        background: #ffffff;
+        border-color: #dee2e6;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #6c757d;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: #dee2e6;
+    }
+
+    .empty-state h4 {
+        margin-bottom: 0.5rem;
+        color: #495057;
+    }
+
+    .empty-state p {
+        margin-bottom: 0;
+        font-size: 0.9rem;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        .card-title {
+            font-size: 1.5rem;
+        }
+        
+        .search-form {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .search-input {
+            min-width: auto;
+        }
+        
+        .table-responsive {
+            font-size: 0.8rem;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        
+        .btn-edit, .btn-delete {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.75rem;
+        }
+    }
+
+    /* Status Indicators */
+    .status-badge {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        border-radius: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-active {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .status-inactive {
+        background: #f8d7da;
+        color: #721c24;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="customer-view-container">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="view-card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="card-title">View Customer</h2>
+                            <p class="card-subtitle mb-0">Manage and view all customer records</p>
+                        </div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{% url 'retailer_2_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'retailer_2_add_customer' %}">Add Customer</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">View Customer</li>
+                </ol>
+            </nav>
+        </div>
+                    
+        <div class="card-body">
+                        <!-- Search Section -->
+                        <div class="search-section">
+                            <form method="get" class="search-form">
+                                <input type="text" name="search" value="{{ search_query }}" class="search-input" placeholder="Search customers by name, email, or mobile...">
+                                <button type="submit" class="search-btn">
+                                    <i class="fa-solid fa-search"></i>
+                                    Search
+                                </button>
+            </form>
+                        </div>
+
+                        <!-- Table Section -->
+                        <div class="table-container">
+            <div class="table-responsive">
+                                <table class="table table-bordered table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>S NO</th>
+                            <th>Full Name</th>
+                            <th>Email</th>
+                            <th>Mobile</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for customer in page_obj %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                                            <td>
+                                                <strong>{{ customer.full_name }}</strong>
+                                                {% if customer.gender %}
+                                                <br><small class="text-muted">{{ customer.gender }}</small>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <a href="mailto:{{ customer.email }}" class="text-decoration-none">
+                                                    {{ customer.email }}
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <a href="tel:{{ customer.mobile }}" class="text-decoration-none">
+                                                    {{ customer.mobile }}
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <div class="action-buttons">
+                                                    <a href="{% url 'retailer_2_edit_customer' customer.id %}" class="btn-edit">
+                                                        <i class="fa-solid fa-edit"></i>
+                                                        Edit
+                                                    </a>
+                                                    <a href="{% url 'retailer_2_delete_customer' customer.id %}" class="btn-delete"
+                                                       onclick="return confirm('Are you sure you want to delete this customer?');">
+                                                        <i class="fa-solid fa-trash"></i>
+                                                        Delete
+                                                    </a>
+                                                </div>
+                            </td>
+                                        </tr>
+                            {% empty %}
+                            <tr>
+                                            <td colspan="5">
+                                                <div class="empty-state">
+                                                    <i class="fa-solid fa-users"></i>
+                                                    <h4>No customers found</h4>
+                                                    <p>No customers match your search criteria. Try adjusting your search terms or add a new customer.</p>
+                                                </div>
+                                            </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                    </table>
+                            </div>
+            </div>
+                
+                        <!-- Pagination -->
+                        {% if page_obj.has_other_pages %}
+                        <div class="pagination-container">
+            <nav>
+                <ul class="pagination">
+                    <!-- Previous Page -->
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">
+                                            <i class="fa-solid fa-chevron-left"></i>
+                                        </a>
+                    </li>
+                    {% endif %}
+            
+                    <!-- Always Show First Page -->
+                    <li class="page-item {% if page_obj.number == 1 %}active{% endif %}">
+                                        <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}">1</a>
+                    </li>
+            
+                    <!-- Ellipsis Before Nearby Pages -->
+                    {% if page_obj.number > 3 %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                    {% endif %}
+            
+                    <!-- Nearby Pages -->
+                    {% for page_num in page_obj.paginator.page_range %}
+                        {% if page_num >= page_obj.number|add:-1 and page_num <= page_obj.number|add:1 and page_num != 1 and page_num != page_obj.paginator.num_pages %}
+                        <li class="page-item {% if page_num == page_obj.number %}active{% endif %}">
+                                            <a class="page-link" href="?page={{ page_num }}{% if search_query %}&search={{ search_query }}{% endif %}">{{ page_num }}</a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+            
+                    <!-- Ellipsis After Nearby Pages -->
+                    {% if page_obj.number < page_obj.paginator.num_pages|add:-2 %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                    {% endif %}
+            
+                    <!-- Always Show Last Page -->
+                    {% if page_obj.paginator.num_pages > 1 %}
+                    <li class="page-item {% if page_obj.number == page_obj.paginator.num_pages %}active{% endif %}">
+                                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}">{{ page_obj.paginator.num_pages }}</a>
+                    </li>
+                    {% endif %}
+            
+                    <!-- Next Page -->
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">
+                                            <i class="fa-solid fa-chevron-right"></i>
+                                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add loading state to search button
+    const searchForm = document.querySelector('.search-form');
+    const searchBtn = document.querySelector('.search-btn');
+    
+    searchForm.addEventListener('submit', function() {
+        const originalText = searchBtn.innerHTML;
+        searchBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Searching...';
+        searchBtn.disabled = true;
+        
+        // Re-enable after 2 seconds (fallback)
+        setTimeout(() => {
+            searchBtn.innerHTML = originalText;
+            searchBtn.disabled = false;
+        }, 2000);
+    });
+
+    // Add hover effects to table rows
+    const tableRows = document.querySelectorAll('.table tbody tr');
+    tableRows.forEach(row => {
+        row.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.01)';
+            this.style.transition = 'transform 0.2s ease';
+        });
+        
+        row.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+        });
+    });
+});
+</script>
+
+{% endblock %} 

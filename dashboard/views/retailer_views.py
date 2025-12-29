@@ -6,7 +6,7 @@ from dashboard.models import Notification
 from dashboard.models import Customer, CustomUser
 from django.contrib import messages
 from dashboard.models import Service, BillingDetails,Transaction, Wallet, Transaction
-from dashboard.forms import AddCustomerForm, BillingDetailsForm
+from dashboard.forms import AddCustomerForm
 from datetime import date
 import random
 from django.http import JsonResponse
@@ -24,6 +24,11 @@ import logging
 import os
 from dashboard.models import BankingPortalAccessRequest
 import calendar
+from dashboard.models import CSCService, CSCServiceRequest
+from dashboard.forms import CSCServiceRequestForm
+from dashboard.forms import AddCustomerForm
+from dashboard.models import Retailer2BillingDetails
+from dashboard.forms import Retailer2BillingForm, BillingDetailsForm, BillingForm
 
 
 
@@ -480,7 +485,7 @@ def banking_portal_request(request):
     try:
         access_request = BankingPortalAccessRequest.objects.get(user=request.user)
         if access_request.is_active:
-            return redirect('https://taxado.finstore.app/')  # Redirect to banking portal if already active
+            return redirect('https://grahakepay.com/login')  # Redirect to banking portal if already active
         else:
             messages.info(request, "Your request is pending from the Bank. Please wait for approval.")
     except BankingPortalAccessRequest.DoesNotExist:
@@ -614,3 +619,491 @@ def get_retailer_monthly_billing(request):
         'labels': monthly_labels,
         'billing': monthly_billing
     })
+
+@role_required(['retailer_2'])
+def retailer_2_dashboard(request):
+    # Fetch notifications for the current user
+    try:
+        wallet = Wallet.objects.get(user=request.user)
+        wallet_balance = wallet.balance
+    except Wallet.DoesNotExist:
+        wallet_balance = 0.0
+    notifications = Notification.objects.filter(user=request.user).order_by('-timestamp')
+    
+    # Count total services
+    total_services = Service.objects.filter(status='active').count()
+    
+    # Count total billings for the retailer 2.0
+    total_billings = BillingDetails.objects.filter(user=request.user).count()
+
+    # Calculate total sales (sum of all Credit transactions for this user)
+    total_sales = Transaction.objects.filter(user=request.user, transaction_type='Credit').aggregate(total=Sum('amount'))['total'] or 0
+
+    billing_details = BillingDetails.objects.filter(user=request.user).order_by('-billing_date')[:7]
+    
+    # Get CSC services for dynamic display
+    csc_services = CSCService.objects.filter(is_active=True).order_by('service_name')
+    
+    context = {
+        'notifications': notifications,
+        'total_services': total_services,
+        'wallet_balance': wallet_balance,
+        'total_billings': total_billings,
+        'billing_details': billing_details,
+        'total_sales': total_sales,
+        'csc_services': csc_services,
+    }
+    return render(request, 'retailer_2_dashboard/retailer_2_dashboard.html', context)
+
+# CSC 2.0 Retailer Views
+@login_required
+@role_required(['retailer_2'])
+def csc_services_view(request):
+    """View available CSC services for Retailer 2.0"""
+    services = CSCService.objects.filter(is_active=True).order_by('service_name')
+    
+    # Get retailer's wallet balance
+    try:
+        wallet = Wallet.objects.get(user=request.user)
+        wallet_balance = wallet.balance
+    except Wallet.DoesNotExist:
+        wallet_balance = 0
+    
+    context = {
+        'services': services,
+        'wallet_balance': wallet_balance,
+    }
+    return render(request, 'retailer_2_dashboard/csc_services.html', context)
+
+@login_required
+@role_required(['retailer_2'])
+def csc_service_detail(request, service_id):
+    """View details of a specific CSC service"""
+    service = get_object_or_404(CSCService, id=service_id, is_active=True)
+    
+    # Get retailer's wallet balance
+    try:
+        wallet = Wallet.objects.get(user=request.user)
+        wallet_balance = wallet.balance
+    except Wallet.DoesNotExist:
+        wallet_balance = 0
+    
+    context = {
+        'service': service,
+        'wallet_balance': wallet_balance,
+    }
+    return render(request, 'retailer_2_dashboard/csc_service_detail.html', context)
+
+@login_required
+@role_required(['retailer_2'])
+def csc_request_service(request, service_id):
+    """Request a CSC service"""
+    service = get_object_or_404(CSCService, id=service_id, is_active=True)
+    
+    # Check if retailer has sufficient wallet balance
+    try:
+        wallet = Wallet.objects.get(user=request.user)
+        if wallet.balance < service.wallet_deduction:
+            messages.error(request, f"Insufficient wallet balance. Required: ₹{service.wallet_deduction}, Available: ₹{wallet.balance}")
+            return redirect('csc_service_detail', service_id=service_id)
+    except Wallet.DoesNotExist:
+        messages.error(request, "Wallet not found. Please contact support.")
+        return redirect('csc_services_view')
+    
+    if request.method == 'POST':
+        form = CSCServiceRequestForm(request.POST)
+        if form.is_valid():
+            # Create the service request
+            service_request = form.save(commit=False)
+            service_request.service = service
+            service_request.retailer = request.user
+            service_request.amount_paid = service.price
+            service_request.wallet_deduction = service.wallet_deduction
+            
+            # Deduct from wallet
+            wallet.balance -= service.wallet_deduction
+            wallet.save()
+            
+            # Create transaction record
+            Transaction.objects.create(
+                user=request.user,
+                amount=service.wallet_deduction,
+                transaction_type="Debit",
+                balance_after_transaction=wallet.balance,
+                description=f"CSC Service: {service.service_name} - {service_request.customer_name}"
+            )
+            
+            service_request.save()
+            messages.success(request, f"CSC service request submitted successfully. ₹{service.wallet_deduction} deducted from wallet.")
+            return redirect('csc_my_requests')
+    else:
+        form = CSCServiceRequestForm(initial={'service': service})
+    
+    context = {
+        'form': form,
+        'service': service,
+        'wallet_balance': wallet.balance,
+    }
+    return render(request, 'retailer_2_dashboard/csc_request_service.html', context)
+
+@login_required
+@role_required(['retailer_2'])
+def csc_my_requests(request):
+    """View retailer's CSC service requests"""
+    requests = CSCServiceRequest.objects.filter(retailer=request.user).order_by('-created_at')
+    
+    context = {
+        'requests': requests,
+    }
+    return render(request, 'retailer_2_dashboard/csc_my_requests.html', context)
+
+# Retailer 2.0 Customer Management Views
+@login_required
+@role_required(['retailer_2'])
+def retailer_2_add_customer(request):
+    """Add a new customer for Retailer 2.0"""
+    if request.method == 'POST':
+        form = AddCustomerForm(request.POST)
+        if form.is_valid():
+            customer = form.save(commit=False)
+            customer.created_by = request.user
+            customer.save()
+            messages.success(request, 'Customer added successfully!')
+            return redirect('retailer_2_view_customer')
+    else:
+        form = AddCustomerForm()
+    
+    context = {
+        'form': form,
+        'title': 'Add Customer - Retailer 2.0'
+    }
+    return render(request, 'retailer_2_dashboard/add_customer.html', context)
+
+@login_required
+@role_required(['retailer_2'])
+def retailer_2_view_customer(request):
+    """View all customers for Retailer 2.0"""
+    # Get search query
+    search_query = request.GET.get('search', '')
+    
+    # Filter customers based on search query
+    customers = Customer.objects.filter(created_by=request.user)
+    
+    if search_query:
+        customers = customers.filter(
+            Q(full_name__icontains=search_query) |
+            Q(email__icontains=search_query) |
+            Q(mobile__icontains=search_query)
+        )
+    
+    # Order by creation date (newest first)
+    customers = customers.order_by('-created_at')
+    
+    # Add pagination
+    from django.core.paginator import Paginator
+    paginator = Paginator(customers, 10)  # Show 10 customers per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'page_obj': page_obj,
+        'search_query': search_query,
+        'title': 'View Customers - Retailer 2.0'
+    }
+    return render(request, 'retailer_2_dashboard/view_customer.html', context)
+
+@login_required
+@role_required(['retailer_2'])
+def retailer_2_edit_customer(request, customer_id):
+    """Edit a customer for Retailer 2.0"""
+    customer = get_object_or_404(Customer, id=customer_id, created_by=request.user)
+    
+    if request.method == 'POST':
+        form = AddCustomerForm(request.POST, instance=customer)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Customer updated successfully!')
+            return redirect('retailer_2_view_customer')
+    else:
+        form = AddCustomerForm(instance=customer)
+    
+    context = {
+        'form': form,
+        'customer': customer,
+        'title': 'Edit Customer - Retailer 2.0'
+    }
+    return render(request, 'retailer_2_dashboard/edit_customer.html', context)
+
+@login_required
+@role_required(['retailer_2'])
+def retailer_2_delete_customer(request, customer_id):
+    """Delete a customer for Retailer 2.0"""
+    customer = get_object_or_404(Customer, id=customer_id, created_by=request.user)
+    
+    if request.method == 'POST':
+        customer.delete()
+        messages.success(request, 'Customer deleted successfully!')
+        return redirect('retailer_2_view_customer')
+    
+    context = {
+        'customer': customer,
+        'title': 'Delete Customer - Retailer 2.0'
+    }
+    return render(request, 'retailer_2_dashboard/delete_customer.html', context)
+
+# Retailer 2.0 Billing Management Views
+@login_required
+@role_required(['retailer_2'])
+def retailer_2_add_billing(request):
+    """Add a new billing for Retailer 2.0 with wallet deduction"""
+    if request.method == 'POST':
+        # Fetch the logged-in user's wallet
+        try:
+            wallet = Wallet.objects.get(user=request.user)
+        except Wallet.DoesNotExist:
+            messages.error(request, "Wallet not found. Please contact support.")
+            return redirect('retailer_2_dashboard')
+
+        # Fetch the selected service
+        service_id = request.POST.get('service')
+        try:
+            service = CSCService.objects.get(id=service_id, is_active=True)
+        except CSCService.DoesNotExist:
+            messages.error(request, "Invalid service selected.")
+            return redirect('retailer_2_add_billing')
+
+        service_price = service.wallet_deduction
+
+        # Check wallet balance
+        if wallet.balance < service_price:
+            messages.error(
+                request,
+                f"Insufficient balance to add billing for this service. Required: ₹{service_price}, Available: ₹{wallet.balance}. Please recharge your wallet."
+            )
+            return redirect('retailer_2_add_billing')
+
+        # Deduct service price from the wallet
+        wallet.balance -= service_price
+        wallet.save()
+
+        # Log the transaction
+        Transaction.objects.create(
+            user=request.user,
+            amount=service_price,
+            transaction_type="Debit",
+            balance_after_transaction=wallet.balance,
+            description=f"Retailer 2.0 Billing: {service.service_name}",
+        )
+
+        # Create Billing Details
+        customer_id = request.POST.get('customer')
+        payment_mode = request.POST.get('payment_mode')
+        payment_status = request.POST.get('payment_status')
+        service_status = 'Pending'
+        ref_no = f"REF-942-{random.randint(100000000, 999999999)}"
+        id_proof = request.FILES.get('id_proof')
+        address_proof = request.FILES.get('address_proof')
+        photo = request.FILES.get('photo')
+
+        try:
+            customer = Customer.objects.get(id=customer_id, created_by=request.user)
+        except Customer.DoesNotExist:
+            messages.error(request, "Invalid customer selected.")
+            return redirect('retailer_2_add_billing')
+
+        Retailer2BillingDetails.objects.create(
+            user=request.user,
+            ref_no=ref_no,
+            customer=customer,
+            service=service,
+            payment_mode=payment_mode,
+            payment_status=payment_status,
+            service_status=service_status,
+            id_proof=id_proof,
+            address_proof=address_proof,
+            photo=photo,
+        )
+
+        messages.success(request, f"Billing added successfully! ₹{service_price} deducted from wallet.")
+        return redirect('retailer_2_view_billing')
+
+    # Render the form
+    customers = Customer.objects.filter(created_by=request.user).order_by('full_name')
+    services = CSCService.objects.filter(is_active=True).order_by('service_name')
+    
+    # Get wallet balance
+    try:
+        wallet = Wallet.objects.get(user=request.user)
+        wallet_balance = wallet.balance
+    except Wallet.DoesNotExist:
+        wallet_balance = 0.00
+    
+    return render(request, 'retailer_2_dashboard/add_billing.html', {
+        'customers': customers,
+        'services': services,
+        'wallet_balance': wallet_balance,
+    })
+
+@login_required
+@role_required(['retailer_2'])
+def retailer_2_view_billing(request):
+    """View all billings for Retailer 2.0"""
+    # Get search query
+    search_query = request.GET.get('search', '')
+    
+    # Filter billings based on search query
+    billings = Retailer2BillingDetails.objects.filter(user=request.user)
+    
+    if search_query:
+        billings = billings.filter(
+            Q(ref_no__icontains=search_query) |
+            Q(customer__full_name__icontains=search_query) |
+            Q(service__service_name__icontains=search_query) |
+            Q(payment_status__icontains=search_query) |
+            Q(service_status__icontains=search_query)
+        )
+    
+    # Order by billing date (newest first)
+    billings = billings.order_by('-billing_date')
+    
+    # Add pagination
+    from django.core.paginator import Paginator
+    paginator = Paginator(billings, 10)  # Show 10 billings per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'billings': page_obj,
+        'search_query': search_query,
+        'title': 'View Billing - Retailer 2.0'
+    }
+    return render(request, 'retailer_2_dashboard/view_billing.html', context)
+
+@login_required
+@role_required(['retailer_2'])
+def retailer_2_view_billing_details(request, billing_id):
+    """View billing details for Retailer 2.0"""
+    billing = get_object_or_404(Retailer2BillingDetails, id=billing_id, user=request.user)
+    context = {
+        'billing': billing,
+        'title': 'Billing Details - Retailer 2.0'
+    }
+    return render(request, 'retailer_2_dashboard/view_billing_details.html', context)
+
+@login_required
+@role_required(['retailer_2'])
+def retailer_2_edit_billing(request, billing_id):
+    """Edit a billing for Retailer 2.0"""
+    billing = get_object_or_404(Retailer2BillingDetails, id=billing_id, user=request.user)
+    if request.method == 'POST':
+        form = Retailer2BillingForm(request.POST, request.FILES, instance=billing)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Billing updated successfully!')
+            return redirect('retailer_2_view_billing')
+    else:
+        form = Retailer2BillingForm(instance=billing)
+    
+    customers = Customer.objects.filter(created_by=request.user).order_by('full_name')
+    services = CSCService.objects.filter(is_active=True).order_by('service_name')
+    form.fields['customer'].queryset = customers
+    form.fields['service'].queryset = services
+    
+    context = {
+        'form': form,
+        'billing': billing,
+        'customers': customers,
+        'services': services,
+        'title': 'Edit Billing - Retailer 2.0'
+    }
+    return render(request, 'retailer_2_dashboard/edit_billing.html', context)
+
+@login_required
+@role_required(['retailer_2'])
+def retailer_2_delete_billing(request, billing_id):
+    """Delete a billing for Retailer 2.0"""
+    billing = get_object_or_404(Retailer2BillingDetails, id=billing_id, user=request.user)
+    
+    if request.method == 'POST':
+        billing.delete()
+        messages.success(request, 'Billing deleted successfully!')
+        return redirect('retailer_2_view_billing')
+    
+    context = {
+        'billing': billing,
+        'title': 'Delete Billing - Retailer 2.0'
+    }
+    return render(request, 'retailer_2_dashboard/delete_billing.html', context)
+
+@login_required
+@role_required(['retailer_2'])
+def retailer_2_wallet_recharge_view(request):
+    """Wallet recharge view for Retailer 2.0 with offer cards"""
+    retailer = request.user  # Get the logged-in retailer
+    user_name = retailer.full_name
+    qr_code_path = os.path.join('static', 'qr_codes', f"{user_name.replace(' ', '_')}_qr.png")
+
+    return render(request, 'retailer_2_dashboard/wallet_recharge.html', {
+        'user_name': user_name,
+        'qr_code': qr_code_path,
+    })
+
+@login_required
+@role_required(['retailer_2'])
+def retailer_2_view_transactions(request):
+    """View transactions for Retailer 2.0"""
+    # Fetch transactions for the logged-in retailer
+    retailer = request.user
+    transactions = Transaction.objects.filter(user=retailer).order_by('-created_at')
+
+    # Add pagination
+    paginator = Paginator(transactions, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'transactions': page_obj,
+        'title': 'View Transactions - Retailer 2.0'
+    }
+
+    return render(request, 'retailer_2_dashboard/view_transactions.html', context)
+
+@login_required
+@role_required(['retailer_2'])
+def retailer_2_edit_profile(request):
+    """Edit profile for Retailer 2.0"""
+    if request.method == 'POST':
+        # Update user profile fields
+        user = request.user
+        user.full_name = request.POST.get('full_name', user.full_name)
+        user.mobile_number = request.POST.get('mobile_number', user.mobile_number)
+        user.address = request.POST.get('address', user.address)
+        user.state = request.POST.get('state', user.state)
+        user.city = request.POST.get('city', user.city)
+        user.postcode = request.POST.get('postcode', user.postcode)
+        user.gender = request.POST.get('gender', user.gender)
+        
+        # Handle profile photo upload
+        if 'profile_photo' in request.FILES:
+            user.profile_photo = request.FILES['profile_photo']
+        
+        user.save()
+        messages.success(request, 'Profile updated successfully!')
+        return redirect('retailer_2_edit_profile')
+    
+    context = {
+        'user': request.user,
+        'title': 'Edit Profile - Retailer 2.0'
+    }
+    return render(request, 'retailer_2_dashboard/edit_profile.html', context)
+
+@login_required
+@role_required(['retailer_2'])
+def retailer_2_settings(request):
+    """Settings page for Retailer 2.0"""
+    context = {
+        'user': request.user,
+        'title': 'Settings - Retailer 2.0'
+    }
+    return render(request, 'retailer_2_dashboard/settings.html', context)
+

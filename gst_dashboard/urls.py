@@ -22,10 +22,7 @@ from dashboard.views import role_based_redirect  # Import the redirect view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('dashboard/', include('dashboard.urls')),
-    path('', auth_views.LoginView.as_view(template_name='login.html'), name='login'),  # Direct login URL
-    path('redirect/', role_based_redirect, name='role_based_redirect'),
-      # Add the redirect route here
+    path('', include('dashboard.urls')),  # Include all dashboard URLs at root level
 ]
 
 if settings.DEBUG:

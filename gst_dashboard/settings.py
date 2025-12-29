@@ -50,9 +50,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'dashboard.middleware.DomainAccessMiddleware',  # Add domain access middleware
     'dashboard.middleware.AdminOnlyMiddleware',
-    
-    
 ]
 
 
@@ -183,4 +182,34 @@ EMAIL_HOST_USER = 'info@grahaksahaayatakendra.com'
 EMAIL_HOST_PASSWORD = 'SAHAAYATA@123'
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = 'info@grahaksahaayatakendra.com'
+
+# Domain configuration for multi-domain setup
+# Domain for Admin, Distributor, and Retailer (v1)
+CRM_DOMAIN = 'crm.grahaksahaayatakendra.com'
+
+# Domain for Retailer 2.0 only
+CSC_DOMAIN = 'clasclass.com'
+
+# Allowed domains for each platform
+CRM_ALLOWED_DOMAINS = [
+    'crm.grahaksahaayatakendra.com',        # Main CRM domain
+    'www.crm.grahaksahaayatakendra.com',    # With www
+    'localhost',                             # For development
+    '127.0.0.1',                            # For development
+    '127.0.0.1:8000',                       # For development with port
+    'localhost:8000',                        # For development with port
+]
+
+CSC_ALLOWED_DOMAINS = [
+    'clasclass.com',                         # Main CSC domain
+    'www.clasclass.com',                     # With www
+    'localhost',                             # For development
+    '127.0.0.1',                            # For development
+    '127.0.0.1:8000',                       # For development with port
+    'localhost:8000',                        # For development with port
+]
+
+# Legacy domains (for backward compatibility)
+RETAILER_2_ALLOWED_DOMAINS = CSC_ALLOWED_DOMAINS
+REGULAR_LOGIN_DOMAINS = CRM_ALLOWED_DOMAINS
 

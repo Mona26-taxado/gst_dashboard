@@ -1,0 +1,1561 @@
+{% extends 'retailer_2_dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Edit Billing - Retailer 2.0{% endblock %}
+
+{% block content %}
+<div class="container mt-10">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2 class="card-titles mb-0">Edit Billing</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{% url 'retailer_2_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Edit Billing</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="card-body">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="row">
+                    <!-- Customer Information -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="customer">Customer</label>
+                            <select id="customer" class="form-control" name="customer" disabled>
+                                <option value="{{ billing_details.customer.id }}" selected>
+                                    {{ billing_details.customer.full_name }}
+                                </option>
+                            </select>
+                            <small class="form-text text-muted">Customer details cannot be edited here.</small>
+                        </div>
+                    </div>
+                    <!-- Service Information -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="service">Service</label>
+                            <select id="service" name="service" class="form-control">
+                                {% for service in services %}
+                                    <option value="{{ service.id }}" {% if billing_details.service.id == service.id %}selected{% endif %}>
+                                        {{ service.service_name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <!-- Ref No (Read-only) -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="ref_no">Ref No</label>
+                            <input type="text" id="ref_no" class="form-control" value="{{ billing_details.ref_no }}" readonly>
+                        </div>
+                    </div>
+                    <!-- Billing Date (Read-only) -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="billing_date">Billing Date</label>
+                            <input type="text" id="billing_date" class="form-control" value="{{ billing_details.billing_date }}" readonly>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <!-- Payment Mode -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="payment_mode">Payment Mode</label>
+                            <select id="payment_mode" class="form-control" name="payment_mode">
+                                <option value="Cash" {% if billing_details.payment_mode == "Cash" %}selected{% endif %}>Cash</option>
+                                <option value="Online" {% if billing_details.payment_mode == "Online" %}selected{% endif %}>Online</option>
+                            </select>
+                        </div>
+                    </div>
+                    <!-- Service Status -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="service_status">Service Status</label>
+                            <select id="service_status" name="service_status" class="form-control">
+                                <option value="Pending" {% if billing_details.service_status == "Pending" %}selected{% endif %}>Pending</option>
+                                <option value="In Progress" {% if billing_details.service_status == "In Progress" %}selected{% endif %}>In Progress</option>
+                                <option value="Complete" {% if billing_details.service_status == "Complete" %}selected{% endif %}>Complete</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <!-- ID Proof -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="id_proof">ID Proof</label>
+                            <input type="file" id="id_proof" class="form-control" name="id_proof">
+                            <small class="form-text text-muted">
+                                {% if billing_details.id_proof %}
+                                    Existing: <a href="{{ billing_details.id_proof.url }}" download>Download Current</a>
+                                {% else %}No file uploaded{% endif %}
+                            </small>
+                        </div>
+                    </div>
+                    <!-- Address Proof -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="address_proof">Address Proof</label>
+                            <input type="file" id="address_proof" class="form-control" name="address_proof">
+                            <small class="form-text text-muted">
+                                {% if billing_details.address_proof %}
+                                    Existing: <a href="{{ billing_details.address_proof.url }}" download>Download Current</a>
+                                {% else %}No file uploaded{% endif %}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <!-- Photo -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="photo">Photo</label>
+                            <input type="file" id="photo" class="form-control" name="photo">
+                            <small class="form-text text-muted">
+                                {% if billing_details.photo %}
+                                    Existing: <a href="{{ billing_details.photo.url }}" download>Download Current</a>
+                                {% else %}No photo uploaded{% endif %}
+                            </small>
+                        </div>
+                    </div>
+                    <!-- Service Notes -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="service_notes">Service Notes</label>
+                            <textarea id="service_notes" class="form-control" name="service_notes" rows="3">{{ billing_details.service_notes }}</textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 text-right">
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                        <a href="{% url 'retailer_2_view_billing' %}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+<style>
+    .gov-form-section {
+        margin-top: 2rem;
+    }
+
+    .form-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        border: 1px solid #e2e8f0;
+    }
+
+    .gov-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: #374151;
+        font-size: 0.875rem;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        transition: border-color 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #1e40af;
+        box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+    }
+
+    .error-message {
+        color: #dc2626;
+        font-size: 0.75rem;
+        margin-top: 0.25rem;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background: #1e40af;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #1d4ed8;
+    }
+
+    .btn-secondary {
+        background: #6b7280;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #4b5563;
+    }
+
+    @media (max-width: 768px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+    }
+</style> 
+{% load static %}
+
+{% block title %}Edit Billing - Retailer 2.0{% endblock %}
+
+{% block content %}
+<div class="container mt-10">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2 class="card-titles mb-0">Edit Billing</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{% url 'retailer_2_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Edit Billing</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="card-body">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="row">
+                    <!-- Customer Information -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="customer">Customer</label>
+                            <select id="customer" class="form-control" name="customer" disabled>
+                                <option value="{{ billing_details.customer.id }}" selected>
+                                    {{ billing_details.customer.full_name }}
+                                </option>
+                            </select>
+                            <small class="form-text text-muted">Customer details cannot be edited here.</small>
+                        </div>
+                    </div>
+                    <!-- Service Information -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="service">Service</label>
+                            <select id="service" name="service" class="form-control">
+                                {% for service in services %}
+                                    <option value="{{ service.id }}" {% if billing_details.service.id == service.id %}selected{% endif %}>
+                                        {{ service.service_name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <!-- Ref No (Read-only) -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="ref_no">Ref No</label>
+                            <input type="text" id="ref_no" class="form-control" value="{{ billing_details.ref_no }}" readonly>
+                        </div>
+                    </div>
+                    <!-- Billing Date (Read-only) -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="billing_date">Billing Date</label>
+                            <input type="text" id="billing_date" class="form-control" value="{{ billing_details.billing_date }}" readonly>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <!-- Payment Mode -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="payment_mode">Payment Mode</label>
+                            <select id="payment_mode" class="form-control" name="payment_mode">
+                                <option value="Cash" {% if billing_details.payment_mode == "Cash" %}selected{% endif %}>Cash</option>
+                                <option value="Online" {% if billing_details.payment_mode == "Online" %}selected{% endif %}>Online</option>
+                            </select>
+                        </div>
+                    </div>
+                    <!-- Service Status -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="service_status">Service Status</label>
+                            <select id="service_status" name="service_status" class="form-control">
+                                <option value="Pending" {% if billing_details.service_status == "Pending" %}selected{% endif %}>Pending</option>
+                                <option value="In Progress" {% if billing_details.service_status == "In Progress" %}selected{% endif %}>In Progress</option>
+                                <option value="Complete" {% if billing_details.service_status == "Complete" %}selected{% endif %}>Complete</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <!-- ID Proof -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="id_proof">ID Proof</label>
+                            <input type="file" id="id_proof" class="form-control" name="id_proof">
+                            <small class="form-text text-muted">
+                                {% if billing_details.id_proof %}
+                                    Existing: <a href="{{ billing_details.id_proof.url }}" download>Download Current</a>
+                                {% else %}No file uploaded{% endif %}
+                            </small>
+                        </div>
+                    </div>
+                    <!-- Address Proof -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="address_proof">Address Proof</label>
+                            <input type="file" id="address_proof" class="form-control" name="address_proof">
+                            <small class="form-text text-muted">
+                                {% if billing_details.address_proof %}
+                                    Existing: <a href="{{ billing_details.address_proof.url }}" download>Download Current</a>
+                                {% else %}No file uploaded{% endif %}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <!-- Photo -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="photo">Photo</label>
+                            <input type="file" id="photo" class="form-control" name="photo">
+                            <small class="form-text text-muted">
+                                {% if billing_details.photo %}
+                                    Existing: <a href="{{ billing_details.photo.url }}" download>Download Current</a>
+                                {% else %}No photo uploaded{% endif %}
+                            </small>
+                        </div>
+                    </div>
+                    <!-- Service Notes -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="service_notes">Service Notes</label>
+                            <textarea id="service_notes" class="form-control" name="service_notes" rows="3">{{ billing_details.service_notes }}</textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 text-right">
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                        <a href="{% url 'retailer_2_view_billing' %}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+<style>
+    .gov-form-section {
+        margin-top: 2rem;
+    }
+
+    .form-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        border: 1px solid #e2e8f0;
+    }
+
+    .gov-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: #374151;
+        font-size: 0.875rem;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        transition: border-color 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #1e40af;
+        box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+    }
+
+    .error-message {
+        color: #dc2626;
+        font-size: 0.75rem;
+        margin-top: 0.25rem;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background: #1e40af;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #1d4ed8;
+    }
+
+    .btn-secondary {
+        background: #6b7280;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #4b5563;
+    }
+
+    @media (max-width: 768px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+    }
+</style> 
+{% load static %}
+
+{% block title %}Edit Billing - Retailer 2.0{% endblock %}
+
+{% block content %}
+<div class="container mt-10">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2 class="card-titles mb-0">Edit Billing</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{% url 'retailer_2_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Edit Billing</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="card-body">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="row">
+                    <!-- Customer Information -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="customer">Customer</label>
+                            <select id="customer" class="form-control" name="customer" disabled>
+                                <option value="{{ billing_details.customer.id }}" selected>
+                                    {{ billing_details.customer.full_name }}
+                                </option>
+                            </select>
+                            <small class="form-text text-muted">Customer details cannot be edited here.</small>
+                        </div>
+                    </div>
+                    <!-- Service Information -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="service">Service</label>
+                            <select id="service" name="service" class="form-control">
+                                {% for service in services %}
+                                    <option value="{{ service.id }}" {% if billing_details.service.id == service.id %}selected{% endif %}>
+                                        {{ service.service_name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <!-- Ref No (Read-only) -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="ref_no">Ref No</label>
+                            <input type="text" id="ref_no" class="form-control" value="{{ billing_details.ref_no }}" readonly>
+                        </div>
+                    </div>
+                    <!-- Billing Date (Read-only) -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="billing_date">Billing Date</label>
+                            <input type="text" id="billing_date" class="form-control" value="{{ billing_details.billing_date }}" readonly>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <!-- Payment Mode -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="payment_mode">Payment Mode</label>
+                            <select id="payment_mode" class="form-control" name="payment_mode">
+                                <option value="Cash" {% if billing_details.payment_mode == "Cash" %}selected{% endif %}>Cash</option>
+                                <option value="Online" {% if billing_details.payment_mode == "Online" %}selected{% endif %}>Online</option>
+                            </select>
+                        </div>
+                    </div>
+                    <!-- Service Status -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="service_status">Service Status</label>
+                            <select id="service_status" name="service_status" class="form-control">
+                                <option value="Pending" {% if billing_details.service_status == "Pending" %}selected{% endif %}>Pending</option>
+                                <option value="In Progress" {% if billing_details.service_status == "In Progress" %}selected{% endif %}>In Progress</option>
+                                <option value="Complete" {% if billing_details.service_status == "Complete" %}selected{% endif %}>Complete</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <!-- ID Proof -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="id_proof">ID Proof</label>
+                            <input type="file" id="id_proof" class="form-control" name="id_proof">
+                            <small class="form-text text-muted">
+                                {% if billing_details.id_proof %}
+                                    Existing: <a href="{{ billing_details.id_proof.url }}" download>Download Current</a>
+                                {% else %}No file uploaded{% endif %}
+                            </small>
+                        </div>
+                    </div>
+                    <!-- Address Proof -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="address_proof">Address Proof</label>
+                            <input type="file" id="address_proof" class="form-control" name="address_proof">
+                            <small class="form-text text-muted">
+                                {% if billing_details.address_proof %}
+                                    Existing: <a href="{{ billing_details.address_proof.url }}" download>Download Current</a>
+                                {% else %}No file uploaded{% endif %}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <!-- Photo -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="photo">Photo</label>
+                            <input type="file" id="photo" class="form-control" name="photo">
+                            <small class="form-text text-muted">
+                                {% if billing_details.photo %}
+                                    Existing: <a href="{{ billing_details.photo.url }}" download>Download Current</a>
+                                {% else %}No photo uploaded{% endif %}
+                            </small>
+                        </div>
+                    </div>
+                    <!-- Service Notes -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="service_notes">Service Notes</label>
+                            <textarea id="service_notes" class="form-control" name="service_notes" rows="3">{{ billing_details.service_notes }}</textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 text-right">
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                        <a href="{% url 'retailer_2_view_billing' %}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+<style>
+    .gov-form-section {
+        margin-top: 2rem;
+    }
+
+    .form-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        border: 1px solid #e2e8f0;
+    }
+
+    .gov-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: #374151;
+        font-size: 0.875rem;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        transition: border-color 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #1e40af;
+        box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+    }
+
+    .error-message {
+        color: #dc2626;
+        font-size: 0.75rem;
+        margin-top: 0.25rem;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background: #1e40af;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #1d4ed8;
+    }
+
+    .btn-secondary {
+        background: #6b7280;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #4b5563;
+    }
+
+    @media (max-width: 768px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+    }
+</style> 
+{% load static %}
+
+{% block title %}Edit Billing - Retailer 2.0{% endblock %}
+
+{% block content %}
+<div class="container mt-10">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2 class="card-titles mb-0">Edit Billing</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{% url 'retailer_2_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Edit Billing</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="card-body">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="row">
+                    <!-- Customer Information -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="customer">Customer</label>
+                            <select id="customer" class="form-control" name="customer" disabled>
+                                <option value="{{ billing_details.customer.id }}" selected>
+                                    {{ billing_details.customer.full_name }}
+                                </option>
+                            </select>
+                            <small class="form-text text-muted">Customer details cannot be edited here.</small>
+                        </div>
+                    </div>
+                    <!-- Service Information -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="service">Service</label>
+                            <select id="service" name="service" class="form-control">
+                                {% for service in services %}
+                                    <option value="{{ service.id }}" {% if billing_details.service.id == service.id %}selected{% endif %}>
+                                        {{ service.service_name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <!-- Ref No (Read-only) -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="ref_no">Ref No</label>
+                            <input type="text" id="ref_no" class="form-control" value="{{ billing_details.ref_no }}" readonly>
+                        </div>
+                    </div>
+                    <!-- Billing Date (Read-only) -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="billing_date">Billing Date</label>
+                            <input type="text" id="billing_date" class="form-control" value="{{ billing_details.billing_date }}" readonly>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <!-- Payment Mode -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="payment_mode">Payment Mode</label>
+                            <select id="payment_mode" class="form-control" name="payment_mode">
+                                <option value="Cash" {% if billing_details.payment_mode == "Cash" %}selected{% endif %}>Cash</option>
+                                <option value="Online" {% if billing_details.payment_mode == "Online" %}selected{% endif %}>Online</option>
+                            </select>
+                        </div>
+                    </div>
+                    <!-- Service Status -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="service_status">Service Status</label>
+                            <select id="service_status" name="service_status" class="form-control">
+                                <option value="Pending" {% if billing_details.service_status == "Pending" %}selected{% endif %}>Pending</option>
+                                <option value="In Progress" {% if billing_details.service_status == "In Progress" %}selected{% endif %}>In Progress</option>
+                                <option value="Complete" {% if billing_details.service_status == "Complete" %}selected{% endif %}>Complete</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <!-- ID Proof -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="id_proof">ID Proof</label>
+                            <input type="file" id="id_proof" class="form-control" name="id_proof">
+                            <small class="form-text text-muted">
+                                {% if billing_details.id_proof %}
+                                    Existing: <a href="{{ billing_details.id_proof.url }}" download>Download Current</a>
+                                {% else %}No file uploaded{% endif %}
+                            </small>
+                        </div>
+                    </div>
+                    <!-- Address Proof -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="address_proof">Address Proof</label>
+                            <input type="file" id="address_proof" class="form-control" name="address_proof">
+                            <small class="form-text text-muted">
+                                {% if billing_details.address_proof %}
+                                    Existing: <a href="{{ billing_details.address_proof.url }}" download>Download Current</a>
+                                {% else %}No file uploaded{% endif %}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <!-- Photo -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="photo">Photo</label>
+                            <input type="file" id="photo" class="form-control" name="photo">
+                            <small class="form-text text-muted">
+                                {% if billing_details.photo %}
+                                    Existing: <a href="{{ billing_details.photo.url }}" download>Download Current</a>
+                                {% else %}No photo uploaded{% endif %}
+                            </small>
+                        </div>
+                    </div>
+                    <!-- Service Notes -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="service_notes">Service Notes</label>
+                            <textarea id="service_notes" class="form-control" name="service_notes" rows="3">{{ billing_details.service_notes }}</textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 text-right">
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                        <a href="{% url 'retailer_2_view_billing' %}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+<style>
+    .gov-form-section {
+        margin-top: 2rem;
+    }
+
+    .form-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        border: 1px solid #e2e8f0;
+    }
+
+    .gov-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: #374151;
+        font-size: 0.875rem;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        transition: border-color 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #1e40af;
+        box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+    }
+
+    .error-message {
+        color: #dc2626;
+        font-size: 0.75rem;
+        margin-top: 0.25rem;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background: #1e40af;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #1d4ed8;
+    }
+
+    .btn-secondary {
+        background: #6b7280;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #4b5563;
+    }
+
+    @media (max-width: 768px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+    }
+</style> 
+{% load static %}
+
+{% block title %}Edit Billing - Retailer 2.0{% endblock %}
+
+{% block content %}
+<div class="container mt-10">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2 class="card-titles mb-0">Edit Billing</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{% url 'retailer_2_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Edit Billing</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="card-body">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="row">
+                    <!-- Customer Information -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="customer">Customer</label>
+                            <select id="customer" class="form-control" name="customer" disabled>
+                                <option value="{{ billing_details.customer.id }}" selected>
+                                    {{ billing_details.customer.full_name }}
+                                </option>
+                            </select>
+                            <small class="form-text text-muted">Customer details cannot be edited here.</small>
+                        </div>
+                    </div>
+                    <!-- Service Information -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="service">Service</label>
+                            <select id="service" name="service" class="form-control">
+                                {% for service in services %}
+                                    <option value="{{ service.id }}" {% if billing_details.service.id == service.id %}selected{% endif %}>
+                                        {{ service.service_name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <!-- Ref No (Read-only) -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="ref_no">Ref No</label>
+                            <input type="text" id="ref_no" class="form-control" value="{{ billing_details.ref_no }}" readonly>
+                        </div>
+                    </div>
+                    <!-- Billing Date (Read-only) -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="billing_date">Billing Date</label>
+                            <input type="text" id="billing_date" class="form-control" value="{{ billing_details.billing_date }}" readonly>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <!-- Payment Mode -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="payment_mode">Payment Mode</label>
+                            <select id="payment_mode" class="form-control" name="payment_mode">
+                                <option value="Cash" {% if billing_details.payment_mode == "Cash" %}selected{% endif %}>Cash</option>
+                                <option value="Online" {% if billing_details.payment_mode == "Online" %}selected{% endif %}>Online</option>
+                            </select>
+                        </div>
+                    </div>
+                    <!-- Service Status -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="service_status">Service Status</label>
+                            <select id="service_status" name="service_status" class="form-control">
+                                <option value="Pending" {% if billing_details.service_status == "Pending" %}selected{% endif %}>Pending</option>
+                                <option value="In Progress" {% if billing_details.service_status == "In Progress" %}selected{% endif %}>In Progress</option>
+                                <option value="Complete" {% if billing_details.service_status == "Complete" %}selected{% endif %}>Complete</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <!-- ID Proof -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="id_proof">ID Proof</label>
+                            <input type="file" id="id_proof" class="form-control" name="id_proof">
+                            <small class="form-text text-muted">
+                                {% if billing_details.id_proof %}
+                                    Existing: <a href="{{ billing_details.id_proof.url }}" download>Download Current</a>
+                                {% else %}No file uploaded{% endif %}
+                            </small>
+                        </div>
+                    </div>
+                    <!-- Address Proof -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="address_proof">Address Proof</label>
+                            <input type="file" id="address_proof" class="form-control" name="address_proof">
+                            <small class="form-text text-muted">
+                                {% if billing_details.address_proof %}
+                                    Existing: <a href="{{ billing_details.address_proof.url }}" download>Download Current</a>
+                                {% else %}No file uploaded{% endif %}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <!-- Photo -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="photo">Photo</label>
+                            <input type="file" id="photo" class="form-control" name="photo">
+                            <small class="form-text text-muted">
+                                {% if billing_details.photo %}
+                                    Existing: <a href="{{ billing_details.photo.url }}" download>Download Current</a>
+                                {% else %}No photo uploaded{% endif %}
+                            </small>
+                        </div>
+                    </div>
+                    <!-- Service Notes -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="service_notes">Service Notes</label>
+                            <textarea id="service_notes" class="form-control" name="service_notes" rows="3">{{ billing_details.service_notes }}</textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 text-right">
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                        <a href="{% url 'retailer_2_view_billing' %}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+<style>
+    .gov-form-section {
+        margin-top: 2rem;
+    }
+
+    .form-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        border: 1px solid #e2e8f0;
+    }
+
+    .gov-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: #374151;
+        font-size: 0.875rem;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        transition: border-color 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #1e40af;
+        box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+    }
+
+    .error-message {
+        color: #dc2626;
+        font-size: 0.75rem;
+        margin-top: 0.25rem;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background: #1e40af;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #1d4ed8;
+    }
+
+    .btn-secondary {
+        background: #6b7280;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #4b5563;
+    }
+
+    @media (max-width: 768px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+    }
+</style> 
+{% load static %}
+
+{% block title %}Edit Billing - Retailer 2.0{% endblock %}
+
+{% block content %}
+<div class="container mt-10">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2 class="card-titles mb-0">Edit Billing</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{% url 'retailer_2_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Edit Billing</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="card-body">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="row">
+                    <!-- Customer Information -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="customer">Customer</label>
+                            <select id="customer" class="form-control" name="customer" disabled>
+                                <option value="{{ billing_details.customer.id }}" selected>
+                                    {{ billing_details.customer.full_name }}
+                                </option>
+                            </select>
+                            <small class="form-text text-muted">Customer details cannot be edited here.</small>
+                        </div>
+                    </div>
+                    <!-- Service Information -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="service">Service</label>
+                            <select id="service" name="service" class="form-control">
+                                {% for service in services %}
+                                    <option value="{{ service.id }}" {% if billing_details.service.id == service.id %}selected{% endif %}>
+                                        {{ service.service_name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <!-- Ref No (Read-only) -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="ref_no">Ref No</label>
+                            <input type="text" id="ref_no" class="form-control" value="{{ billing_details.ref_no }}" readonly>
+                        </div>
+                    </div>
+                    <!-- Billing Date (Read-only) -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="billing_date">Billing Date</label>
+                            <input type="text" id="billing_date" class="form-control" value="{{ billing_details.billing_date }}" readonly>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <!-- Payment Mode -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="payment_mode">Payment Mode</label>
+                            <select id="payment_mode" class="form-control" name="payment_mode">
+                                <option value="Cash" {% if billing_details.payment_mode == "Cash" %}selected{% endif %}>Cash</option>
+                                <option value="Online" {% if billing_details.payment_mode == "Online" %}selected{% endif %}>Online</option>
+                            </select>
+                        </div>
+                    </div>
+                    <!-- Service Status -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="service_status">Service Status</label>
+                            <select id="service_status" name="service_status" class="form-control">
+                                <option value="Pending" {% if billing_details.service_status == "Pending" %}selected{% endif %}>Pending</option>
+                                <option value="In Progress" {% if billing_details.service_status == "In Progress" %}selected{% endif %}>In Progress</option>
+                                <option value="Complete" {% if billing_details.service_status == "Complete" %}selected{% endif %}>Complete</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <!-- ID Proof -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="id_proof">ID Proof</label>
+                            <input type="file" id="id_proof" class="form-control" name="id_proof">
+                            <small class="form-text text-muted">
+                                {% if billing_details.id_proof %}
+                                    Existing: <a href="{{ billing_details.id_proof.url }}" download>Download Current</a>
+                                {% else %}No file uploaded{% endif %}
+                            </small>
+                        </div>
+                    </div>
+                    <!-- Address Proof -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="address_proof">Address Proof</label>
+                            <input type="file" id="address_proof" class="form-control" name="address_proof">
+                            <small class="form-text text-muted">
+                                {% if billing_details.address_proof %}
+                                    Existing: <a href="{{ billing_details.address_proof.url }}" download>Download Current</a>
+                                {% else %}No file uploaded{% endif %}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <!-- Photo -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="photo">Photo</label>
+                            <input type="file" id="photo" class="form-control" name="photo">
+                            <small class="form-text text-muted">
+                                {% if billing_details.photo %}
+                                    Existing: <a href="{{ billing_details.photo.url }}" download>Download Current</a>
+                                {% else %}No photo uploaded{% endif %}
+                            </small>
+                        </div>
+                    </div>
+                    <!-- Service Notes -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="service_notes">Service Notes</label>
+                            <textarea id="service_notes" class="form-control" name="service_notes" rows="3">{{ billing_details.service_notes }}</textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 text-right">
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                        <a href="{% url 'retailer_2_view_billing' %}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+<style>
+    .gov-form-section {
+        margin-top: 2rem;
+    }
+
+    .form-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        border: 1px solid #e2e8f0;
+    }
+
+    .gov-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: #374151;
+        font-size: 0.875rem;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        transition: border-color 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #1e40af;
+        box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+    }
+
+    .error-message {
+        color: #dc2626;
+        font-size: 0.75rem;
+        margin-top: 0.25rem;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background: #1e40af;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #1d4ed8;
+    }
+
+    .btn-secondary {
+        background: #6b7280;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #4b5563;
+    }
+
+    @media (max-width: 768px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+    }
+</style> 

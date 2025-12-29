@@ -1,0 +1,463 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Seva Connect - Login</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;700&display=swap">
+    <link rel="stylesheet" href="{% static 'assets/vendors/mdi/css/materialdesignicons.min.css'%}">
+    <link rel="shortcut icon" href="{% static 'services/CSC.png' %}" />
+    <meta name="theme-color" content="#ffffff"/>
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+    <link rel="apple-touch-icon" href="{% static 'services/CSC.png' %}"/>
+    <style>
+        @keyframes moveGradient {
+            0% {
+                background-position: 0% 50%;
+            }
+            100% {
+                background-position: 100% 50%;
+            }
+        }
+
+        :root {
+            --primary-color: #0d9488; /* Teal */
+            --primary-dark: #0f766e;
+            --secondary-color: #0ea5e9; /* Sky blue for links */
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --bg-light: #f8fafc;
+            --border-color: #e2e8f0;
+            --welcome-bg: #e0f2fe;
+            --welcome-text: #0c4a6e;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Public Sans', sans-serif;
+            background-color: var(--bg-light);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: var(--text-dark);
+        }
+        
+        .main-container {
+            display: flex;
+            width: 1000px;
+            max-width: 95vw;
+            background: #ffffff;
+            border-radius: 1.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            position: relative;
+            margin-top: 12px;
+        }
+
+        .welcome-section {
+            background: linear-gradient(90deg, #FF9933, #FFFFFF, #138808, #FFFFFF, #FF9933);
+            background-size: 400% 100%;
+            padding: 3rem;
+            width: 45%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            animation: moveGradient 15s ease-in-out infinite alternate;
+        }
+        
+        .welcome-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+        }
+
+        .welcome-header .logo {
+            height: 45px;
+        }
+
+        .welcome-content h1 {
+            font-size: 2.25rem;
+            color: #212529;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            text-shadow: 0 1px 5px rgba(255, 255, 255, 0.8);
+        }
+        
+        .welcome-content p {
+            font-size: 1rem;
+            color: #212529;
+            line-height: 1.6;
+            text-shadow: 0 1px 3px rgba(255, 255, 255, 0.8);
+        }
+
+        .welcome-content .tagline {
+            font-weight: 700;
+            margin-top: 2rem;
+            text-align: center;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+        }
+
+        .typing-cursor::after {
+            content: '|';
+            animation: blink 1s step-end infinite;
+            font-weight: 100;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
+
+        .login-section {
+            padding: 2rem 3rem;
+            width: 55%;
+            position: relative;
+        }
+        
+        .login-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .language-selector {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            background: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .login-header .logo {
+            height: 30px;
+            opacity: 0.8;
+        }
+
+        .login-form-container h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-form-container .underline {
+            width: 50px;
+            height: 4px;
+            background-color: var(--primary-color);
+            border-radius: 2px;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-input::placeholder {
+            color: var(--text-light);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+        }
+        
+        .input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+            font-size: 1.25rem;
+        }
+
+        .captcha-wrapper {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .captcha-box {
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            font-size: 1.5rem;
+            letter-spacing: 5px;
+            font-weight: bold;
+            color: #555;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            user-select: none;
+            min-width: 251px;  /* Added minimum width */
+            justify-content: center;  /* Center the content */
+        }
+        .captcha-box .mdi-reload { cursor: pointer; color: #777; }
+        .captcha-wrapper .form-input { padding-left: 1rem; }
+
+        .login-btn {
+            width: auto;
+            padding: 0.8rem 2rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .login-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(13, 148, 136, 0.2);
+        }
+        
+        .forgot-password {
+            display: block;
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-top: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .forgot-password:hover {
+            text-decoration: underline;
+        }
+        
+        .alert-danger {
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-radius: 0.5rem;
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
+        .footer {
+            width: 1000px;
+            max-width: 95vw;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-top: 1rem;
+        }
+
+        .footer a {
+            color: var(--text-light);
+            text-decoration: none;
+            margin: 0 0.5rem;
+        }
+        
+        .footer-icons a {
+            font-size: 1.25rem;
+            color: var(--text-light);
+        }
+        
+        /* Responsive */
+        @media (max-width: 900px) {
+            .welcome-section {
+                display: none;
+            }
+            .login-section {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="welcome-section">
+            <div class="welcome-header">
+                <img src="{% static 'services/CSC.png' %}" alt="CSC Logo" class="logo">
+                <img src="{% static 'services/Digital-india.png' %}" alt="Digital India Logo" class="logo">
+            </div>
+            <div class="welcome-content">
+                <h1 id="welcome-heading"></h1>
+                <p id="welcome-paragraph"></p>
+                <p id="welcome-tagline" class="tagline"></p>
+            </div>
+        </div>
+        <div class="login-section">
+            <div class="login-header">
+                <div class="language-selector">
+                    <span class="mdi mdi-web"></span>
+                    English
+                    <span class="mdi mdi-chevron-down"></span>
+                </div>
+                 <img src="{% static 'services/CSC.png' %}" alt="Digital Seva Connect Logo" class="logo">
+            </div>
+            
+            <div class="login-form-container">
+                <h2>Login</h2>
+                <div class="underline"></div>
+
+                {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    Please enter a correct email and password.
+                </div>
+                {% endif %}
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <input type="text" name="username" class="form-input" placeholder="Username or Email" value="{{ username|default:'' }}" required>
+                            <span class="mdi mdi-account-outline input-icon"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <input type="password" name="password" class="form-input" placeholder="Password" required>
+                            <span class="mdi mdi-lock-outline input-icon"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group captcha-wrapper">
+                        <div class="captcha-box" id="captcha-container">
+                            {% if captcha_image %}
+                            <img src="{{ captcha_image }}" alt="Captcha" style="height: 60px; width: 167px; border-radius: 8px; border: 2px solid #e2e8f0;">
+                            {% else %}
+                            <span style="font-size: 24px; font-weight: bold; letter-spacing: 4px; color: #333; padding: 10px; background: #f8f9fa; border-radius: 8px; border: 2px solid #e2e8f0;">{{ captcha_text|default:"ABCD12" }}</span>
+                            {% endif %}
+                            <span class="mdi mdi-reload" onclick="refreshCaptcha()" style="cursor: pointer; color: #777; font-size: 20px; margin-left: 10px;"></span>
+                        </div>
+                         <div class="input-wrapper">
+                            <input type="text" name="captcha" class="form-input" placeholder="Enter Captcha Text" required>
+                        </div>
+                    </div>
+                    
+                    <a href="#" class="forgot-password">Forgot password</a>
+
+                    <button type="submit" class="login-btn">Sign In</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="footer">
+        <div>
+            <a href="#">Terms of Service</a>
+            <a href="#">Privacy Policy</a>
+        </div>
+        <div>
+            <span>Copyright © 2025 CSC Classes. All rights reserved.</span>
+        </div>
+        <div class="footer-icons">
+             <a href="#"><span class="mdi mdi-phone"></span></a>
+             <a href="#"><span class="mdi mdi-email-outline"></span></a>
+             <a href="#"><span class="mdi mdi-twitter"></span></a>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const headingEl = document.getElementById('welcome-heading');
+            const paragraphEl = document.getElementById('welcome-paragraph');
+            const taglineEl = document.getElementById('welcome-tagline');
+
+            const headingText = "Welcome to CSC Classes";
+            const paragraphText = "CSC Classes is your trusted online learning platform to master government, banking, GST, and citizen service center operations. Login to access your courses, track your progress, and start building your skills to run your own service center successfully.";
+            const taglineText = "Learn | Grow | Succeed";
+            
+            function typeWriter(element, text, index = 0, callback) {
+                if (index === 0) {
+                    element.innerHTML = '';
+                    element.classList.add('typing-cursor');
+                }
+
+                if (index < text.length) {
+                    element.innerHTML += text.charAt(index);
+                    setTimeout(() => typeWriter(element, text, index + 1, callback), 35);
+                } else {
+                    element.classList.remove('typing-cursor');
+                    if (callback) {
+                        setTimeout(callback, 1000); // Pause for 1 second before next line
+                    }
+                }
+            }
+
+            // Chain the typing animations
+            typeWriter(headingEl, headingText, 0, () => {
+                typeWriter(paragraphEl, paragraphText, 0, () => {
+                    typeWriter(taglineEl, taglineText, 0, null); // No callback for the last one
+                });
+            });
+        });
+
+        // Form submission loading state
+        document.querySelector('form').addEventListener('submit', function() {
+            const button = this.querySelector('.login-btn');
+            button.innerHTML = '<span class="mdi mdi-loading mdi-spin"></span> Signing In...';
+            button.disabled = true;
+        });
+
+        // Captcha refresh function
+        function refreshCaptcha() {
+            const captchaContainer = document.getElementById('captcha-container');
+            const img = captchaContainer.querySelector('img');
+            
+            // Show loading state
+            if (img) {
+                img.style.opacity = '0.5';
+            }
+            
+            // Make AJAX request to get new captcha
+            fetch('{% url "refresh_captcha" %}', {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (img && data.captcha_image) {
+                    img.src = data.captcha_image;
+                    img.style.opacity = '1';
+                }
+                
+                // Clear the captcha input field
+                document.querySelector('input[name="captcha"]').value = '';
+            })
+            .catch(error => {
+                console.error('Error refreshing captcha:', error);
+                if (img) {
+                    img.style.opacity = '1';
+                }
+            });
+        }
+    </script>
+</body>
+</html> 

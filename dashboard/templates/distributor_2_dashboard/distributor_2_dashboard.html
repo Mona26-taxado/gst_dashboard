@@ -1,0 +1,797 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}CSC Dashboard - Government Services{% endblock %}
+
+{% block content %}
+<div class="gov-dashboard">
+    <!-- Government Header -->
+    <div class="gov-header">
+        <div class="gov-logo">
+            <img src="{% static 'services/CSC.png' %}" alt="Government Logo" class="logo-img">
+            <div class="logo-text">
+                <h1 class="gov-title">CSC 2.0</h1>
+                <p class="gov-subtitle">Common Service Centre</p>
+            </div>
+        </div>
+        <div class="gov-user-info">
+            <div class="user-details">
+                <span class="user-name">{{ user.username }}</span>
+                <span class="user-role">{{ user.get_role_display }}</span>
+            </div>
+            <div class="wallet-info">
+                <div class="wallet-icon">
+                    <i class="fa-solid fa-wallet"></i>
+                </div>
+                <div class="wallet-details">
+                    <span class="wallet-label">Wallet Balance</span>
+                    <span class="wallet-amount">₹{{ wallet_balance|default:"0.00" }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Welcome Section -->
+    <div class="welcome-section">
+        <div class="welcome-content">
+            <h2 class="welcome-title">Government Services Portal</h2>
+            <p class="welcome-description">Access official government services and documents</p>
+        </div>
+        <div class="service-stats">
+            <div class="stat-item">
+                <span class="stat-number">25+</span>
+                <span class="stat-label">Services</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">24/7</span>
+                <span class="stat-label">Available</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">100%</span>
+                <span class="stat-label">Secure</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Government Services Grid -->
+    <div class="services-container">
+        <div class="services-header">
+            <h3 class="services-title">Available Government Services</h3>
+            <p class="services-subtitle">Select a service to begin your application</p>
+        </div>
+        
+        <div class="gov-services-grid">
+            <!-- PAN Card Service -->
+            <div class="gov-service-card">
+                <div class="service-icon">
+                    <img src="{% static 'services/uti.png' %}" alt="PAN Card">
+                </div>
+                <div class="service-content">
+                    <h4 class="service-name">UTI PAN Card</h4>
+                    <p class="service-description">Apply for new PAN card</p>
+                    <div class="service-actions">
+                        <button class="btn-apply">Apply</button>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- PAN Card Service -->
+            <div class="gov-service-card">
+                <div class="service-icon">
+                    <img src="{% static 'services/uti.png' %}" alt="PAN Card">
+                </div>
+                <div class="service-content">
+                    <h4 class="service-name">UTI PAN Correction</h4>
+                    <p class="service-description">Apply for PAN correction</p>
+                    <div class="service-actions">
+                        <button class="btn-apply">Apply</button>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- PAN Card Service -->
+            <div class="gov-service-card">
+                <div class="service-icon">
+                    <img src="{% static 'services/logo.png' %}" alt="PAN Card">
+                </div>
+                <div class="service-content">
+                    <h4 class="service-name">NSDL PAN Card</h4>
+                    <p class="service-description">Apply for new PAN card</p>
+                    <div class="service-actions">
+                        <button class="btn-apply">Apply</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAN Card Service -->
+            <div class="gov-service-card">
+                <div class="service-icon">
+                    <img src="{% static 'services/logo.png' %}" alt="PAN Card">
+                </div>
+                <div class="service-content">
+                    <h4 class="service-name">NSDL PAN Correction</h4>
+                    <p class="service-description">Apply for PAN correction</p>
+                    <div class="service-actions">
+                        <button class="btn-apply">Apply</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAN Card Service -->
+            <div class="gov-service-card">
+                <div class="service-icon">
+                    <img src="{% static 'services/online-pan-service-center.png' %}" alt="PAN Card">
+                </div>
+                <div class="service-content">
+                    <h4 class="service-name">Company PAN Card</h4>
+                    <p class="service-description">Apply for company PAN card</p>
+                    <div class="service-actions">
+                        <button class="btn-apply">Apply</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aadhar Service -->
+            <div class="gov-service-card">
+                <div class="service-icon">
+                    <img src="{% static 'services/aadhar.png' %}" alt="Aadhar Card">
+                </div>
+                <div class="service-content">
+                    <h4 class="service-name">Aadhar Services</h4>
+                    <p class="service-description">Update and correct your Aadhar details</p>
+                    <div class="service-actions">
+                        <button class="btn-apply">Apply</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Passport Service -->
+            <div class="gov-service-card">
+                <div class="service-icon">
+                    <img src="{% static 'services/passport.png' %}" alt="Passport">
+                </div>
+                <div class="service-content">
+                    <h4 class="service-name">Passport</h4>
+                    <p class="service-description">Apply for new passport or renewal</p>
+                    <div class="service-actions">
+                        <button class="btn-apply">Apply</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Voter ID Service -->
+            <div class="gov-service-card">
+                <div class="service-icon">
+                    <img src="{% static 'services/vh.png' %}" alt="Voter ID">
+                </div>
+                <div class="service-content">
+                    <h4 class="service-name">Voter ID</h4>
+                    <p class="service-description">Apply for voter ID </p>
+                    <div class="service-actions">
+                        <button class="btn-apply">Apply</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Voter ID Service -->
+            <div class="gov-service-card">
+                <div class="service-icon">
+                    <img src="{% static 'services/vh.png' %}" alt="Voter ID">
+                </div>
+                <div class="service-content">
+                    <h4 class="service-name">Voter Correction</h4>
+                    <p class="service-description">Apply for voter correction</p>
+                    <div class="service-actions">
+                        <button class="btn-apply">Apply</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Driving License Service -->
+            <div class="gov-service-card">
+                <div class="service-icon">
+                    <img src="{% static 'services/drivinf.png' %}" alt="Driving License">
+                </div>
+                <div class="service-content">
+                    <h4 class="service-name">Driving License</h4>
+                    <p class="service-description">Apply for driving license or renewal</p>
+                    <div class="service-actions">
+                        <button class="btn-apply">Apply</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ayushman Card Service -->
+            <div class="gov-service-card">
+                <div class="service-icon">
+                    <img src="{% static 'services/Ayushman_Bharat_logo.png' %}" alt="Ayushman Card">
+                </div>
+                <div class="service-content">
+                    <h4 class="service-name">Ayushman Bharat</h4>
+                    <p class="service-description">Apply for health insurance card</p>
+                    <div class="service-actions">
+                        <button class="btn-apply">Apply</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- IRCTC Service -->
+            <div class="gov-service-card">
+                <div class="service-icon">
+                    <img src="{% static 'services/irctc.png' %}" alt="IRCTC">
+                </div>
+                <div class="service-content">
+                    <h4 class="service-name">IRCTC</h4>
+                    <p class="service-description">Book train tickets and reservations</p>
+                    <div class="service-actions">
+                        <button class="btn-apply">Book</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sarkari Result Service -->
+            <div class="gov-service-card">
+                <div class="service-icon">
+                    <img src="{% static 'services/sarkari_result.png' %}" alt="Sarkari Result">
+                </div>
+                <div class="service-content">
+                    <h4 class="service-name">Sarkari Result</h4>
+                    <p class="service-description">Check government exam results</p>
+                    <div class="service-actions">
+                        <button class="btn-apply">Check</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Birth Certificate -->
+            <div class="gov-service-card">
+                <div class="service-icon">
+                    <img src="{% static 'services/Ration_card.png' %}" alt="Birth Certificate">
+                </div>
+                <div class="service-content">
+                    <h4 class="service-name">Ration Card</h4>
+                    <p class="service-description">Apply for ration card</p>
+                    <div class="service-actions">
+                        <button class="btn-apply">Apply</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Death Certificate -->
+            <div class="gov-service-card">
+                <div class="service-icon">
+                    <img src="{% static 'services/msme-logo-500x500-1.png' %}" alt="Death Certificate">
+                </div>
+                <div class="service-content">
+                    <h4 class="service-name">MSME Registration</h4>
+                    <p class="service-description">Apply for MSME registration</p>
+                    <div class="service-actions">
+                        <button class="btn-apply">Apply</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Marriage Certificate -->
+            <div class="gov-service-card">
+                <div class="service-icon">
+                    <img src="{% static 'services/marriage-certificate.jpg' %}" alt="Marriage Certificate">
+                </div>
+                <div class="service-content">
+                    <h4 class="service-name">Marriage Certificate</h4>
+                    <p class="service-description">Apply for marriage certificate</p>
+                    <div class="service-actions">
+                        <button class="btn-apply">Apply</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Income Certificate -->
+            <div class="gov-service-card">
+                <div class="service-icon">
+                    <img src="{% static 'services/2683764.png' %}" alt="Income Certificate">
+                </div>
+                <div class="service-content">
+                    <h4 class="service-name">Income Certificate</h4>
+                    <p class="service-description">Apply for income certificate</p>
+                    <div class="service-actions">
+                        <button class="btn-apply">Apply</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Caste Certificate -->
+            <div class="gov-service-card">
+                <div class="service-icon">
+                    <img src="{% static 'services/images.png' %}" alt="Caste Certificate">
+                </div>
+                <div class="service-content">
+                    <h4 class="service-name">Caste Certificate</h4>
+                    <p class="service-description">Apply for caste certificate</p>
+                    <div class="service-actions">
+                        <button class="btn-apply">Apply</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Domicile Certificate -->
+            <div class="gov-service-card">
+                <div class="service-icon">
+                    <img src="{% static 'services/marriage-certificate.jpg' %}" alt="Domicile Certificate">
+                </div>
+                <div class="service-content">
+                    <h4 class="service-name">Domicile Certificate</h4>
+                    <p class="service-description">Apply for domicile certificate</p>
+                    <div class="service-actions">
+                        <button class="btn-apply">Apply</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Character Certificate -->
+            <div class="gov-service-card">
+                <div class="service-icon">
+                    <img src="{% static 'services/death-certificate.png' %}" alt="Character Certificate">
+                </div>
+                <div class="service-content">
+                    <h4 class="service-name">Death Certificate</h4>
+                    <p class="service-description">Apply for death certificate</p>
+                    <div class="service-actions">
+                        <button class="btn-apply">Apply</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Property Registration -->
+            <div class="gov-service-card">
+                <div class="service-icon">
+                    <img src="{% static 'services/trade_licens.png' %}" alt="Property Registration">
+                </div>
+                <div class="service-content">
+                    <h4 class="service-name">Trade License</h4>
+                    <p class="service-description">Apply for trade license</p>
+                    <div class="service-actions">
+                        <button class="btn-apply">Register</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Electricity Bill -->
+            <div class="gov-service-card">
+                <div class="service-icon">
+                    <img src="{% static 'services/Shop act.png' %}" alt="Electricity Bill">
+                </div>
+                <div class="service-content">
+                    <h4 class="service-name">Shop Registration</h4>
+                    <p class="service-description">Apply for shop registration</p>
+                    <div class="service-actions">
+                        <button class="btn-apply">Pay</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Water Bill -->
+            <div class="gov-service-card">
+                <div class="service-icon">
+                    <img src="{% static 'services/GST_LOGO.png' %}" alt="Water Bill">
+                </div>
+                <div class="service-content">
+                    <h4 class="service-name">GST Registration</h4>
+                    <p class="service-description">Apply for GST registration</p>
+                    <div class="service-actions">
+                        <button class="btn-apply">Pay</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gas Bill -->
+            <div class="gov-service-card">
+                <div class="service-icon">
+                    <img src="{% static 'services/link-aadhar-to-pan.png' %}" alt="Gas Bill">
+                </div>
+                <div class="service-content">
+                    <h4 class="service-name">Pan with Aadhar Link</h4>
+                    <p class="service-description">Apply for pan with aadhar link</p>
+                    <div class="service-actions">
+                        <button class="btn-apply">Pay</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Recharge -->
+            <div class="gov-service-card">
+                <div class="service-icon">
+                    <img src="{% static 'services/Logo_of_Income_Tax_Department_India.png' %}" alt="Mobile Recharge">
+                </div>
+                <div class="service-content">
+                    <h4 class="service-name">IT Returns</h4>
+                    <p class="service-description">Apply for IT returns</p>
+                    <div class="service-actions">
+                        <button class="btn-apply">Apply</button>
+                    </div>
+                </div>
+            </div>
+
+           
+        </div>
+    </div>
+
+    <!-- Government Notice -->
+    <div class="gov-notice">
+        <div class="notice-header">
+            <i class="fas fa-info-circle"></i>
+            <h4>Important Notice</h4>
+        </div>
+        <div class="notice-content">
+            <p>All services are official government services. Please ensure you have all required documents before applying. For assistance, contact our support team.</p>
+        </div>
+    </div>
+</div>
+
+<style>
+    .gov-dashboard {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        min-height: 100vh;
+        padding: 1.5rem;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* Government Header */
+    .gov-header {
+        background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 10px rgba(30, 64, 175, 0.3);
+    }
+
+    .gov-logo {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .logo-img {
+        width: 40px;
+        height: 40px;
+        border-radius: 6px;
+        background: white;
+        padding: 6px;
+    }
+
+    .gov-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin: 0;
+        letter-spacing: 0.5px;
+    }
+
+    .gov-subtitle {
+        font-size: 0.8rem;
+        margin: 0;
+        opacity: 0.9;
+    }
+
+    .gov-user-info {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+    }
+
+    .wallet-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        color: white;
+        box-shadow: 0 2px 8px rgba(30, 64, 175, 0.3);
+        transition: all 0.3s ease;
+    }
+
+    .wallet-info:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(30, 64, 175, 0.4);
+    }
+
+    .wallet-info .wallet-icon {
+        font-size: 1.2rem;
+        color: #fbbf24;
+    }
+
+    .wallet-details {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .wallet-label {
+        font-size: 0.7rem;
+        font-weight: 500;
+        opacity: 0.9;
+    }
+
+    .wallet-amount {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #fbbf24;
+    }
+
+    .user-name {
+        display: block;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .user-role {
+        display: block;
+        font-size: 0.75rem;
+        opacity: 0.8;
+        text-transform: capitalize;
+    }
+
+    /* Welcome Section */
+    .welcome-section {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .welcome-title {
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin: 0 0 0.25rem 0;
+    }
+
+    .welcome-description {
+        color: #64748b;
+        margin: 0;
+        font-size: 0.9rem;
+    }
+
+    .service-stats {
+        display: flex;
+        gap: 1.5rem;
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+
+    .stat-number {
+        display: block;
+        font-size: 1rem;
+        font-weight: 700;
+        color: #1e40af;
+    }
+
+    .stat-label {
+        font-size: 0.7rem;
+        color: #64748b;
+    }
+
+    /* Services Container */
+    .services-container {
+        margin-bottom: 1.5rem;
+    }
+
+    .services-header {
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .services-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin: 0 0 0.25rem 0;
+    }
+
+    .services-subtitle {
+        color: #64748b;
+        margin: 0;
+        font-size: 0.9rem;
+    }
+
+    .gov-services-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1rem;
+    }
+
+    /* Compact Government Service Cards */
+    .gov-service-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e2e8f0;
+        transition: all 0.3s ease;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        gap: 1rem;
+    }
+
+    .gov-service-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        border-color: #1e40af;
+    }
+
+    .service-icon {
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .service-icon img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    .service-content {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .service-name {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin: 0 0 0.25rem 0;
+        line-height: 1.2;
+    }
+
+    .service-description {
+        color: #64748b;
+        margin: 0 0 0.75rem 0;
+        font-size: 0.8rem;
+        line-height: 1.3;
+    }
+
+    .service-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-apply {
+        background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-apply:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(30, 64, 175, 0.4);
+    }
+
+    /* Government Notice */
+    .gov-notice {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border: 1px solid #f59e0b;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .notice-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .notice-header i {
+        color: #d97706;
+        font-size: 1rem;
+    }
+
+    .notice-header h4 {
+        margin: 0;
+        color: #92400e;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .notice-content p {
+        margin: 0;
+        color: #78350f;
+        line-height: 1.4;
+        font-size: 0.8rem;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .gov-dashboard {
+            padding: 1rem;
+        }
+
+        .gov-header {
+            flex-direction: column;
+            text-align: center;
+            gap: 0.75rem;
+        }
+
+        .gov-user-info {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .wallet-info {
+            padding: 0.5rem 0.75rem;
+        }
+
+        .wallet-amount {
+            font-size: 0.9rem;
+        }
+
+        .welcome-section {
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
+        }
+
+        .service-stats {
+            gap: 1rem;
+        }
+
+        .gov-services-grid {
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .gov-service-card {
+            padding: 0.75rem;
+            gap: 0.75rem;
+        }
+
+        .service-icon {
+            width: 40px;
+            height: 40px;
+        }
+
+        .service-name {
+            font-size: 0.9rem;
+        }
+
+        .service-description {
+            font-size: 0.75rem;
+        }
+
+        .btn-apply {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.75rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .gov-services-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %} 

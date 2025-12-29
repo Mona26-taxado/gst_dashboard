@@ -194,6 +194,8 @@
                             <option value="retailer" {% if form.role.value == "retailer" %}selected{% endif %}>Retailer</option>
                             <option value="distributor" {% if form.role.value == "distributor" %}selected{% endif %}>Distributor</option>
                             <option value="master_distributor" {% if form.role.value == "master_distributor" %}selected{% endif %}>Master Distributor</option>
+                            <option value="retailer_2" {% if form.role.value == "retailer_2" %}selected{% endif %}>Retailer 2.0</option>
+                            <option value="distributor_2" {% if form.role.value == "distributor_2" %}selected{% endif %}>Distributor 2.0</option>
                         </select>
                         {% if form.role.errors %}
                             <div class="text-danger">{{ form.role.errors|join:", " }}</div>
@@ -223,3 +225,4 @@
 </div>
 
 {% endblock %}
+
