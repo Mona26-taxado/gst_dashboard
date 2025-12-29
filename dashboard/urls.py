@@ -42,11 +42,11 @@ urlpatterns = [
     path('not-authorized/', not_authorized_view, name='not_authorized'),
     path('qr-payment/<int:user_id>/', generate_qr_for_recharge, name='qr_payment'),
 
-    path('admin-dashboard/', admin_views.admin_dashboard, name='admin_dashboard'),
-    path('admin-add-gsk/', admin_add_gsk, name='admin_add_gsk'),
-    path('admin-view-gsk/', admin_view_gsk, name='admin_view_gsk'),
+    path('admin/dashboard/', admin_views.admin_dashboard, name='admin_dashboard'),
+    path('admin/add-gsk/', admin_add_gsk, name='admin_add_gsk'),
+    path('admin/view-gsk/', admin_view_gsk, name='admin_view_gsk'),
     path('edit-gsk/<int:gsk_id>/', admin_views.edit_gsk, name='edit_gsk'),
-    path('admin-delete-gsk/<int:user_id>/', admin_views.delete_gsk, name='delete_gsk'),
+    path('admin/delete-gsk/<int:user_id>/', admin_views.delete_gsk, name='delete_gsk'),
     # Admin URLs
     path('admin-view-billing/<int:billing_id>/', admin_views.view_billing_details, name='admin_view_billing_details'),
     path('delete-service/<int:service_id>/', delete_service, name='delete_service'),
