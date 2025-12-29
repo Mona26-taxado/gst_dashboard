@@ -18,10 +18,10 @@ from django.urls import path, include
 from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
-from dashboard.views import role_based_redirect  # Import the redirect view
+from dashboard.views import role_based_redirect, admin_redirect_view  # Import the redirect views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('admin/', admin_redirect_view, name='admin_redirect'),  # Redirect Django admin to custom dashboard
     path('', include('dashboard.urls')),  # Include all dashboard URLs at root level
 ]
 

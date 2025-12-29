@@ -206,11 +206,26 @@ def custom_login_view(request):
                 now = timezone.now().timestamp()
                 request.session['demo_start'] = now
             login(request, user)
+            # Always redirect to role_based_redirect, ignore 'next' parameter
             return redirect('role_based_redirect')  # Redirect to role-based redirect
         else:
             error = "Invalid username or password. Please try again."
             print("DEBUG: Error set in view")  # Debug print
     return render(request, "login.html", {"error": error})
+
+def admin_redirect_view(request):
+    """
+    Redirect Django admin requests to custom admin dashboard.
+    If user is authenticated and is admin, redirect to /admin/dashboard/
+    Otherwise, redirect to login page.
+    """
+    if request.user.is_authenticated:
+        if hasattr(request.user, 'role') and request.user.role == 'admin':
+            return redirect('/admin/dashboard/')
+        else:
+            return redirect('not_authorized')
+    else:
+        return redirect('login')
 
 def retailer_2_login_view(request):
     """Universal login view for both Retailer 2.0 and Distributor 2.0 with domain validation and captcha."""
@@ -310,7 +325,7 @@ def refresh_captcha(request):
 def role_based_redirect(request):
     user = request.user
     if user.role == 'admin':
-        return redirect('admin_dashboard')
+        return redirect('/admin/dashboard/')  # Explicit redirect to admin dashboard
     elif user.role == 'retailer':
         return redirect('retailer_dashboard')
     elif user.role == 'distributor':
