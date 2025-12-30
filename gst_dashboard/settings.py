@@ -24,9 +24,19 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-7!vt#&t0m+#hhx*lo_@@(a5bp27^*$hum$jb$y#rw(_gm@0p&8'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://crm.grahaksahaayatakendra.com',
+    'https://www.crm.grahaksahaayatakendra.com',
+    'http://crm.grahaksahaayatakendra.com',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+    'http://localhost',
+    'http://127.0.0.1',
+]
 
 
 # Application definition
@@ -214,14 +224,4 @@ RETAILER_2_ALLOWED_DOMAINS = CSC_ALLOWED_DOMAINS
 REGULAR_LOGIN_DOMAINS = CRM_ALLOWED_DOMAINS
 
 # CSRF Trusted Origins - Required for CSRF protection
-CSRF_TRUSTED_ORIGINS = [
-    'https://crm.grahaksahaayatakendra.com',
-    'https://www.crm.grahaksahaayatakendra.com',
-    'https://clasclass.com',
-    'https://www.clasclass.com',
-    'http://localhost:8000',
-    'http://127.0.0.1:8000',
-    'http://localhost',
-    'http://127.0.0.1',
-]
 
