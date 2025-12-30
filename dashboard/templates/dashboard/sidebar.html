@@ -184,6 +184,22 @@
             <li class="nav-item"> <a class="nav-link" href="{% url 'admin_equipment_billing' %}">Equipment Orders</a></li>
           </ul>
         </div>
+     </li>
+     <li class="nav-item menu-items">
+        <a class="nav-link" data-toggle="collapse" href="#csc-2" aria-expanded="false" aria-controls="csc-2">
+          <span class="menu-icon">
+            <i class="mdi mdi-cog"></i>
+          </span>
+          <span class="menu-title">CSC 2.0</span>
+          <i class="menu-arrow"></i>
+        </a>
+        <div class="collapse" id="csc-2">
+          <ul class="nav flex-column sub-menu">
+            <li class="nav-item"> <a class="nav-link" href="{% url 'csc_services_list' %}">Manage Services</a></li>
+            <li class="nav-item"> <a class="nav-link" href="{% url 'csc_service_requests' %}">Service Requests</a></li>
+          </ul>
+        </div>
+     </li>
   {% endif %}
 
 

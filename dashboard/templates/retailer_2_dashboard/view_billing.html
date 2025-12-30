@@ -1,0 +1,389 @@
+{% extends 'retailer_2_dashboard/base.html' %}
+{% load static %}
+
+{% block title %}View Billing - Retailer 2.0{% endblock %}
+
+{% block content %}
+<div class="container mt-10">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2 class="card-titles mb-0">Billing Records</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{% url 'retailer_2_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Billing Records</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="card-body">
+            <!-- Messages -->
+            {% if messages %}
+            <div id="alert-container">
+                {% for message in messages %}
+                <div class="custom-alert {{ message.tags }}">
+                    {{ message }}
+                    <span class="close-btn" onclick="this.parentElement.style.display='none';">&times;</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Header Actions -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="mb-1">Manage Your Billing Records</h4>
+                    <p class="text-muted mb-0">View and manage all your billing transactions</p>
+                </div>
+                <div>
+                    <a href="{% url 'retailer_2_add_billing' %}" class="btn btn-primary">
+                        <i class="mdi mdi-plus"></i> Add Billing
+                    </a>
+                </div>
+            </div>
+
+            <!-- Search Section -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <form method="GET" class="d-flex">
+                        <div class="input-group">
+                            <input type="text" name="search" class="form-control" 
+                                   placeholder="Search by Ref No, Customer, Service, Status..." 
+                                   value="{{ search_query }}">
+                            <div class="input-group-append">
+                                <button type="submit" class="btn btn-outline-secondary">
+                                    <i class="mdi mdi-magnify"></i>
+                                </button>
+                                {% if search_query %}
+                                    <a href="{% url 'retailer_2_view_billing' %}" class="btn btn-outline-danger">
+                                        <i class="mdi mdi-close"></i>
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-md-6 text-md-right">
+                    <p class="text-muted mb-0">
+                        {% if search_query %}
+                            Showing {{ billings.paginator.count }} result{% if billings.paginator.count != 1 %}s{% endif %} for "{{ search_query }}"
+                        {% else %}
+                            Total {{ billings.paginator.count }} billing record{% if billings.paginator.count != 1 %}s{% endif %}
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Billing Records Table -->
+            {% if billings %}
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>S. No.</th>
+                                <th>Ref No.</th>
+                                <th>Customer Name</th>
+                                <th>Billing Date</th>
+                                <th>Payment Status</th>
+                                <th>Service Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for billing in billings %}
+                            <tr>
+                                <td>
+                                    <strong>{{ forloop.counter }}</strong>
+                                </td>
+                                <td>
+                                    <strong>{{ billing.ref_no }}</strong>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        
+                                        <div>
+                                            <div class="font-weight-bold">{{ billing.customer.full_name }}</div>
+                                            <small class="text-muted">{{ billing.customer.mobile_number }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>
+                                        <div class="font-weight-bold">{{ billing.billing_date|date:"M d, Y" }}</div>
+                                        <small class="text-muted">{{ billing.billing_date|date:"h:i A" }}</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if billing.payment_status == 'Paid' %}
+                                        <span class="badge badge-primary">{{ billing.payment_status }}</span>
+                                    {% elif billing.payment_status == 'Unpaid' %}
+                                        <span class="badge badge-danger">{{ billing.payment_status }}</span>
+                                    {% else %}
+                                        <span class="badge badge-secondary">{{ billing.payment_status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if billing.service_status == 'Pending' %}
+                                        <span class="badge badge-danger">{{ billing.service_status }}</span>
+                                    {% elif billing.service_status == 'Processing' %}
+                                        <span class="badge badge-warning">{{ billing.service_status }}</span>
+                                    {% elif billing.service_status == 'Complete' %}
+                                        <span class="badge badge-success">{{ billing.service_status }}</span>
+                                    {% else %}
+                                        <span class="badge badge-secondary">{{ billing.service_status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="{% url 'retailer_2_view_billing_details' billing.id %}" 
+                                           class="btn btn-outline-primary btn-sm" title="View Details">
+                                            <i class="mdi mdi-eye"></i> View
+                                        </a>
+                                        <a href="{% url 'retailer_2_edit_billing' billing.id %}" 
+                                           class="btn btn-outline-warning btn-sm" title="Edit">
+                                            <i class="mdi mdi-pencil"></i> Edit
+                                        </a>
+                                        
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                {% if billings.has_other_pages %}
+                <nav aria-label="Billing records pagination" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        {% if billings.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ billings.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">Previous</a>
+                            </li>
+                        {% endif %}
+
+                        {% for num in billings.paginator.page_range %}
+                            {% if billings.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% elif num > billings.number|add:'-3' and num < billings.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if billings.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ billings.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">Next</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+
+            {% else %}
+                <div class="text-center py-5">
+                    <div class="empty-state">
+                        <i class="mdi mdi-file-document-outline" style="font-size: 4rem; color: #6c757d;"></i>
+                        <h4 class="mt-3 mb-2">No Billing Records</h4>
+                        <p class="text-muted mb-4">You haven't created any billing records yet.</p>
+                        <a href="{% url 'retailer_2_add_billing' %}" class="btn btn-primary">
+                            <i class="mdi mdi-plus"></i> Create Your First Billing
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .table th {
+        background-color: #f8f9fa;
+        border-top: none;
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .table td {
+        vertical-align: middle;
+    }
+
+    .avatar-sm {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #e9ecef;
+        border-radius: 50%;
+    }
+
+    .badge {
+        font-size: 0.75rem;
+        padding: 0.375rem 0.75rem;
+        font-weight: 500;
+    }
+
+    /* Custom badge colors to ensure they display properly */
+    .badge-primary {
+        background-color: #007bff !important;
+        color: white !important;
+    }
+
+    .badge-danger {
+        background-color: #dc3545 !important;
+        color: white !important;
+    }
+
+    .badge-warning {
+        background-color: #ffc107 !important;
+        color: #212529 !important;
+    }
+
+    .badge-success {
+        background-color: #28a745 !important;
+        color: white !important;
+    }
+
+    .badge-secondary {
+        background-color: #6c757d !important;
+        color: white !important;
+    }
+
+    .btn-group .btn {
+        margin-right: 2px;
+        font-size: 0.75rem;
+        padding: 0.375rem 0.75rem;
+        border-radius: 0.25rem;
+        font-weight: 500;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .btn-group .btn:last-child {
+        margin-right: 0;
+    }
+
+    .btn-group .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: all 0.2s ease;
+    }
+
+    .btn-outline-primary {
+        color: #007bff;
+        border-color: #007bff;
+    }
+
+    .btn-outline-primary:hover {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .btn-outline-warning {
+        color: #ffc107;
+        border-color: #ffc107;
+    }
+
+    .btn-outline-warning:hover {
+        background-color: #ffc107;
+        color: #212529;
+    }
+
+    .btn-outline-danger {
+        color: #dc3545;
+        border-color: #dc3545;
+    }
+
+    .btn-outline-danger:hover {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .mdi {
+        font-size: 0.875rem;
+    }
+
+    .custom-alert {
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 0.375rem;
+        position: relative;
+    }
+
+    .custom-alert.success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .custom-alert.error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .custom-alert.warning {
+        background-color: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+    }
+
+    .custom-alert.info {
+        background-color: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+    }
+
+    .close-btn {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+
+    .empty-state {
+        padding: 2rem;
+    }
+
+    .table-responsive {
+        border-radius: 0.375rem;
+        overflow: hidden;
+    }
+
+    @media (max-width: 768px) {
+        .table-responsive {
+            font-size: 0.875rem;
+        }
+        
+        .btn-group .btn {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+        }
+    }
+</style>
+
+<script>
+    setTimeout(() => {
+        const alerts = document.querySelectorAll('.custom-alert');
+        alerts.forEach(alert => {
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+        });
+    }, 1000);
+
+    function deleteBilling(billingId) {
+        if (confirm('Are you sure you want to delete this billing record? This action cannot be undone.')) {
+            window.location.href = `/retailer2/delete-billing/${billingId}/`;
+        }
+    }
+</script>
+{% endblock %} 

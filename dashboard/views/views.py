@@ -19,6 +19,28 @@ from django.contrib.auth import get_user_model
 import string
 
 
+def check_domain_access(request, allowed_domains):
+    """Helper function to check if the current domain is allowed."""
+    current_domain = request.get_host()
+    
+    # Check exact match first
+    if current_domain in allowed_domains:
+        return True
+    
+    # Check without port number
+    domain_without_port = current_domain.split(':')[0]
+    if domain_without_port in allowed_domains:
+        return True
+    
+    # Check with common ports
+    for port in ['8000', '80', '443']:
+        domain_with_port = f"{domain_without_port}:{port}"
+        if domain_with_port in allowed_domains:
+            return True
+    
+    return False
+
+
 
 
 def admin_dashboard(request):
@@ -184,11 +206,115 @@ def custom_login_view(request):
                 now = timezone.now().timestamp()
                 request.session['demo_start'] = now
             login(request, user)
-            return redirect('redirect')  # or your dashboard URL
+            # Always redirect to role_based_redirect, ignore 'next' parameter
+            return redirect('role_based_redirect')  # Redirect to role-based redirect
         else:
             error = "Invalid username or password. Please try again."
             print("DEBUG: Error set in view")  # Debug print
     return render(request, "login.html", {"error": error})
+
+def admin_redirect_view(request):
+    """
+    Redirect Django admin requests to custom admin dashboard.
+    If user is authenticated and is admin, redirect to /admin/dashboard/
+    Otherwise, redirect to login page.
+    """
+    if request.user.is_authenticated:
+        if hasattr(request.user, 'role') and request.user.role == 'admin':
+            return redirect('/admin/dashboard/')
+        else:
+            return redirect('not_authorized')
+    else:
+        return redirect('login')
+
+def retailer_2_login_view(request):
+    """Universal login view for both Retailer 2.0 and Distributor 2.0 with domain validation and captcha."""
+    error = None
+    
+    # Check domain access for CSC domains
+    allowed_domains = getattr(settings, 'CSC_ALLOWED_DOMAINS', [])
+    
+    # Only allow access from CSC domains
+    if not check_domain_access(request, allowed_domains):
+        error = "Access denied. This login page is only accessible from authorized CSC domains (clasclass.com)."
+        return render(request, "retailer_2_login.html", {"error": error})
+    
+    # Generate captcha for new requests or if captcha is invalid
+    if request.method == "GET" or 'captcha_text' not in request.session:
+        try:
+            from dashboard.utils import generate_simple_captcha
+            captcha_text, captcha_image = generate_simple_captcha()
+            request.session['captcha_text'] = captcha_text
+            request.session['captcha_image'] = captcha_image
+        except Exception as e:
+            error = "Error generating captcha. Please refresh the page."
+            return render(request, "retailer_2_login.html", {"error": error})
+    
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+        captcha_input = request.POST.get("captcha")
+        
+        # Verify captcha first
+        from dashboard.utils import verify_captcha
+        if not verify_captcha(captcha_input, request.session.get('captcha_text')):
+            error = "Invalid captcha. Please try again."
+            # Generate new captcha for retry
+            try:
+                from dashboard.utils import generate_simple_captcha
+                captcha_text, captcha_image = generate_simple_captcha()
+                request.session['captcha_text'] = captcha_text
+                request.session['captcha_image'] = captcha_image
+            except Exception as e:
+                error = "Error generating captcha. Please refresh the page."
+            
+            return render(request, "retailer_2_login.html", {
+                "error": error,
+                "captcha_image": captcha_image if 'captcha_image' in locals() else None,
+                "captcha_text": captcha_text if 'captcha_text' in locals() else None,
+                "username": username  # Preserve username
+            })
+        
+        user = authenticate(request, username=username, password=password)
+        
+        if user is not None and user.role in ['retailer_2', 'distributor_2']:
+            # Clear captcha from session after successful login
+            if 'captcha_text' in request.session:
+                del request.session['captcha_text']
+            if 'captcha_image' in request.session:
+                del request.session['captcha_image']
+            
+            login(request, user)
+            # Redirect based on role
+            if user.role == 'retailer_2':
+                return redirect('retailer_2_dashboard')
+            elif user.role == 'distributor_2':
+                return redirect('distributor_2_dashboard')
+        else:
+            error = "Invalid credentials or unauthorized access for CSC 2.0."
+    
+    # Get captcha for display
+    captcha_image = request.session.get('captcha_image')
+    captcha_text = request.session.get('captcha_text')
+    
+    return render(request, "retailer_2_login.html", {
+        "error": error,
+        "captcha_image": captcha_image,
+        "captcha_text": captcha_text
+    })
+
+
+def refresh_captcha(request):
+    """AJAX view to refresh captcha"""
+    from dashboard.utils import generate_simple_captcha
+    
+    captcha_text, captcha_image = generate_simple_captcha()
+    request.session['captcha_text'] = captcha_text
+    request.session['captcha_image'] = captcha_image
+    
+    return JsonResponse({
+        'captcha_image': captcha_image
+    })
 
 
 
@@ -199,13 +325,17 @@ def custom_login_view(request):
 def role_based_redirect(request):
     user = request.user
     if user.role == 'admin':
-        return redirect('admin_dashboard')
+        return redirect('/admin/dashboard/')  # Explicit redirect to admin dashboard
     elif user.role == 'retailer':
         return redirect('retailer_dashboard')
     elif user.role == 'distributor':
         return redirect('distributor_dashboard')
     elif user.role == 'master_distributor':
         return redirect('master_distributor_dashboard')
+    elif user.role == 'retailer_2':
+        return redirect('retailer_2_dashboard')
+    elif user.role == 'distributor_2':
+        return redirect('distributor_2_dashboard')
     elif user.role == 'demo':
         return redirect('dashboard_demo')
     else:
@@ -267,8 +397,18 @@ def view_notifications(request):
 
 
 def custom_logout_view(request):
+    # Store user role before logout
+    user_role = getattr(request.user, 'role', None)
+    
     logout(request)
-    return redirect('login')
+    
+    # Redirect based on user role
+    if user_role == 'retailer_2':
+        return redirect('retailer_2_login')
+    elif user_role == 'distributor_2':
+        return redirect('distributor_2_login')
+    else:
+        return redirect('login')
 
 
 
@@ -571,3 +711,5 @@ def recharge_plans_view(request):
     View to display available recharge plans to the retailer, distributor, and master distributor.
     """
     return render(request, 'recharge_plans.html')
+
+

@@ -1,0 +1,256 @@
+{% extends 'retailer_2_dashboard/base.html' %}
+{% load static %}
+
+{% block title %}View Transactions - Retailer 2.0{% endblock %}
+
+{% block content %}
+<style>
+    .transactions-container {
+        background: white;
+        padding: 20px;
+    }
+    
+    .transactions-header {
+        background: #f8f9fa;
+        padding: 15px;
+        border-bottom: 1px solid #dee2e6;
+        margin-bottom: 20px;
+    }
+    
+    .transactions-title {
+        font-size: 24px;
+        font-weight: 600;
+        margin: 0;
+        color: #333;
+    }
+    
+    .transactions-subtitle {
+        font-size: 14px;
+        color: #666;
+        margin-top: 5px;
+    }
+    
+    .search-section {
+        background: white;
+        border: 1px solid #dee2e6;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+    }
+    
+    .search-input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+    
+    .table-container {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        overflow: hidden;
+    }
+    
+    .table {
+        margin: 0;
+    }
+    
+    .table thead th {
+        background: #f8f9fa;
+        border-bottom: 2px solid #dee2e6;
+        font-weight: 600;
+        color: #495057;
+        padding: 12px;
+    }
+    
+    .table tbody td {
+        padding: 12px;
+        border-bottom: 1px solid #dee2e6;
+        vertical-align: middle;
+        color: #333;
+    }
+    
+    .table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .amount-credit {
+        color: #28a745 !important;
+        font-weight: 600;
+    }
+    
+    .amount-debit {
+        color: #dc3545 !important;
+        font-weight: 600;
+    }
+    
+    .amount-neutral {
+        color: #495057 !important;
+        font-weight: 600;
+    }
+    
+    .balance-amount {
+        color: #007bff !important;
+        font-weight: 600;
+    }
+    
+    .pagination {
+        display: flex;
+        justify-content: center;
+        padding: 15px;
+        background: #f8f9fa;
+        border-top: 1px solid #dee2e6;
+    }
+    
+    .pagination .page-item {
+        margin: 0 2px;
+    }
+    
+    .pagination .page-item .page-link {
+        color: #007bff;
+        text-decoration: none;
+        padding: 8px 12px;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+    }
+    
+    .pagination .page-item.active .page-link {
+        background-color: #007bff;
+        color: white;
+        border-color: #007bff;
+    }
+    
+    .pagination .page-item .page-link:hover {
+        background-color: #e9ecef;
+    }
+    
+    .breadcrumb {
+        background: transparent;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .breadcrumb-item a {
+        color: #007bff;
+        text-decoration: none;
+    }
+    
+    .breadcrumb-item.active {
+        color: #6c757d;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #6c757d;
+    }
+    
+    .empty-state i {
+        font-size: 48px;
+        margin-bottom: 15px;
+        color: #dee2e6;
+    }
+</style>
+
+<div class="transactions-container">
+    <div class="transactions-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="transactions-title">View Transactions</h2>
+                <p class="transactions-subtitle">Manage and view all your transaction history</p>
+            </div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'retailer_2_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">View Transactions</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    
+    <div class="search-section">
+        <form method="GET" class="row">
+            <div class="col-md-8">
+                <input type="text" name="search" class="search-input" placeholder="Search transactions..." value="{{ search_query }}">
+</div>
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-primary">Search</button>
+                {% if search_query %}
+                    <a href="{% url 'retailer_2_view_transactions' %}" class="btn btn-secondary">Clear</a>
+                        {% endif %}
+            </div>
+        </form>
+    </div>
+    
+    <div class="table-container">
+            <div class="table-responsive">
+            <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>S. No</th>
+                            <th>Branch Name</th>
+                            <th>Amount</th>
+                            <th>Balance After</th>
+                            <th>Description</th>
+                        <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for transaction in transactions %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ transaction.user.full_name }}</td>
+                        <td>
+                            <span class="{% if transaction.transaction_type == 'Credit' %}amount-credit{% elif transaction.transaction_type == 'Debit' %}amount-debit{% else %}amount-neutral{% endif %}">
+                                ₹{{ transaction.amount|floatformat:2 }}
+                            </span>
+                        </td>
+                        <td class="balance-amount">₹{{ transaction.balance_after_transaction|floatformat:2 }}</td>
+                            <td>{{ transaction.description|default:"N/A" }}</td>
+                        <td>{{ transaction.created_at|date:"d M Y, h:i A" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                        <td colspan="6">
+                            <div class="empty-state">
+                                <i class="mdi mdi-cash-multiple"></i>
+                                <h5>No transactions found</h5>
+                                <p>No transaction records are available at the moment.</p>
+                            </div>
+                        </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+        </div>
+        
+        {% if transactions.has_other_pages %}
+                <nav>
+                    <ul class="pagination">
+                        {% if transactions.has_previous %}
+                        <li class="page-item">
+                        <a class="page-link" href="?page={{ transactions.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">Previous</a>
+                        </li>
+                        {% endif %}
+                    
+                        {% for page_num in transactions.paginator.page_range %}
+                        {% if page_num >= transactions.number|add:-2 and page_num <= transactions.number|add:2 %}
+                            <li class="page-item {% if page_num == transactions.number %}active{% endif %}">
+                            <a class="page-link" href="?page={{ page_num }}{% if search_query %}&search={{ search_query }}{% endif %}">{{ page_num }}</a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                        {% if transactions.has_next %}
+                        <li class="page-item">
+                        <a class="page-link" href="?page={{ transactions.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">Next</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 

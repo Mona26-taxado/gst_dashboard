@@ -1,0 +1,289 @@
+{% extends 'retailer_2_dashboard/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-10">
+    <div class="row">
+        <div class="col-12 grid-margin stretch-card">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="card-title">Settings</h4>
+                        <a href="{% url 'retailer_2_dashboard' %}" class="btn btn-secondary">
+                            <i class="mdi mdi-arrow-left"></i> Back to Dashboard
+                        </a>
+                    </div>
+                    
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    <!-- Settings Navigation -->
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <ul class="nav nav-tabs" id="settingsTabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="password-tab" data-bs-toggle="tab" data-bs-target="#password" type="button" role="tab" aria-controls="password" aria-selected="true">
+                                        <i class="fa-solid fa-key me-2"></i>Password Settings
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="security-tab" data-bs-toggle="tab" data-bs-target="#security" type="button" role="tab" aria-controls="security" aria-selected="false">
+                                        <i class="fa-solid fa-shield-alt me-2"></i>Security
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Settings Content -->
+                    <div class="tab-content" id="settingsTabsContent">
+                        <!-- Password Settings Tab -->
+                        <div class="tab-pane fade show active" id="password" role="tabpanel" aria-labelledby="password-tab">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5 class="mb-0">
+                                                <i class="fa-solid fa-key me-2"></i>Change Password
+                                            </h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <form method="post" id="passwordForm">
+                                                {% csrf_token %}
+                                                
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div class="form-group mb-3">
+                                                            <label for="current_password">Current Password *</label>
+                                                            <input type="password" id="current_password" name="current_password" class="form-control" required>
+                                                            <small class="form-text text-muted">Enter your current password to verify your identity</small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group mb-3">
+                                                            <label for="new_password">New Password *</label>
+                                                            <input type="password" id="new_password" name="new_password" class="form-control" required>
+                                                            <small class="form-text text-muted">Minimum 8 characters</small>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group mb-3">
+                                                            <label for="confirm_password">Confirm New Password *</label>
+                                                            <input type="password" id="confirm_password" name="confirm_password" class="form-control" required>
+                                                            <small class="form-text text-muted">Re-enter your new password</small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div class="password-strength mb-3">
+                                                            <label class="form-label">Password Strength:</label>
+                                                            <div class="progress" style="height: 8px;">
+                                                                <div class="progress-bar" id="passwordStrength" role="progressbar" style="width: 0%"></div>
+                                                            </div>
+                                                            <small class="form-text text-muted" id="passwordFeedback"></small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <button type="submit" class="btn btn-primary">
+                                                            <i class="fa-solid fa-save me-2"></i>Update Password
+                                                        </button>
+                                                        <button type="reset" class="btn btn-secondary">
+                                                            <i class="fa-solid fa-undo me-2"></i>Reset Form
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">
+                                                <i class="fa-solid fa-info-circle me-2"></i>Password Guidelines
+                                            </h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <ul class="list-unstyled mb-0">
+                                                <li class="mb-2">
+                                                    <i class="fa-solid fa-check text-success me-2"></i>
+                                                    Minimum 8 characters
+                                                </li>
+                                                <li class="mb-2">
+                                                    <i class="fa-solid fa-check text-success me-2"></i>
+                                                    Include uppercase letters
+                                                </li>
+                                                <li class="mb-2">
+                                                    <i class="fa-solid fa-check text-success me-2"></i>
+                                                    Include lowercase letters
+                                                </li>
+                                                <li class="mb-2">
+                                                    <i class="fa-solid fa-check text-success me-2"></i>
+                                                    Include numbers
+                                                </li>
+                                                <li class="mb-2">
+                                                    <i class="fa-solid fa-check text-success me-2"></i>
+                                                    Include special characters
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Security Tab -->
+                        <div class="tab-pane fade" id="security" role="tabpanel" aria-labelledby="security-tab">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5 class="mb-0">
+                                                <i class="fa-solid fa-shield-alt me-2"></i>Security Settings
+                                            </h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="alert alert-info">
+                                                <i class="fa-solid fa-info-circle me-2"></i>
+                                                <strong>Security Features:</strong> Additional security features will be available in future updates.
+                                            </div>
+                                            
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-check form-switch">
+                                                        <input class="form-check-input" type="checkbox" id="twoFactorAuth" disabled>
+                                                        <label class="form-check-label" for="twoFactorAuth">
+                                                            Two-Factor Authentication
+                                                        </label>
+                                                        <small class="form-text text-muted d-block">Coming soon</small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-check form-switch">
+                                                        <input class="form-check-input" type="checkbox" id="loginNotifications" disabled>
+                                                        <label class="form-check-label" for="loginNotifications">
+                                                            Login Notifications
+                                                        </label>
+                                                        <small class="form-text text-muted d-block">Coming soon</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Password strength checker
+document.getElementById('new_password').addEventListener('input', function() {
+    const password = this.value;
+    const strengthBar = document.getElementById('passwordStrength');
+    const feedback = document.getElementById('passwordFeedback');
+    
+    let strength = 0;
+    let feedbackText = '';
+    
+    // Check length
+    if (password.length >= 8) strength += 25;
+    
+    // Check for uppercase
+    if (/[A-Z]/.test(password)) strength += 25;
+    
+    // Check for lowercase
+    if (/[a-z]/.test(password)) strength += 25;
+    
+    // Check for numbers
+    if (/[0-9]/.test(password)) strength += 25;
+    
+    // Update progress bar
+    strengthBar.style.width = strength + '%';
+    
+    // Update color and feedback
+    if (strength <= 25) {
+        strengthBar.className = 'progress-bar bg-danger';
+        feedbackText = 'Weak password';
+    } else if (strength <= 50) {
+        strengthBar.className = 'progress-bar bg-warning';
+        feedbackText = 'Fair password';
+    } else if (strength <= 75) {
+        strengthBar.className = 'progress-bar bg-info';
+        feedbackText = 'Good password';
+    } else {
+        strengthBar.className = 'progress-bar bg-success';
+        feedbackText = 'Strong password';
+    }
+    
+    feedback.textContent = feedbackText;
+});
+
+// Password confirmation checker
+document.getElementById('confirm_password').addEventListener('input', function() {
+    const newPassword = document.getElementById('new_password').value;
+    const confirmPassword = this.value;
+    
+    if (newPassword !== confirmPassword) {
+        this.setCustomValidity('Passwords do not match');
+    } else {
+        this.setCustomValidity('');
+    }
+});
+</script>
+
+<style>
+.nav-tabs .nav-link {
+    color: #6c757d;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 0.75rem 1rem;
+    font-weight: 500;
+}
+
+.nav-tabs .nav-link.active {
+    color: #007bff;
+    border-bottom-color: #007bff;
+    background: none;
+}
+
+.nav-tabs .nav-link:hover {
+    border-color: transparent;
+    color: #007bff;
+}
+
+.password-strength .progress {
+    background-color: #e9ecef;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.form-check-input:disabled {
+    opacity: 0.5;
+}
+</style>
+{% endblock %} 

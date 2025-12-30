@@ -1,0 +1,403 @@
+{% extends 'retailer_2_dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Add Billing - Retailer 2.0{% endblock %}
+
+{% block content %}
+<style>
+    .billing-container {
+        background: white;
+        padding: 20px;
+    }
+    
+    .billing-header {
+        background: #f8f9fa;
+        padding: 15px;
+        border-bottom: 1px solid #dee2e6;
+        margin-bottom: 20px;
+    }
+    
+    .billing-title {
+        font-size: 24px;
+        font-weight: 600;
+        margin: 0;
+        color: #333;
+    }
+    
+    .billing-subtitle {
+        font-size: 14px;
+        color: #666;
+        margin-top: 5px;
+    }
+    
+    .form-section {
+        background: white;
+        border: 1px solid #dee2e6;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .section-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 15px;
+        border-bottom: 1px solid #dee2e6;
+        padding-bottom: 10px;
+    }
+    
+    .form-group {
+        margin-bottom: 15px;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 5px;
+        display: block;
+    }
+    
+    .form-control, .form-select {
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        padding: 8px 12px;
+        font-size: 14px;
+        width: 100%;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #80bdff;
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+    
+    .form-control[readonly] {
+        background: #e9ecef;
+        color: #6c757d;
+    }
+    
+    .btn-submit {
+        background: #007bff;
+        border: 1px solid #007bff;
+        color: white;
+        padding: 10px 20px;
+        font-size: 16px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    
+    .btn-submit:hover {
+        background: #0056b3;
+        border-color: #0056b3;
+    }
+    
+    .btn-submit:disabled {
+        background: #6c757d;
+        border-color: #6c757d;
+        cursor: not-allowed;
+    }
+    
+    .btn-recharge {
+        background: #ffc107;
+        border: 1px solid #ffc107;
+        color: #212529;
+        padding: 8px 16px;
+        border-radius: 4px;
+        text-decoration: none;
+        display: inline-block;
+        margin-top: 10px;
+    }
+    
+    .btn-recharge:hover {
+        background: #e0a800;
+        border-color: #e0a800;
+        color: #212529;
+        text-decoration: none;
+    }
+    
+    .alert {
+        padding: 12px 16px;
+        margin-bottom: 15px;
+        border: 1px solid;
+        border-radius: 4px;
+    }
+    
+    .alert-warning {
+        background: #fff3cd;
+        color: #856404;
+        border-color: #ffeaa7;
+    }
+    
+    .alert-success {
+        background: #d4edda;
+        color: #155724;
+        border-color: #c3e6cb;
+    }
+    
+    .alert-error {
+        background: #f8d7da;
+        color: #721c24;
+        border-color: #f5c6cb;
+    }
+    
+    .wallet-info {
+        background: #d1ecf1;
+        color: #0c5460;
+        padding: 12px 16px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+        border: 1px solid #bee5eb;
+        text-align: center;
+    }
+    
+    .breadcrumb {
+        background: transparent;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .breadcrumb-item a {
+        color: #007bff;
+        text-decoration: none;
+    }
+    
+    .breadcrumb-item a:hover {
+        text-decoration: underline;
+    }
+    
+    .breadcrumb-item.active {
+        color: #6c757d;
+    }
+</style>
+
+<div class="billing-container">
+    <!-- Header -->
+    <div class="billing-header">
+        <h1 class="billing-title">Add Billing</h1>
+        <p class="billing-subtitle">Create a new service billing record</p>
+            <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'retailer_2_dashboard' %}">Dashboard</a>
+                </li>
+                    <li class="breadcrumb-item active" aria-current="page">Add Billing</li>
+                </ol>
+            </nav>
+        </div>
+    
+            <!-- Messages -->
+            {% if messages %}
+            <div id="alert-container">
+                {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+            <span style="float: right; cursor: pointer;" onclick="this.parentElement.style.display='none';">&times;</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+    
+    <!-- Wallet Info -->
+    <div class="wallet-info">
+        Current Wallet Balance: ₹{{ wallet_balance|floatformat:2 }}
+    </div>
+    
+            <form action="{% url 'retailer_2_add_billing' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+
+        
+        <!-- Basic Information Section -->
+        <div class="form-section">
+            <h3 class="section-title">Basic Information</h3>
+                <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">Date of Billing</label>
+                        <input type="text" id="billing_date" name="billing_date" class="form-control" value="{{ today_date }}" readonly>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">Reference Number</label>
+                        <input type="text" id="ref_no" name="ref_no" class="form-control" value="{{ ref_no }}" readonly>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Customer & Service Section -->
+        <div class="form-section">
+            <h3 class="section-title">Customer & Service Details</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">Customer *</label>
+                        <select id="customer" name="customer" class="form-select" required>
+                            <option value="" disabled selected>Select Customer</option>
+                            {% for customer in customers %}
+                            <option value="{{ customer.id }}">{{ customer.full_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">Service *</label>
+                        <select id="service" name="service" class="form-select" required>
+                            <option value="">Select Service</option>
+                            {% for service in services %}
+                            <option value="{{ service.id }}" data-price="{{ service.wallet_deduction }}">
+                                {{ service.service_name }} - ₹{{ service.wallet_deduction }} (Wallet Deduction)
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        
+        <!-- Payment Section -->
+        <div class="form-section">
+            <h3 class="section-title">Payment Information</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">Payment Mode *</label>
+                        <select id="payment_mode" name="payment_mode" class="form-select" required>
+                            <option value="Cash">Cash</option>
+                            <option value="Online">Online</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">Payment Status</label>
+                        <select id="payment_status" name="payment_status" class="form-select">
+                            <option value="Paid">Paid</option>
+                            <option value="Unpaid">Unpaid</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Documents Section -->
+        <div class="form-section">
+            <h3 class="section-title">Required Documents</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">ID Proof *</label>
+                        <input type="file" id="id_proof" name="id_proof" class="form-control" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">Address Proof *</label>
+                        <input type="file" id="address_proof" name="address_proof" class="form-control" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">PAN Card</label>
+                        <input type="text" id="pan_card" name="pan_card" class="form-control" placeholder="Enter PAN number">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">Banking Documents</label>
+                        <input type="file" id="banking" name="banking" class="form-control">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">Photo (Passport Size)</label>
+                        <input type="file" id="photo" name="photo" class="form-control">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">Other Documents</label>
+                        <input type="file" id="others" name="others" class="form-control">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Service Details Section -->
+        <div class="form-section">
+            <h3 class="section-title">Service Details</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">Service Status</label>
+                        <input type="text" id="service_status" name="service_status" class="form-control" value="Pending" readonly>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">Service Notes</label>
+                        <textarea id="service_notes" name="service_notes" class="form-control" rows="3" placeholder="Add any additional notes about the service..."></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Submit Section -->
+        <div style="text-align: center; padding: 20px;">
+            <button type="submit" class="btn-submit" {% if insufficient_balance %}disabled{% endif %}>
+                            Add Service Billing
+                        </button>
+                        {% if insufficient_balance %}
+            <div style="margin-top: 10px;">
+                <a href="{% url 'wallet_recharge_view' %}" class="btn-recharge">
+                    Recharge Wallet
+                </a>
+                        </div>
+                        {% endif %}
+                </div>
+            </form>
+</div>
+
+<script>
+    // Auto-hide alerts after 5 seconds
+    setTimeout(() => {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+            alert.style.transition = "opacity 0.5s ease-out";
+            alert.style.opacity = 0;
+            setTimeout(() => alert.remove(), 500);
+        });
+    }, 5000);
+    
+    // Service selection change handler
+    document.getElementById('service').addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const walletBalance = parseFloat('{{ wallet_balance|floatformat:2 }}');
+        const servicePrice = parseFloat(selectedOption.getAttribute('data-price')) || 0;
+        
+        if (servicePrice > walletBalance) {
+            // Show insufficient balance warning
+            const warningDiv = document.createElement('div');
+            warningDiv.className = 'alert alert-warning';
+            warningDiv.innerHTML = '<strong>Warning:</strong> Service price (₹' + servicePrice + ') exceeds wallet balance (₹' + walletBalance + '). Please recharge your wallet.';
+            
+            // Remove any existing warning
+            const existingWarning = document.querySelector('.alert-warning');
+            if (existingWarning) {
+                existingWarning.remove();
+            }
+            
+            // Add new warning
+            this.parentNode.appendChild(warningDiv);
+        } else {
+            // Remove warning if balance is sufficient
+            const existingWarning = document.querySelector('.alert-warning');
+            if (existingWarning) {
+                existingWarning.remove();
+            }
+        }
+    });
+</script>
+{% endblock %} 

@@ -40,6 +40,23 @@ input.form-control {
     margin-right: 11px;
 }
 
+.billing-type-badge {
+    font-size: 0.75em;
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-left: 5px;
+}
+
+.billing-type-regular {
+    background-color: #007bff;
+    color: white;
+}
+
+.billing-type-retailer2 {
+    background-color: #28a745;
+    color: white;
+}
+
 </style>
 
 
@@ -54,7 +71,7 @@ input.form-control {
         </nav>
     </div>
     <form method="get" class="form-inline mb-3">
-        <input type="text" name="search" value="{{ search_query }}" class="form-control" placeholder="Search GSK Users">
+        <input type="text" name="search" value="{{ search_query }}" class="form-control" placeholder="Search by Ref No">
         <button type="submit" class="btn btn-primary">Search</button>
     </form>
     <div class="table-responsive">
@@ -66,6 +83,7 @@ input.form-control {
                     <th>Customer Name</th>
                     <th>Billing Date</th>
                     <th>Service Name</th>
+                    <th>Type</th>
                     <th>Service Status</th>
                     <th>Action</th>
                 </tr>
@@ -77,11 +95,25 @@ input.form-control {
                     <td>{{ billing.ref_no }}</td>
                     <td>{{ billing.customer.full_name }}</td>
                     <td>{{ billing.billing_date }}</td>
-                    <td>{{ billing.service.service_name }}</td>
+                    <td>
+                        {% if billing.billing_type == 'retailer2' %}
+                            {{ billing.service.service_name }}
+                        {% else %}
+                            {{ billing.service.service_name }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if billing.billing_type == 'retailer2' %}
+                            <span class="billing-type-badge billing-type-retailer2">Retailer 2.0</span>
+                        {% else %}
+                            <span class="billing-type-badge billing-type-regular">Regular</span>
+                        {% endif %}
+                    </td>
                     <td>
                         <form method="POST" style="display: inline;">
                             {% csrf_token %}
                             <input type="hidden" name="billing_id" value="{{ billing.id }}">
+                            <input type="hidden" name="billing_type" value="{{ billing.billing_type }}">
                             <select name="service_status"
                                     class="status-dropdown {% if billing.service_status == 'Pending' %}pending{% elif billing.service_status == 'In Progress' %}in-progress{% elif billing.service_status == 'Complete' %}complete{% endif %}"
                                     onchange="this.form.submit()">
@@ -118,7 +150,7 @@ input.form-control {
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="7" class="text-center">No Billing Records Found</td>
+                    <td colspan="8" class="text-center">No Billing Records Found</td>
                 </tr>
                 {% endfor %}
             </tbody>

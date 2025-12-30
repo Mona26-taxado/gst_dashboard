@@ -1,0 +1,586 @@
+{% extends 'retailer_2_dashboard/base.html' %}
+{% load static %}
+
+{% block title %}{{ service.service_name }} - CSC Service Details{% endblock %}
+
+{% block content %}
+<div class="gov-dashboard">
+    <!-- Government Header -->
+    <div class="gov-header">
+        <div class="gov-logo">
+            <img src="{% static 'services/CSC.png' %}" alt="Government Logo" class="logo-img">
+            <div class="logo-text">
+                <h1 class="gov-title">CSC 2.0</h1>
+                <p class="gov-subtitle">Common Service Centre</p>
+            </div>
+        </div>
+        <div class="gov-user-info">
+            <div class="user-details">
+                <span class="user-name">{{ user.full_name }}</span>
+                <span class="user-role">Retailer 2.0</span>
+            </div>
+            <div class="wallet-info">
+                <span class="wallet-label">Wallet Balance:</span>
+                <span class="wallet-amount">₹{{ wallet_balance|floatformat:2 }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Service Detail Section -->
+    <div class="service-detail-container">
+        <div class="service-detail-card">
+            <div class="service-header">
+                <div class="service-image">
+                    {% if service.service_image %}
+                        <img src="{{ service.service_image.url }}" alt="{{ service.service_name }}" class="service-img">
+                    {% else %}
+                        <div class="service-icon">
+                            <i class="mdi mdi-file-document"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="service-info">
+                    <h2 class="service-title">{{ service.service_name }}</h2>
+                    <p class="service-description">{{ service.description }}</p>
+                    <div class="service-pricing">
+                        <div class="price-info">
+                            <span class="price-label">Service Price:</span>
+                            <span class="price-amount">₹{{ service.wallet_deduction }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Required Documents Section -->
+            <div class="documents-section">
+                <h3 class="section-title">
+                    <i class="mdi mdi-file-document-multiple"></i>
+                    Required Documents
+                </h3>
+                <div class="documents-list">
+                    {% if service.service_name == "Digital PAN Card" %}
+                        <div class="document-item">
+                            <i class="mdi mdi-check-circle text-success"></i>
+                            <span>Aadhar Card (Original + Copy)</span>
+                        </div>
+                        <div class="document-item">
+                            <i class="mdi mdi-check-circle text-success"></i>
+                            <span>Passport Size Photograph (2 copies)</span>
+                        </div>
+                        <div class="document-item">
+                            <i class="mdi mdi-check-circle text-success"></i>
+                            <span>Mobile Number (for OTP verification)</span>
+                        </div>
+                        <div class="document-item">
+                            <i class="mdi mdi-check-circle text-success"></i>
+                            <span>Email ID (optional)</span>
+                        </div>
+                    {% elif service.service_name == "Aadhar Update" %}
+                        <div class="document-item">
+                            <i class="mdi mdi-check-circle text-success"></i>
+                            <span>Aadhar Card (Original)</span>
+                        </div>
+                        <div class="document-item">
+                            <i class="mdi mdi-check-circle text-success"></i>
+                            <span>Address Proof (if address change)</span>
+                        </div>
+                        <div class="document-item">
+                            <i class="mdi mdi-check-circle text-success"></i>
+                            <span>Mobile Number (for OTP)</span>
+                        </div>
+                        <div class="document-item">
+                            <i class="mdi mdi-check-circle text-success"></i>
+                            <span>Passport Size Photograph (1 copy)</span>
+                        </div>
+                    {% elif service.service_name == "GST Registration" %}
+                        <div class="document-item">
+                            <i class="mdi mdi-check-circle text-success"></i>
+                            <span>PAN Card (Original + Copy)</span>
+                        </div>
+                        <div class="document-item">
+                            <i class="mdi mdi-check-circle text-success"></i>
+                            <span>Aadhar Card (Original + Copy)</span>
+                        </div>
+                        <div class="document-item">
+                            <i class="mdi mdi-check-circle text-success"></i>
+                            <span>Business Address Proof</span>
+                        </div>
+                        <div class="document-item">
+                            <i class="mdi mdi-check-circle text-success"></i>
+                            <span>Bank Account Details</span>
+                        </div>
+                        <div class="document-item">
+                            <i class="mdi mdi-check-circle text-success"></i>
+                            <span>Business Registration Certificate (if applicable)</span>
+                        </div>
+                    {% else %}
+                        <div class="document-item">
+                            <i class="mdi mdi-check-circle text-success"></i>
+                            <span>Aadhar Card (Original + Copy)</span>
+                        </div>
+                        <div class="document-item">
+                            <i class="mdi mdi-check-circle text-success"></i>
+                            <span>PAN Card (Original + Copy)</span>
+                        </div>
+                        <div class="document-item">
+                            <i class="mdi mdi-check-circle text-success"></i>
+                            <span>Passport Size Photographs (2 copies)</span>
+                        </div>
+                        <div class="document-item">
+                            <i class="mdi mdi-check-circle text-success"></i>
+                            <span>Mobile Number (for OTP verification)</span>
+                        </div>
+                        <div class="document-item">
+                            <i class="mdi mdi-check-circle text-success"></i>
+                            <span>Address Proof (if required)</span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Service Process Section -->
+            <div class="process-section">
+                <h3 class="section-title">
+                    <i class="mdi mdi-clock-outline"></i>
+                    Service Process
+                </h3>
+                <div class="process-steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h4>Document Collection</h4>
+                            <p>Submit all required documents at CSC center</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h4>Verification</h4>
+                            <p>Documents will be verified by our team</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h4>Processing</h4>
+                            <p>Application will be processed within 3-5 working days</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <h4>Delivery</h4>
+                            <p>Service will be delivered to your registered address</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Apply Button Section -->
+            <div class="apply-section">
+                <div class="apply-info">
+                    <div class="balance-check">
+                        {% if wallet_balance >= service.wallet_deduction %}
+                            <i class="mdi mdi-check-circle text-success"></i>
+                            <span>Sufficient wallet balance available</span>
+                        {% else %}
+                            <i class="mdi mdi-alert-circle text-warning"></i>
+                            <span>Insufficient wallet balance. Please recharge.</span>
+                        {% endif %}
+                    </div>
+                    <div class="deduction-info">
+                        <span>Service Price: ₹{{ service.wallet_deduction }}</span>
+                    </div>
+                </div>
+                <div class="apply-actions">
+                    <a href="{% url 'retailer_2_dashboard' %}" class="btn btn-secondary">
+                        <i class="mdi mdi-arrow-left"></i>
+                        Back to Dashboard
+                    </a>
+                    {% if wallet_balance >= service.wallet_deduction %}
+                        <a href="{% url 'retailer_2_add_billing' %}" class="btn btn-primary apply-btn">
+                            <i class="mdi mdi-check-circle"></i>
+                            Add Customer & Apply
+                        </a>
+                    {% else %}
+                        <a href="{% url 'retailer_2_wallet_recharge' %}" class="btn btn-warning">
+                            <i class="mdi mdi-wallet"></i>
+                            Recharge Wallet
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.gov-dashboard {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 20px;
+}
+
+.gov-header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.gov-logo {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.logo-img {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+}
+
+.logo-text .gov-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin: 0;
+}
+
+.logo-text .gov-subtitle {
+    font-size: 1rem;
+    color: #7f8c8d;
+    margin: 0;
+}
+
+.gov-user-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 5px;
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.user-name {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 1.1rem;
+}
+
+.user-role {
+    color: #7f8c8d;
+    font-size: 0.9rem;
+}
+
+.wallet-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 8px 15px;
+    border-radius: 25px;
+    font-weight: 600;
+}
+
+.service-detail-container {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.service-detail-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.service-header {
+    display: flex;
+    gap: 25px;
+    margin-bottom: 30px;
+    padding-bottom: 25px;
+    border-bottom: 2px solid #f8f9fa;
+}
+
+.service-image {
+    flex-shrink: 0;
+}
+
+.service-img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.service-icon {
+    width: 120px;
+    height: 120px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 3rem;
+}
+
+.service-info {
+    flex: 1;
+}
+
+.service-title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.service-description {
+    font-size: 1.1rem;
+    color: #7f8c8d;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.service-pricing {
+    display: flex;
+    gap: 30px;
+}
+
+.price-info, .wallet-deduction {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.price-label, .deduction-label {
+    font-size: 0.9rem;
+    color: #7f8c8d;
+    font-weight: 500;
+}
+
+.price-amount, .deduction-amount {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.deduction-amount {
+    color: #e74c3c;
+}
+
+.section-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.documents-section, .process-section {
+    margin-bottom: 30px;
+    padding-bottom: 25px;
+    border-bottom: 2px solid #f8f9fa;
+}
+
+.documents-list {
+    display: grid;
+    gap: 12px;
+}
+
+.document-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 15px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    font-size: 1rem;
+    color: #2c3e50;
+}
+
+.document-item i {
+    font-size: 1.2rem;
+    color: #27ae60;
+}
+
+.process-steps {
+    display: grid;
+    gap: 20px;
+}
+
+.step {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.step-number {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.step-content h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 5px;
+}
+
+.step-content p {
+    color: #7f8c8d;
+    margin: 0;
+}
+
+.apply-section {
+    background: #f8f9fa;
+    border-radius: 15px;
+    padding: 25px;
+    margin-top: 30px;
+}
+
+.apply-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.balance-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+}
+
+.balance-check i {
+    font-size: 1.2rem;
+}
+
+.deduction-info {
+    font-size: 1rem;
+    color: #7f8c8d;
+}
+
+.apply-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+}
+
+.btn {
+    padding: 12px 25px;
+    border-radius: 10px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #5a6fd8, #6a4190);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-warning {
+    background: #ffc107;
+    color: #212529;
+}
+
+.btn-warning:hover {
+    background: #e0a800;
+    color: #212529;
+    transform: translateY(-2px);
+}
+
+.apply-btn {
+    font-size: 1.1rem;
+    padding: 15px 30px;
+}
+
+@media (max-width: 768px) {
+    .gov-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .gov-user-info {
+        align-items: center;
+    }
+    
+    .service-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .service-pricing {
+        justify-content: center;
+    }
+    
+    .apply-info {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+    
+    .apply-actions {
+        flex-direction: column;
+    }
+    
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+</style>
+{% endblock %} 

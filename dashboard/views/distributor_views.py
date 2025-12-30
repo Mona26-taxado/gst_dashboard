@@ -626,7 +626,7 @@ def banking_portal_request(request):
     try:
         access_request = BankingPortalAccessRequest.objects.get(user=request.user)
         if access_request.is_active:
-            return redirect('https://taxado.finstore.app/')  # Redirect to banking portal if already active
+            return redirect('https://grahakepay.com/login')  # Redirect to banking portal if already active
         else:
             messages.info(request, "Your request is pending. Please wait for approval.")
     except BankingPortalAccessRequest.DoesNotExist:

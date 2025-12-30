@@ -58,6 +58,8 @@ class CustomUser(AbstractUser):
             ("retailer", "Retailer"),
             ("distributor", "Distributor"),
             ("master_distributor", "Master Distributor"),
+            ("retailer_2", "Retailer 2.0"),
+            ("distributor_2", "Distributor 2.0"),
         ],
         null=True,
         blank=False,
@@ -158,7 +160,7 @@ class Notification(models.Model):
     )
     group = models.CharField(
         max_length=50,
-        choices=[('retailer', 'Retailer'), ('distributor', 'Distributor'), ('master_distributor', 'Master Distributor')],
+        choices=[('retailer', 'Retailer'), ('distributor', 'Distributor'), ('master_distributor', 'Master Distributor'), ('retailer_2', 'Retailer 2.0'), ('distributor_2', 'Distributor 2.0')],
         null=True,
         blank=True  # Allow blank for individual notifications
     )
@@ -196,29 +198,20 @@ class Customer(models.Model):
         return self.full_name
 
 
-
-
-
-#Add a PIN field to the CustomUser model so that each user can have a unique PIN.
-CustomUser = get_user_model()
-
 class ServicePIN(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     pin = models.CharField(max_length=4, default="0000")  # 4-digit PIN
 
     def __str__(self):
-        return f"PIN for {self.user.username}"
+        return f"PIN for {self.user.email}"
 
 
-
-
-
-User = get_user_model()
 class BillingDetails(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)  # Replace `1` with the correct default user ID
     ref_no = models.CharField(max_length=255, unique=True)
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)  # Foreign Key to Customer
     service = models.ForeignKey(Service, on_delete=models.CASCADE)  # Automatically delete related records
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)  # Add amount field
     billing_date = models.DateTimeField(auto_now_add=True, null=True)  # Ensure this field is defined
     payment_mode = models.CharField(max_length=50, choices=[('Cash', 'Cash'), ('Online', 'Online')])
     payment_status = models.CharField(max_length=50, choices=[('Paid', 'Paid'), ('Unpaid', 'Unpaid')], default='Unpaid')
@@ -239,30 +232,24 @@ class BillingDetails(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.ref_no:
-            self.ref_no = f"REF-{random.randint(1000, 9999)}-{random.randint(1000000000, 9999999999)}"
-        if not self.invoice_id:
-            self.invoice_id = f"INV-{random.randint(1000, 9999)}-{random.randint(1000000000, 9999999999)}"
+            # Generate a unique reference number
+            import uuid
+            self.ref_no = f"BILL-{uuid.uuid4().hex[:8].upper()}"
+        # Set amount from service price if not set
+        if not self.amount and self.service:
+            self.amount = self.service.price
         super().save(*args, **kwargs)
 
+    def __str__(self):
+        return f"Billing {self.ref_no} - {self.customer.full_name}"
 
-
-
-
-
-
-
-
-#To manage wallets and transactions, you need to create or update models for:
 
 class Wallet(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="wallet")
     balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
     def __str__(self):
-        return f"{self.user.full_name} - Balance: {self.balance}"
-
-    
-
+        return f"Wallet for {self.user.email}"
 
 
 class Transaction(models.Model):
@@ -279,14 +266,8 @@ class Transaction(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user.full_name} - {self.transaction_type} - {self.amount} - {self.balance_after}"
+        return f"{self.transaction_type} - {self.amount} for {self.user.email}"
 
-
-
-
-
-
-User = get_user_model()
 
 class BankingPortalAccessRequest(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='access_requests')
@@ -296,13 +277,8 @@ class BankingPortalAccessRequest(models.Model):
     created_at = models.DateTimeField(default=now)  # Sets the current timestamp as the default
 
     def __str__(self):
-        return f"{self.user.username} - {'Active' if self.is_active else 'Inactive'}"
-    
+        return f"Banking Portal Access Request for {self.user.email}"
 
-
-
-
-#Invoice
 
 class Equipment(models.Model):
     name = models.CharField(max_length=200)
@@ -317,6 +293,7 @@ class Equipment(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class EquipmentOrder(models.Model):
     equipment = models.ForeignKey(Equipment, on_delete=models.CASCADE)
@@ -337,14 +314,15 @@ class EquipmentOrder(models.Model):
         verbose_name_plural = 'Equipment Orders'
 
     def __str__(self):
-        return f"Order #{self.id} - {self.equipment.name}"
+        return f"Order {self.id} - {self.equipment.name}"
 
     def save(self, *args, **kwargs):
-        if not self.pk:  # Only calculate prices on creation
-            self.base_price = self.equipment.price * self.quantity
-            self.gst_amount = self.base_price * Decimal('0.18')
-            self.total_amount = self.base_price + self.gst_amount
+        # Calculate GST and total amount
+        self.base_price = self.equipment.price * self.quantity
+        self.gst_amount = self.base_price * Decimal('0.18')  # 18% GST
+        self.total_amount = self.base_price + self.gst_amount
         super().save(*args, **kwargs)
+
 
 class Invoice(models.Model):
     billing = models.ForeignKey('BillingDetails', on_delete=models.CASCADE)
@@ -356,7 +334,112 @@ class Invoice(models.Model):
     invoice_date = models.DateTimeField()
 
     def __str__(self):
-        return f"Invoice {self.invoice_number} for {self.customer_name}"
+        return f"Invoice {self.invoice_number}"
+
+
+class CSCService(models.Model):
+    """Model for CSC 2.0 services that can be customized by admin"""
+    service_name = models.CharField(max_length=200)
+    description = models.TextField(blank=True, null=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    wallet_deduction = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    required_documents = models.TextField(help_text="List of required documents separated by commas")
+    service_icon = models.CharField(max_length=100, default="mdi mdi-cog", help_text="Material Design Icon class (e.g., mdi mdi-account)")
+    service_color = models.CharField(max_length=7, default="#007bff", help_text="Hex color code for service card")
+    service_image = models.ImageField(upload_to='csc_services/', blank=True, null=True, help_text="Service card image")
+    external_link = models.URLField(blank=True, null=True, help_text="External link for the service (optional)")
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'CSC Service'
+        verbose_name_plural = 'CSC Services'
+
+    def __str__(self):
+        return self.service_name
+
+
+class CSCServiceDocument(models.Model):
+    """Model for managing required documents for CSC services"""
+    service = models.ForeignKey(CSCService, on_delete=models.CASCADE, related_name='documents')
+    document_name = models.CharField(max_length=100)
+    is_required = models.BooleanField(default=True)
+    description = models.TextField(blank=True, null=True)
+
+    class Meta:
+        verbose_name = 'CSC Service Document'
+        verbose_name_plural = 'CSC Service Documents'
+
+    def __str__(self):
+        return f"{self.document_name} for {self.service.service_name}"
+
+
+class CSCServiceRequest(models.Model):
+    """Model for tracking CSC service requests from Retailer 2.0 users"""
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('in_progress', 'In Progress'),
+        ('completed', 'Completed'),
+        ('cancelled', 'Cancelled'),
+    ]
+    
+    service = models.ForeignKey(CSCService, on_delete=models.CASCADE)
+    retailer = models.ForeignKey(CustomUser, on_delete=models.CASCADE, limit_choices_to={'role': 'retailer_2'})
+    customer_name = models.CharField(max_length=200)
+    customer_mobile = models.CharField(max_length=15)
+    amount_paid = models.DecimalField(max_digits=10, decimal_places=2)
+    wallet_deduction = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    documents_uploaded = models.TextField(blank=True, null=True)
+    notes = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'CSC Service Request'
+        verbose_name_plural = 'CSC Service Requests'
+
+    def __str__(self):
+        return f"{self.service.service_name} request by {self.retailer.full_name}"
+
+
+class Retailer2BillingDetails(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    ref_no = models.CharField(max_length=255, unique=True)
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    service = models.ForeignKey(CSCService, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)  # Add amount field
+    billing_date = models.DateTimeField(auto_now_add=True, null=True)
+    payment_mode = models.CharField(max_length=50, choices=[('Cash', 'Cash'), ('Online', 'Online')])
+    payment_status = models.CharField(max_length=50, choices=[('Paid', 'Paid'), ('Unpaid', 'Unpaid')], default='Unpaid')
+    id_proof = models.FileField(upload_to='id_proofs/', blank=True, null=True)
+    address_proof = models.FileField(upload_to='address_proofs/', blank=True, null=True)
+    pan_card = models.CharField(max_length=255, null=True, blank=True)
+    banking = models.FileField(upload_to='banking/', null=True, blank=True)
+    photo = models.FileField(upload_to='photos/', null=True, blank=True)
+    others = models.FileField(upload_to='others/', null=True, blank=True)
+    service_status = models.CharField(
+        max_length=20,
+        choices=[('Pending', 'Pending'), ('In Progress', 'In Progress'), ('Complete', 'Complete')],
+        default='Pending',
+    )
+    service_notes = models.TextField(null=True, blank=True)
+    admin_completed_file = models.FileField(upload_to='completed_service_files/', null=True, blank=True)
+    invoice_id = models.CharField(max_length=100, unique=True, null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if not self.ref_no:
+            # Generate a unique reference number
+            import uuid
+            self.ref_no = f"R2-BILL-{uuid.uuid4().hex[:8].upper()}"
+        # Set amount from service price if not set
+        if not self.amount and self.service:
+            self.amount = self.service.price
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Retailer 2.0 Billing {self.ref_no} - {self.customer.full_name}"
 
 
 

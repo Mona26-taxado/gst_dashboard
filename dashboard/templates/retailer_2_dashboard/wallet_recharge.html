@@ -1,0 +1,262 @@
+{% extends 'retailer_2_dashboard/base.html' %}
+{% load static %}
+{% block content %}
+<style>
+    .plan-card {
+        border-radius: 18px;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.10), 0 1.5px 4px rgba(0,0,0,0.06);
+        transition: transform 0.2s, box-shadow 0.2s;
+        position: relative;
+        overflow: hidden;
+        border: 2px solid #e0e0e0;
+        background: #fff;
+        min-height: 328px;
+    }
+    .plan-card:hover {
+        transform: translateY(-8px) scale(1.03);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 3px 8px rgba(0,0,0,0.10);
+        z-index: 2;
+        border-color: #28a745;
+    }
+    .plan-badge {
+        font-size: 0.95rem;
+        margin: 0 2px 4px 2px;
+        padding: 0.4em 0.8em;
+        border-radius: 12px;
+        font-weight: 500;
+    }
+    .ribbon {
+        position: absolute;
+        top: 18px;
+        right: -38px;
+        background: linear-gradient(90deg, #ff9800 60%, #ff5722 100%);
+        color: #fff;
+        padding: 6px 48px;
+        font-size: 1rem;
+        font-weight: bold;
+        transform: rotate(30deg);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        z-index: 10;
+        letter-spacing: 1px;
+    }
+    .ribbon-best {
+        background: linear-gradient(90deg, #43a047 60%, #2196f3 100%);
+    }
+    .plan-amount {
+        font-size: 2.1rem;
+        font-weight: 700;
+        color: #222;
+    }
+    .plan-bonus {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #43a047;
+    }
+    .plan-features li {
+        margin-bottom: 0.5em;
+        font-size: 1.05rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5em;
+    }
+    .plan-features i {
+        color: #009688;
+        font-size: 1.2em;
+    }
+    .plan-select-btn {
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 8px;
+        padding: 0.6em 2em;
+        margin-top: 1em;
+        transition: background 0.2s, color 0.2s;
+        background: linear-gradient(90deg, #28a745 60%, #43a047 100%);
+        color: #fff;
+        border: none;
+        box-shadow: 0 2px 8px rgba(40,167,69,0.08);
+    }
+    .plan-select-btn:hover {
+        background: linear-gradient(90deg, #222 60%, #43a047 100%);
+        color: #fff;
+    }
+    .plan-entry {
+        border: 2.5px solid #2196f3;
+        box-shadow: 0 6px 24px rgba(33,150,243,0.10);
+        background: linear-gradient(120deg, #e3f2fd 60%, #fff 100%);
+    }
+    .plan-entry .plan-amount {
+        color: #2196f3;
+    }
+    .plan-entry .plan-select-btn {
+        background: linear-gradient(90deg, #2196f3 60%, #43a047 100%);
+    }
+    .plan-entry .plan-select-btn:hover {
+        background: linear-gradient(90deg, #222 60%, #2196f3 100%);
+    }
+    @media (max-width: 767px) {
+        .plan-card { margin-bottom: 2em; }
+    }
+</style>
+
+<form id="upiPaymentForm" method="post" action="{% url 'initiate_upi_payment' %}" style="display: none;">
+    {% csrf_token %}
+    <input type="hidden" name="amount" id="paymentAmount">
+    <input type="hidden" name="plan_id" id="planId">
+</form>
+
+<div class="container mt-10">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0 font-weight-bold">Recharge Plans <span class="badge badge-primary ml-2" style="font-size:1rem;">Starting at ₹3,000</span></h2>
+        <a href="{% url 'retailer_2_dashboard' %}" class="btn btn-outline-secondary">Back to Dashboard</a>
+    </div>
+    <div class="row">
+        <!-- Plan 1: Entry Plan -->
+        <div class="col-lg-4 col-md-6 mb-4 position-relative">
+            <div class="card plan-card plan-entry h-100">
+                <div class="ribbon">Entry Plan</div>
+                <div class="card-body text-center">
+                    <div class="plan-amount">₹3,000</div>
+                    <div class="mb-2">
+                        <span class="plan-badge badge badge-info">No Bonus</span>
+                        <span class="plan-badge badge badge-light">Just Start</span>
+                    </div>
+                    <ul class="plan-features list-unstyled mb-3 mt-3">
+                        <li><i class="mdi mdi-wallet"></i>Get ₹3,000 in your wallet</li>
+                        <li><i class="mdi mdi-close-circle-outline text-danger"></i>No extra benefits</li>
+                    </ul>
+                    <button class="plan-select-btn" onclick="initiatePayment(3000, 'plan1')">Recharge Now</button>
+                </div>
+            </div>
+        </div>
+        <!-- Plan 2 -->
+        <div class="col-lg-4 col-md-6 mb-4 position-relative">
+            <div class="card plan-card border-success h-100" style="border-width:2.5px;">
+                <div class="card-body text-center">
+                    <div class="plan-amount" style="font-size:2.3rem; font-weight:800; color:#28a745;">
+                        ₹5,000 
+                    </div>
+                    <div class="mb-2">
+                        <span class="plan-badge badge badge-info">₹200 Bonus</span>
+                        <span class="plan-badge badge badge-success">Save ₹700</span>
+                    </div>
+                    <ul class="plan-features list-unstyled mb-3 mt-3">
+                        <li><i class="mdi mdi-wallet-giftcard"></i>₹200 Bonus</li>
+                        <li><i class="mdi mdi-cash-multiple"></i><span style="color:#ff9800; font-weight:600;">Get ₹5,200 in wallet</span></li>
+                        <li><i class="mdi mdi-card-account-details"></i>5 PAN Card Free</li>
+                    </ul>
+                    <button class="btn plan-select-btn" onclick="initiatePayment(5000, 'plan2')">Recharge Now</button>
+                </div>
+            </div>
+        </div>
+        <!-- Plan 3 -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card plan-card border-success h-100">
+                <div class="card-body text-center">
+                    <div class="plan-amount text-success">₹8,500 </div>
+                    <div class="mb-2">
+                        <span class="plan-badge badge badge-info">₹500 Bonus</span>
+                        <span class="plan-badge badge badge-success">Save ₹1,300</span>
+                    </div>
+                    <ul class="plan-features list-unstyled mb-3 mt-3">
+                        <li><i class="mdi mdi-wallet-giftcard"></i>₹500 Bonus</li>
+                        <li><i class="mdi mdi-cash-multiple"></i><span style="color:#ff9800; font-weight:600;">Get ₹9,000 in wallet</span></li>
+                        <li><i class="mdi mdi-card-account-details"></i>8 PAN Card Free</li>
+                    </ul>
+                    <button class="btn plan-select-btn" onclick="initiatePayment(8500, 'plan3')">Recharge Now</button>
+                </div>
+            </div>
+        </div>
+        <!-- Plan 4 -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card plan-card border-success h-100">
+                <div class="card-body text-center">
+                    <div class="plan-amount text-success">₹10,000 </div>
+                    <div class="mb-2">
+                        <span class="plan-badge badge badge-info">₹2,000 Bonus</span>
+                        <span class="plan-badge badge badge-success">Save ₹2,000</span>
+                    </div>
+                    <ul class="plan-features list-unstyled mb-3 mt-3">
+                        <li><i class="mdi mdi-wallet-giftcard"></i>₹2,000 Bonus</li>
+                        <li><i class="mdi mdi-cash-multiple"></i><span style="color:#ff9800; font-weight:600;">Get ₹12,000 in wallet</span></li>
+                        <li><i class="mdi mdi-card-account-details"></i>10 PAN Card Free</li>
+                    </ul>
+                    <button class="btn plan-select-btn" onclick="initiatePayment(10000, 'plan4')">Recharge Now</button>
+                </div>
+            </div>
+        </div>
+        <!-- Plan 5: Best Value -->
+        <div class="col-lg-4 col-md-6 mb-4 position-relative">
+            <div class="card plan-card border-success h-100">
+                <div class="ribbon ribbon-best">Best Value</div>
+                <div class="card-body text-center">
+                    <div class="plan-amount text-success">₹15,000 </div>
+                    <div class="mb-2">
+                        <span class="plan-badge badge badge-info">₹2,000 Bonus</span>
+                        <span class="plan-badge badge badge-success">Save ₹2,500</span>
+                    </div>
+                    <ul class="plan-features list-unstyled mb-3 mt-3">
+                        <li><i class="mdi mdi-wallet-giftcard"></i>₹2,000 Bonus</li>
+                        <li><i class="mdi mdi-cash-multiple"></i><span style="color:#ff9800; font-weight:600;">Get ₹17,000 in wallet</span></li>
+                        <li><i class="mdi mdi-card-account-details"></i>15 PAN Card Free</li>
+                        <li><i class="mdi mdi-train"></i>IRCTC ID Free</li>
+                        <li><i class="mdi mdi-account-check"></i>Ayushman Operator Free <small>(if available in state)</small></li>
+                    </ul>
+                    <button class="btn plan-select-btn" onclick="initiatePayment(15000, 'plan5')">Recharge Now</button>
+                </div>
+            </div>
+        </div>
+        <!-- Plan 6 -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card plan-card border-success h-100">
+                <div class="card-body text-center">
+                    <div class="plan-amount text-success">₹20,000 </div>
+                    <div class="mb-2">
+                        <span class="plan-badge badge badge-info">₹3,000 Bonus</span>
+                        <span class="plan-badge badge badge-success">Save ₹4,000</span>
+                    </div>
+                    <ul class="plan-features list-unstyled mb-3 mt-3">
+                        <li><i class="mdi mdi-wallet-giftcard"></i>₹3,000 Bonus</li>
+                        <li><i class="mdi mdi-cash-multiple"></i><span style="color:#ff9800; font-weight:600;">Get ₹23,000 in wallet</span></li>
+                        <li><i class="mdi mdi-card-account-details"></i>20 PAN Card Free</li>
+                        <li><i class="mdi mdi-store"></i>Shop Registration Free</li>
+                        <li><i class="mdi mdi-train"></i>IRCTC ID Free</li>
+                        <li><i class="mdi mdi-account-tie"></i>Distributor ID Free</li>
+                    </ul>
+                    <button class="btn plan-select-btn" onclick="initiatePayment(20000, 'plan6')">Recharge Now</button>
+                </div>
+            </div>
+        </div>
+        <!-- Plan 7 -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card plan-card border-success h-100">
+                <div class="card-body text-center">
+                    <div class="plan-amount text-success">₹25,000 </div>
+                    <div class="mb-2">
+                        <span class="plan-badge badge badge-info">₹5,000 Bonus</span>
+                        <span class="plan-badge badge badge-success">Save ₹6,000</span>
+                    </div>
+                    <ul class="plan-features list-unstyled mb-3 mt-3">
+                        <li><i class="mdi mdi-wallet-giftcard"></i>₹5,000 Bonus</li>
+                        <li><i class="mdi mdi-cash-multiple"></i><span style="color:#ff9800; font-weight:600;">Get ₹30,000 in wallet</span></li>
+                        <li><i class="mdi mdi-card-account-details"></i>30 PAN Card Free</li>
+                        <li><i class="mdi mdi-store"></i>Shop Registration Free</li>
+                        <li><i class="mdi mdi-train"></i>IRCTC ID Free</li>
+                        <li><i class="mdi mdi-account-tie"></i>Distributor ID Free</li>
+                        <li><i class="mdi mdi-fingerprint"></i>Mantra Fingerprint Scanner FREE</li>
+                    </ul>
+                    <button class="btn plan-select-btn" onclick="initiatePayment(25000, 'plan7')">Recharge Now</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function initiatePayment(amount, planId) {
+    document.getElementById('paymentAmount').value = amount;
+    document.getElementById('planId').value = planId;
+    document.getElementById('upiPaymentForm').submit();
+}
+</script>
+<link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.5.95/css/materialdesignicons.min.css" rel="stylesheet">
+{% endblock %} 

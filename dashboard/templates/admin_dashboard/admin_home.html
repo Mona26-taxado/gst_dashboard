@@ -430,7 +430,7 @@ function getGradient(ctx, color1, color2) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-  fetch('/dashboard/get-monthly-income-data/')
+  fetch('/get-monthly-income-data/')
     .then(response => response.json())
     .then(data => {
       var ctx1 = document.getElementById('userGrowthChart').getContext('2d');
