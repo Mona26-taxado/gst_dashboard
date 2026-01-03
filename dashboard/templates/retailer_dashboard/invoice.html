@@ -1,0 +1,615 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Invoice - {{ invoice_id }}{% endblock %}
+
+{% block content %}
+<style>
+    @media print {
+        .no-print {
+            display: none !important;
+        }
+        body {
+            background: white;
+        }
+        /* Hide sidebar, header, and footer */
+        .sidebar,
+        .navbar,
+        .navbar-wrapper,
+        .page-body-wrapper > .navbar,
+        footer,
+        .footer,
+        .main-panel > footer {
+            display: none !important;
+        }
+        /* Adjust container for print */
+        .container-scroller,
+        .container-fluid,
+        .page-body-wrapper,
+        .main-panel,
+        .content-wrapper {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+        }
+        .invoice-container {
+            box-shadow: none;
+            border: none;
+            margin: 0;
+            padding: 10px 15px !important;
+            max-width: 100% !important;
+            page-break-inside: avoid;
+        }
+        .edit-amount-section {
+            display: none !important;
+        }
+        /* Compact header for print */
+        .invoice-header {
+            padding-bottom: 10px !important;
+            margin-bottom: 15px !important;
+            border-bottom-width: 2px !important;
+        }
+        .invoice-logo {
+            font-size: 18px !important;
+            margin-bottom: 5px !important;
+        }
+        .invoice-title {
+            font-size: 24px !important;
+            letter-spacing: 1px !important;
+        }
+        .invoice-meta p {
+            margin: 2px 0 !important;
+            font-size: 11px !important;
+        }
+        /* Compact body sections */
+        .invoice-body {
+            gap: 15px !important;
+            margin-bottom: 15px !important;
+        }
+        .invoice-section {
+            padding: 12px !important;
+            margin-bottom: 0 !important;
+        }
+        .section-title {
+            font-size: 14px !important;
+            margin-bottom: 8px !important;
+            padding-bottom: 5px !important;
+        }
+        .info-row {
+            margin-bottom: 5px !important;
+            font-size: 11px !important;
+            line-height: 1.4 !important;
+        }
+        .info-label {
+            width: 100px !important;
+            font-size: 11px !important;
+        }
+        .info-value {
+            font-size: 11px !important;
+        }
+        /* Compact service details */
+        .service-details {
+            padding: 15px !important;
+            margin-bottom: 15px !important;
+        }
+        .service-table {
+            margin-top: 10px !important;
+        }
+        .service-table th {
+            padding: 8px !important;
+            font-size: 12px !important;
+        }
+        .service-table td {
+            padding: 8px !important;
+            font-size: 12px !important;
+        }
+        .service-name-cell {
+            font-size: 12px !important;
+        }
+        .price-cell {
+            font-size: 14px !important;
+        }
+        .total-section {
+            padding: 12px !important;
+            margin-top: 10px !important;
+        }
+        .total-row {
+            margin-bottom: 5px !important;
+            font-size: 12px !important;
+        }
+        .total-amount {
+            font-size: 20px !important;
+            margin-top: 5px !important;
+        }
+        /* Compact payment info */
+        .payment-info-section {
+            padding: 12px !important;
+            margin-top: 10px !important;
+        }
+        .invoice-footer {
+            margin-top: 15px !important;
+            padding-top: 10px !important;
+            font-size: 10px !important;
+        }
+        /* Ensure full width for print */
+        @page {
+            margin: 0.8cm;
+            size: A4;
+        }
+        /* Prevent page breaks */
+        .invoice-header,
+        .invoice-body,
+        .service-details,
+        .payment-info-section {
+            page-break-inside: avoid;
+        }
+    }
+    
+    .invoice-container {
+        max-width: 1000px;
+        margin: 20px auto;
+        background: white;
+        padding: 50px;
+        box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        border: 1px solid #e0e0e0;
+    }
+    
+    .invoice-header {
+        border-bottom: 4px solid #007bff;
+        padding-bottom: 25px;
+        margin-bottom: 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+    
+    .invoice-header-left {
+        flex: 1;
+    }
+    
+    .invoice-logo {
+        font-size: 28px;
+        font-weight: bold;
+        color: #007bff;
+        margin-bottom: 10px;
+    }
+    
+    .invoice-title {
+        font-size: 36px;
+        font-weight: bold;
+        color: #007bff;
+        margin: 0;
+        letter-spacing: 2px;
+    }
+    
+    .invoice-meta {
+        text-align: right;
+    }
+    
+    .invoice-meta p {
+        margin: 5px 0;
+        font-size: 14px;
+        color: #666;
+    }
+    
+    .invoice-body {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        margin-bottom: 40px;
+    }
+    
+    .invoice-section {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 25px;
+        border-radius: 8px;
+        border-left: 4px solid #007bff;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    
+    .section-title {
+        font-size: 20px;
+        font-weight: bold;
+        color: #007bff;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #007bff;
+        padding-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .info-row {
+        margin-bottom: 12px;
+        font-size: 15px;
+        line-height: 1.6;
+    }
+    
+    .info-label {
+        font-weight: 600;
+        color: #495057;
+        display: inline-block;
+        width: 130px;
+    }
+    
+    .info-value {
+        color: #212529;
+        font-weight: 500;
+    }
+    
+    .service-details {
+        background: white;
+        border: 2px solid #007bff;
+        padding: 30px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    
+    .service-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    
+    .service-table th {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        color: white;
+        padding: 15px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 16px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .service-table td {
+        padding: 15px;
+        border-bottom: 1px solid #dee2e6;
+        font-size: 15px;
+    }
+    
+    .service-table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .service-table tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .service-name-cell {
+        font-weight: 600;
+        color: #007bff;
+        font-size: 16px;
+    }
+    
+    .price-cell {
+        font-weight: bold;
+        color: #28a745;
+        font-size: 18px;
+    }
+    
+    .total-section {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 25px;
+        border-radius: 8px;
+        text-align: right;
+        margin-top: 20px;
+        border-top: 3px solid #007bff;
+    }
+    
+    .total-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        font-size: 16px;
+    }
+    
+    .total-label {
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .total-amount {
+        font-size: 32px;
+        font-weight: bold;
+        color: #007bff;
+        margin-top: 10px;
+    }
+    
+    .edit-amount-section {
+        background: #fff3cd;
+        border: 2px dashed #ffc107;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    
+    .edit-amount-form {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .edit-amount-form input {
+        padding: 10px 15px;
+        border: 2px solid #007bff;
+        border-radius: 5px;
+        font-size: 16px;
+        width: 150px;
+    }
+    
+    .edit-amount-form button {
+        background: #007bff;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+    
+    .edit-amount-form button:hover {
+        background: #0056b3;
+    }
+    
+    .invoice-footer {
+        margin-top: 50px;
+        padding-top: 25px;
+        border-top: 2px solid #dee2e6;
+        text-align: center;
+        color: #666;
+        font-size: 13px;
+        line-height: 1.8;
+    }
+    
+    .btn-print {
+        background: #007bff;
+        color: white;
+        padding: 12px 30px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-right: 10px;
+        font-weight: 600;
+        font-size: 16px;
+        transition: all 0.3s;
+    }
+    
+    .btn-print:hover {
+        background: #0056b3;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    .btn-back {
+        background: #6c757d;
+        color: white;
+        padding: 12px 30px;
+        border: none;
+        border-radius: 5px;
+        text-decoration: none;
+        display: inline-block;
+        font-weight: 600;
+        font-size: 16px;
+        transition: all 0.3s;
+    }
+    
+    .btn-back:hover {
+        background: #5a6268;
+        color: white;
+        text-decoration: none;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    .text-success {
+        color: #28a745 !important;
+        font-weight: 600;
+    }
+    
+    .text-danger {
+        color: #dc3545 !important;
+        font-weight: 600;
+    }
+    
+    .payment-info-section {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 25px;
+        border-radius: 8px;
+        margin-top: 20px;
+        border-left: 4px solid #28a745;
+    }
+</style>
+
+<div class="invoice-container">
+    <!-- Header -->
+    <div class="invoice-header">
+        <div class="invoice-header-left">
+            <div class="invoice-logo">GRAHAK SAHAAYATA KENDRA</div>
+            <h1 class="invoice-title">TAX INVOICE</h1>
+        </div>
+        <div class="invoice-meta">
+            <p><strong>Invoice ID:</strong> {{ invoice_id }}</p>
+            <p><strong>Reference No:</strong> {{ billing.ref_no }}</p>
+            <p><strong>Date:</strong> {{ billing_date|date:"d M Y" }}</p>
+            <p><strong>Status:</strong> <span class="{% if billing.payment_status == 'Paid' %}text-success{% else %}text-danger{% endif %}">
+                {{ billing.payment_status }}
+            </span></p>
+        </div>
+    </div>
+    
+    <!-- Edit Amount Section -->
+    <div class="edit-amount-section no-print">
+        <h4 style="margin-bottom: 15px; color: #856404;">✏️ Edit Invoice Amount</h4>
+        <form method="POST" class="edit-amount-form">
+            {% csrf_token %}
+            <label style="font-weight: 600;">Amount (₹):</label>
+            <input type="number" name="amount" value="{{ billing.amount|floatformat:2 }}" step="0.01" min="0" required>
+            <button type="submit">Update Amount</button>
+        </form>
+    </div>
+    
+    <!-- Body -->
+    <div class="invoice-body">
+        <!-- User (Retailer) Details -->
+        <div class="invoice-section">
+            <h3 class="section-title">From (Service Provider)</h3>
+            <div class="info-row">
+                <span class="info-label">Name:</span>
+                <span class="info-value">{{ user.full_name }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Email:</span>
+                <span class="info-value">{{ user.email }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Mobile:</span>
+                <span class="info-value">{{ user.mobile_number|default:"N/A" }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Shop Name:</span>
+                <span class="info-value">{{ user.branch_id|default:"N/A" }}</span>
+            </div>
+            {% if user.address %}
+            <div class="info-row">
+                <span class="info-label">Address:</span>
+                <span class="info-value">{{ user.address }}</span>
+            </div>
+            {% endif %}
+            {% if user.city %}
+            <div class="info-row">
+                <span class="info-label">City:</span>
+                <span class="info-value">{{ user.city }}</span>
+            </div>
+            {% endif %}
+            {% if user.state %}
+            <div class="info-row">
+                <span class="info-label">State:</span>
+                <span class="info-value">{{ user.state }}</span>
+            </div>
+            {% endif %}
+            {% if user.postcode %}
+            <div class="info-row">
+                <span class="info-label">PIN Code:</span>
+                <span class="info-value">{{ user.postcode }}</span>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Customer Details -->
+        <div class="invoice-section">
+            <h3 class="section-title">To (Customer Details)</h3>
+            <div class="info-row">
+                <span class="info-label">Name:</span>
+                <span class="info-value">{{ customer.full_name }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Mobile:</span>
+                <span class="info-value">{{ customer.mobile }}</span>
+            </div>
+            {% if customer.email %}
+            <div class="info-row">
+                <span class="info-label">Email:</span>
+                <span class="info-value">{{ customer.email }}</span>
+            </div>
+            {% endif %}
+            {% if customer.address %}
+            <div class="info-row">
+                <span class="info-label">Address:</span>
+                <span class="info-value">{{ customer.address }}</span>
+            </div>
+            {% endif %}
+            {% if customer.city %}
+            <div class="info-row">
+                <span class="info-label">City:</span>
+                <span class="info-value">{{ customer.city }}</span>
+            </div>
+            {% endif %}
+            {% if customer.state %}
+            <div class="info-row">
+                <span class="info-label">State:</span>
+                <span class="info-value">{{ customer.state }}</span>
+            </div>
+            {% endif %}
+            {% if customer.pin_code %}
+            <div class="info-row">
+                <span class="info-label">PIN Code:</span>
+                <span class="info-value">{{ customer.pin_code }}</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Service Details -->
+    <div class="service-details">
+        <h3 class="section-title">Service Details</h3>
+        <table class="service-table">
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th style="text-align: right;">Amount (₹)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="service-name-cell">
+                        <strong>{{ service.service_name|default:"Service" }}</strong>
+                    </td>
+                    <td class="price-cell" style="text-align: right;">₹{{ billing.amount|floatformat:2 }}</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div class="total-section">
+            <div class="total-row">
+                <span class="total-label">Subtotal:</span>
+                <span style="font-weight: 600; font-size: 18px;">₹{{ billing.amount|floatformat:2 }}</span>
+            </div>
+            <div class="total-row">
+                <span class="total-label">Tax (GST):</span>
+                <span style="font-weight: 600; font-size: 18px;">₹0.00</span>
+            </div>
+            <div style="border-top: 2px solid #007bff; padding-top: 15px; margin-top: 15px;">
+                <div class="total-row">
+                    <span class="total-label" style="font-size: 20px;">Total Amount:</span>
+                    <span class="total-amount">₹{{ billing.amount|floatformat:2 }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Payment Information -->
+    <div class="payment-info-section">
+        <h3 class="section-title">Payment Information</h3>
+        <div class="info-row">
+            <span class="info-label">Payment Mode:</span>
+            <span class="info-value">{{ billing.payment_mode }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Payment Status:</span>
+            <span class="info-value {% if billing.payment_status == 'Paid' %}text-success{% else %}text-danger{% endif %}">
+                {{ billing.payment_status }}
+            </span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Service Status:</span>
+            <span class="info-value">{{ billing.service_status }}</span>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <div class="invoice-footer">
+        <p style="font-weight: 600; font-size: 14px; margin-bottom: 10px;">Thank you for your business!</p>
+        <p>This is a computer-generated invoice and does not require a signature.</p>
+        <p style="margin-top: 15px; color: #999;">For any queries, please contact: {{ user.email }}</p>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="no-print" style="text-align: center; margin-top: 40px;">
+        <button onclick="window.print()" class="btn-print">🖨️ Print Invoice</button>
+        <a href="{% url 'retailer_view_billing' %}" class="btn-back">← Back to Billing</a>
+    </div>
+</div>
+{% endblock %}
