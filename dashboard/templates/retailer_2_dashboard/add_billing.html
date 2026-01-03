@@ -253,6 +253,13 @@
                         </select>
                     </div>
                 </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">Service Price (₹) *</label>
+                        <input type="number" id="service_price" name="amount" class="form-control" step="0.01" min="0" required placeholder="Enter service price">
+                        <small class="text-muted">You can edit the price if needed</small>
+                    </div>
+                </div>
 
             </div>
         </div>
@@ -377,6 +384,9 @@
         const walletBalance = parseFloat('{{ wallet_balance|floatformat:2 }}');
         const servicePrice = parseFloat(selectedOption.getAttribute('data-price')) || 0;
         
+        // Auto-fill price field
+        document.getElementById('service_price').value = servicePrice;
+        
         if (servicePrice > walletBalance) {
             // Show insufficient balance warning
             const warningDiv = document.createElement('div');
@@ -391,6 +401,37 @@
             
             // Add new warning
             this.parentNode.appendChild(warningDiv);
+        } else {
+            // Remove warning if balance is sufficient
+            const existingWarning = document.querySelector('.alert-warning');
+            if (existingWarning) {
+                existingWarning.remove();
+            }
+        }
+    });
+    
+    // Price field change handler to check balance
+    document.getElementById('service_price').addEventListener('input', function() {
+        const walletBalance = parseFloat('{{ wallet_balance|floatformat:2 }}');
+        const enteredPrice = parseFloat(this.value) || 0;
+        
+        if (enteredPrice > walletBalance) {
+            // Show insufficient balance warning
+            const warningDiv = document.createElement('div');
+            warningDiv.className = 'alert alert-warning';
+            warningDiv.innerHTML = '<strong>Warning:</strong> Entered price (₹' + enteredPrice + ') exceeds wallet balance (₹' + walletBalance + '). Please recharge your wallet.';
+            
+            // Remove any existing warning
+            const existingWarning = document.querySelector('.alert-warning');
+            if (existingWarning) {
+                existingWarning.remove();
+            }
+            
+            // Add new warning after wallet info
+            const walletInfo = document.querySelector('.wallet-info');
+            if (walletInfo && !walletInfo.nextElementSibling.classList.contains('alert-warning')) {
+                walletInfo.parentNode.insertBefore(warningDiv, walletInfo.nextSibling);
+            }
         } else {
             // Remove warning if balance is sufficient
             const existingWarning = document.querySelector('.alert-warning');
