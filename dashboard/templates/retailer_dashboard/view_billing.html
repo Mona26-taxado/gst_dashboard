@@ -110,15 +110,15 @@ input.form-control {
                         </td>
                         <td>
                             <div class="dropdown">
-                                <button class="btn btn-secondary dropdown-toggle" type="button" id="actionDropdown{{ billing.id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                <button class="btn btn-secondary dropdown-toggle" type="button" id="actionDropdown_{{ billing.id }}" data-bs-toggle="dropdown" aria-expanded="false">
                                     Action
                                 </button>
-                                <ul class="dropdown-menu" aria-labelledby="actionDropdown{{ billing.id }}">
+                                <ul class="dropdown-menu" aria-labelledby="actionDropdown_{{ billing.id }}">
                                     <li>
                                         <a class="dropdown-item" href="{% url 'retailer_edit_billing' billing.id %}">Edit Details</a>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" href="{% url 'retailer_view_billing_details' billing.id %}">View Details</a>
+                                        <a class="dropdown-item" href="{% url 'retailer_view_billing_details' billing.id %}" >View Details</a>
                                     </li>
                                     <li>
                                         <a class="dropdown-item" href="{% url 'retailer_invoice' billing.id %}">Generate Invoice</a>

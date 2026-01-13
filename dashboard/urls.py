@@ -54,6 +54,7 @@ urlpatterns = [
     path("admin-add-money/", add_or_deduct_money, name="add_or_deduct_money"),
 
     path("admin-view-transactions/", admin_view_transactions, name="view_transactions"),
+    path("admin-update-qr-code/", admin_views.update_qr_code, name="update_qr_code"),
 
 
      # Admin URLs
@@ -86,10 +87,9 @@ urlpatterns = [
     path('retailer/add-billing/', retailer_views.add_billing, name='retailer_add_billing'),
     path('banking-portal/request/', banking_portal_request, name='banking_portal_request'),
     
-     path('retailer/view-billing/', retailer_views.view_billing, name='retailer_view_billing'),
-     path('retailer/view-billing/<int:billing_id>/', retailer_views.view_billing_details, name='retailer_view_billing_details'),
-     path('retailer/edit-billing/<int:billing_id>/', retailer_views.edit_billing, name='retailer_edit_billing'),
-     path('retailer/invoice/<int:billing_id>/', retailer_views.retailer_invoice, name='retailer_invoice'),
+    path('retailer/view-billing/', retailer_views.view_billing, name='retailer_view_billing'),
+    path('retailer/view-billing/<int:billing_id>/', retailer_views.view_billing_details, name='retailer_view_billing_details'),
+    path('retailer/edit-billing/<int:billing_id>/', retailer_views.edit_billing, name='retailer_edit_billing'),
     path('dashboard/retailer/view-transactions/', retailer_view_transactions, name='retailer_view_transactions'),
     path('recharge-plans/', recharge_plans_view, name='recharge_plans'),
     path('retailer/monthly-billing/', retailer_views.get_retailer_monthly_billing, name='retailer_monthly_billing'),
@@ -197,5 +197,8 @@ urlpatterns = [
     path('retailer2/edit-billing/<int:billing_id>/', retailer_views.retailer_2_edit_billing, name='retailer_2_edit_billing'),
     path('retailer2/delete-billing/<int:billing_id>/', retailer_views.retailer_2_delete_billing, name='retailer_2_delete_billing'),
     path('retailer2/invoice/<int:billing_id>/', retailer_views.retailer_2_invoice, name='retailer_2_invoice'),
+    
+    # Retailer Invoice URL
+    path('retailer/invoice/<int:billing_id>/', retailer_views.retailer_invoice, name='retailer_invoice'),
 
 ]

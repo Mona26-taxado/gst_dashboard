@@ -142,7 +142,10 @@
                                            class="btn btn-outline-warning btn-sm" title="Edit">
                                             <i class="mdi mdi-pencil"></i> Edit
                                         </a>
-                                        
+                                        <a href="{% url 'retailer_2_invoice' billing.id %}" 
+                                           class="btn btn-outline-success btn-sm" title="Generate Invoice">
+                                            <i class="mdi mdi-file-document"></i> Invoice
+                                        </a>
                                     </div>
                                 </td>
                             </tr>

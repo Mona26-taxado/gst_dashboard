@@ -59,23 +59,41 @@ def equipment_payment(request):
             status='pending'
         )
         
-        # Generate payment QR code
-        upi_id = "9336323478@okbizaxis"
+        # Get UPI ID from QRCodeSettings
+        from dashboard.models import QRCodeSettings
+        qr_settings = QRCodeSettings.objects.first()
+        
+        if qr_settings and qr_settings.upi_id:
+            upi_id = qr_settings.upi_id
+        else:
+            upi_id = "9336323478@okbizaxis"  # Default fallback
+        
         upi_link = f"upi://pay?pa={upi_id}&pn=Grahak%20Sahaayata%20Kendra&am={total_amount}&tn=Order%20{order.id}"
         
-        qr = qrcode.QRCode(version=1, box_size=10, border=5)
-        qr.add_data(upi_link)
-        qr.make(fit=True)
-        qr_image = qr.make_image(fill_color="black", back_color="white")
-        
-        buffer = BytesIO()
-        qr_image.save(buffer, format="PNG")
-        qr_code_base64 = base64.b64encode(buffer.getvalue()).decode()
+        # Check if admin has uploaded a custom QR code
+        if qr_settings and qr_settings.qr_code_image:
+            # Use admin's uploaded QR code - convert to base64
+            from PIL import Image
+            qr_image = Image.open(qr_settings.qr_code_image)
+            buffer = BytesIO()
+            qr_image.save(buffer, format="PNG")
+            qr_code_base64 = base64.b64encode(buffer.getvalue()).decode()
+        else:
+            # Generate QR code dynamically with updated UPI ID
+            qr = qrcode.QRCode(version=1, box_size=10, border=5)
+            qr.add_data(upi_link)
+            qr.make(fit=True)
+            qr_image = qr.make_image(fill_color="black", back_color="white")
+            
+            buffer = BytesIO()
+            qr_image.save(buffer, format="PNG")
+            qr_code_base64 = base64.b64encode(buffer.getvalue()).decode()
         
         return render(request, 'equipment_store/payment.html', {
             'order_id': order.id,
             'total_amount': total_amount,
             'qr_code': qr_code_base64,
+            'upi_id': upi_id,  # Pass UPI ID for UPI link
         })
         
     except Exception:

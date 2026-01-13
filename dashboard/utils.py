@@ -37,7 +37,22 @@ import base64
 from django.core.cache import cache
 from django.conf import settings
 
-def generate_qr(user_name, upi_id="9336323478@okbizaxis"):
+def generate_qr(user_name, upi_id=None):
+    """
+    Generate QR code for a user. Uses UPI ID from QRCodeSettings if available.
+    """
+    # Get UPI ID from settings if not provided
+    if upi_id is None:
+        try:
+            from dashboard.models import QRCodeSettings
+            qr_settings = QRCodeSettings.objects.first()
+            if qr_settings and qr_settings.upi_id:
+                upi_id = qr_settings.upi_id
+            else:
+                upi_id = "9336323478@okbizaxis"  # Default UPI ID
+        except Exception:
+            upi_id = "9336323478@okbizaxis"  # Fallback to default
+    
     qr_data = f"upi://pay?pa={upi_id}&pn={user_name}&cu=INR"
     qr = qrcode.QRCode(version=1, box_size=10, border=4)
     qr.add_data(qr_data)

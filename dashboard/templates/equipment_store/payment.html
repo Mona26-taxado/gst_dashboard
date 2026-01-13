@@ -19,7 +19,7 @@
 
                     <div class="payment-options mb-4">
                         <div class="d-grid">
-                            <a href="upi://pay?pa=9336323478@okbizaxis&pn=Grahak%20Sahaayata%20Kendra&am={{ total_amount }}&tn=Order%20{{ order_id }}" class="btn btn-upi btn-lg">
+                            <a href="upi://pay?pa={{ upi_id|default:'9336323478@okbizaxis' }}&pn=Grahak%20Sahaayata%20Kendra&am={{ total_amount }}&tn=Order%20{{ order_id }}" class="btn btn-upi btn-lg">
                                 <div class="btn-upi-content">
                                     <i class="mdi mdi-cellphone-link"></i>
                                     <span class="btn-text">Pay with UPI App</span>

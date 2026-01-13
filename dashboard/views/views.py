@@ -206,26 +206,11 @@ def custom_login_view(request):
                 now = timezone.now().timestamp()
                 request.session['demo_start'] = now
             login(request, user)
-            # Always redirect to role_based_redirect, ignore 'next' parameter
             return redirect('role_based_redirect')  # Redirect to role-based redirect
         else:
             error = "Invalid username or password. Please try again."
             print("DEBUG: Error set in view")  # Debug print
     return render(request, "login.html", {"error": error})
-
-def admin_redirect_view(request):
-    """
-    Redirect Django admin requests to custom admin dashboard.
-    If user is authenticated and is admin, redirect to /admin/dashboard/
-    Otherwise, redirect to login page.
-    """
-    if request.user.is_authenticated:
-        if hasattr(request.user, 'role') and request.user.role == 'admin':
-            return redirect('/admin/dashboard/')
-        else:
-            return redirect('not_authorized')
-    else:
-        return redirect('login')
 
 def retailer_2_login_view(request):
     """Universal login view for both Retailer 2.0 and Distributor 2.0 with domain validation and captcha."""
@@ -322,10 +307,21 @@ def refresh_captcha(request):
 
 
 @login_required
+def admin_redirect_view(request):
+    """Intercept /admin/ URL and redirect admin users to custom dashboard"""
+    if request.user.is_authenticated:
+        if hasattr(request.user, 'role') and request.user.role == 'admin':
+            return redirect('admin_dashboard')  # Redirect to custom admin dashboard
+        else:
+            return redirect('not_authorized')
+    else:
+        # If not authenticated, redirect to login
+        return redirect('login')
+
 def role_based_redirect(request):
     user = request.user
     if user.role == 'admin':
-        return redirect('/admin/dashboard/')  # Explicit redirect to admin dashboard
+        return redirect('admin_dashboard')
     elif user.role == 'retailer':
         return redirect('retailer_dashboard')
     elif user.role == 'distributor':
@@ -459,8 +455,16 @@ def generate_qr_for_recharge(request, user_id):
         distributor = CustomUser.objects.get(id=user_id)
         user_name = distributor.full_name
 
-        # Generate the QR code
-        qr_code_path = generate_qr(user_name)
+        # Check if admin has uploaded a custom QR code
+        from dashboard.models import QRCodeSettings
+        qr_settings = QRCodeSettings.objects.first()
+        
+        if qr_settings and qr_settings.qr_code_image:
+            # Use admin's uploaded QR code
+            qr_code_path = qr_settings.qr_code_image.url
+        else:
+            # Generate the QR code dynamically
+            qr_code_path = generate_qr(user_name)
 
         return render(request, 'recharge_wallet.html', {
             'user_name': user_name,
