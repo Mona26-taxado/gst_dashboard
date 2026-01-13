@@ -99,8 +99,15 @@ def initiate_upi_payment(request):
         amount = request.POST.get('amount')
         plan_id = request.POST.get('plan_id')
         
-        # Generate UPI payment link with proper encoding
-        upi_id = "9336323478@okbizaxis"
+        # Get UPI ID from QRCodeSettings
+        from dashboard.models import QRCodeSettings
+        qr_settings = QRCodeSettings.objects.first()
+        
+        if qr_settings and qr_settings.upi_id:
+            upi_id = qr_settings.upi_id
+        else:
+            upi_id = "9336323478@okbizaxis"  # Default fallback
+        
         merchant_name = "Grahak Sahaayata Kendra"
         transaction_note = f"Recharge Plan {plan_id}"
         
@@ -116,16 +123,27 @@ def initiate_upi_payment(request):
             f"&cu=INR"
         )
         
-        # Generate QR code
-        qr = qrcode.QRCode(version=1, box_size=10, border=5)
-        qr.add_data(upi_link)
-        qr.make(fit=True)
-        qr_image = qr.make_image(fill_color="black", back_color="white")
-        
-        # Convert QR code to base64 string
-        buffer = BytesIO()
-        qr_image.save(buffer, format="PNG")
-        qr_code_base64 = base64.b64encode(buffer.getvalue()).decode()
+        # Check if admin has uploaded a custom QR code
+        if qr_settings and qr_settings.qr_code_image:
+            # Use admin's uploaded QR code - convert to base64
+            from PIL import Image
+            
+            # Read the uploaded QR image
+            qr_image = Image.open(qr_settings.qr_code_image)
+            buffer = BytesIO()
+            qr_image.save(buffer, format="PNG")
+            qr_code_base64 = base64.b64encode(buffer.getvalue()).decode()
+        else:
+            # Generate QR code dynamically with updated UPI ID
+            qr = qrcode.QRCode(version=1, box_size=10, border=5)
+            qr.add_data(upi_link)
+            qr.make(fit=True)
+            qr_image = qr.make_image(fill_color="black", back_color="white")
+            
+            # Convert QR code to base64 string
+            buffer = BytesIO()
+            qr_image.save(buffer, format="PNG")
+            qr_code_base64 = base64.b64encode(buffer.getvalue()).decode()
         
         context = {
             'amount': amount,

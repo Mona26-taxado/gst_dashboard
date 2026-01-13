@@ -442,4 +442,24 @@ class Retailer2BillingDetails(models.Model):
         return f"Retailer 2.0 Billing {self.ref_no} - {self.customer.full_name}"
 
 
+class QRCodeSettings(models.Model):
+    """Model to store QR code image and UPI ID for all users"""
+    qr_code_image = models.ImageField(upload_to='qr_codes/', null=True, blank=True, help_text="Upload QR code image")
+    upi_id = models.CharField(max_length=100, default="9336323478@okbizaxis", help_text="UPI ID for payments")
+    updated_at = models.DateTimeField(auto_now=True)
+    updated_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='qr_updates')
+    
+    class Meta:
+        verbose_name = "QR Code Settings"
+        verbose_name_plural = "QR Code Settings"
+    
+    def __str__(self):
+        return f"QR Code Settings - Updated: {self.updated_at}"
+    
+    def save(self, *args, **kwargs):
+        # Ensure only one instance exists
+        if not self.pk:
+            # Delete any existing instances
+            QRCodeSettings.objects.all().delete()
+        super().save(*args, **kwargs)
 

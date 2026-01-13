@@ -24,9 +24,11 @@ from django.db.models.signals import pre_delete
 from django.db import IntegrityError
 from django.contrib.auth.hashers import make_password
 from django.core.exceptions import PermissionDenied
-from dashboard.models import CSCService, CSCServiceRequest
+from dashboard.models import CSCService, CSCServiceRequest, QRCodeSettings
 from dashboard.forms import CSCServiceForm
 from django.http import Http404
+import os
+from django.core.files.storage import default_storage
 
 
 
@@ -1586,3 +1588,61 @@ def csc_update_request_status(request, request_id):
 
 
 
+
+
+@login_required
+@role_required(['admin'])
+def update_qr_code(request):
+    """Admin view to update QR code and UPI ID for all users - Requires additional password"""
+    QR_PASSWORD = "Arjun@1078Q"  # Special password for QR code update
+    
+    # Check if password is verified in session
+    if not request.session.get('qr_code_password_verified', False):
+        # Show password entry form
+        if request.method == 'POST':
+            entered_password = request.POST.get('qr_password', '')
+            if entered_password == QR_PASSWORD:
+                request.session['qr_code_password_verified'] = True
+                messages.success(request, "Password verified. You can now update QR code.")
+                return redirect('update_qr_code')
+            else:
+                messages.error(request, "Invalid password. Access denied.")
+        
+        return render(request, 'admin_dashboard/qr_password_entry.html', {
+            'title': 'QR Code Update - Password Required'
+        })
+    
+    # Password verified, show the update form
+    qr_settings, created = QRCodeSettings.objects.get_or_create(pk=1)
+    if request.method == 'POST':
+        # Check if user wants to logout from QR update session
+        if 'logout_qr_session' in request.POST:
+            request.session['qr_code_password_verified'] = False
+            messages.info(request, "Session ended. Please enter password again to update QR code.")
+            return redirect('update_qr_code')
+        
+        if 'qr_code_image' in request.FILES:
+            if qr_settings.qr_code_image:
+                try:
+                    import os
+                    if os.path.isfile(qr_settings.qr_code_image.path):
+                        os.remove(qr_settings.qr_code_image.path)
+                except: pass
+            qr_settings.qr_code_image = request.FILES['qr_code_image']
+        upi_id = request.POST.get('upi_id', '')
+        if upi_id: qr_settings.upi_id = upi_id
+        qr_settings.updated_by = request.user
+        qr_settings.save()
+        from dashboard.utils import generate_qr
+        users_to_update = CustomUser.objects.filter(role__in=['retailer', 'distributor', 'master_distributor'])
+        updated_count = 0
+        for user in users_to_update:
+            try:
+                generate_qr(user.full_name, qr_settings.upi_id)
+                updated_count += 1
+            except Exception as e:
+                messages.warning(request, f"Error updating QR for {user.full_name}: {str(e)}")
+        messages.success(request, f"QR code and UPI ID updated successfully! Updated {updated_count} users.")
+        return redirect('update_qr_code')
+    context = {'qr_settings': qr_settings, 'title': 'Update QR Code'}
+    return render(request, 'admin_dashboard/update_qr_code.html', context)

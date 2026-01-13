@@ -375,49 +375,6 @@ def view_billing_details(request, billing_id):
     }
     return render(request, 'retailer_dashboard/view_billing_details.html', context)
 
-@login_required
-@role_required(['retailer'])
-def retailer_invoice(request, billing_id):
-    """Generate and display invoice for Retailer billing with editable amount"""
-    try:
-        billing = BillingDetails.objects.get(id=billing_id, user=request.user)
-    except BillingDetails.DoesNotExist:
-        messages.error(request, "Invoice not found.")
-        return redirect('retailer_view_billing')
-    
-    # Handle amount update if POST request
-    if request.method == 'POST':
-        new_amount = request.POST.get('amount')
-        if new_amount:
-            try:
-                billing.amount = Decimal(new_amount)
-                billing.save()
-                messages.success(request, "Invoice amount updated successfully!")
-            except (ValueError, TypeError):
-                messages.error(request, "Invalid amount entered.")
-        return redirect('retailer_invoice', billing_id=billing_id)
-    
-    # Get user details (retailer)
-    user = request.user
-    customer = billing.customer
-    
-    # Generate invoice_id if not exists
-    if not billing.invoice_id:
-        import uuid
-        billing.invoice_id = f"INV-{uuid.uuid4().hex[:8].upper()}"
-        billing.save()
-    
-    context = {
-        'billing': billing,
-        'user': user,
-        'customer': customer,
-        'service': billing.service,
-        'invoice_id': billing.invoice_id or billing.ref_no,
-        'billing_date': billing.billing_date,
-    }
-    
-    return render(request, 'retailer_dashboard/invoice.html', context)
-
 
 
 
@@ -528,7 +485,7 @@ def banking_portal_request(request):
     try:
         access_request = BankingPortalAccessRequest.objects.get(user=request.user)
         if access_request.is_active:
-            return redirect('https://grahakepay.com/login')  # Redirect to banking portal if already active
+            return redirect('https://taxado.finstore.app/')  # Redirect to banking portal if already active
         else:
             messages.info(request, "Your request is pending from the Bank. Please wait for approval.")
     except BankingPortalAccessRequest.DoesNotExist:
@@ -915,15 +872,7 @@ def retailer_2_add_billing(request):
             messages.error(request, "Invalid service selected.")
             return redirect('retailer_2_add_billing')
 
-        # Get custom price from form, or use service default price
-        custom_price = request.POST.get('amount')
-        if custom_price:
-            try:
-                service_price = Decimal(custom_price)
-            except (ValueError, TypeError):
-                service_price = service.wallet_deduction
-        else:
-            service_price = service.wallet_deduction
+        service_price = service.wallet_deduction
 
         # Check wallet balance
         if wallet.balance < service_price:
@@ -952,17 +901,9 @@ def retailer_2_add_billing(request):
         payment_status = request.POST.get('payment_status')
         service_status = 'Pending'
         ref_no = f"REF-942-{random.randint(100000000, 999999999)}"
-        # Generate unique invoice ID
-        import uuid
-        invoice_id = f"INV-{uuid.uuid4().hex[:8].upper()}"
-        
         id_proof = request.FILES.get('id_proof')
         address_proof = request.FILES.get('address_proof')
         photo = request.FILES.get('photo')
-        pan_card = request.POST.get('pan_card', '')
-        banking = request.FILES.get('banking')
-        others = request.FILES.get('others')
-        service_notes = request.POST.get('service_notes', '')
 
         try:
             customer = Customer.objects.get(id=customer_id, created_by=request.user)
@@ -970,73 +911,21 @@ def retailer_2_add_billing(request):
             messages.error(request, "Invalid customer selected.")
             return redirect('retailer_2_add_billing')
 
-        billing = Retailer2BillingDetails.objects.create(
+        Retailer2BillingDetails.objects.create(
             user=request.user,
             ref_no=ref_no,
             customer=customer,
             service=service,
-            amount=service_price,  # Save custom price
             payment_mode=payment_mode,
             payment_status=payment_status,
             service_status=service_status,
-            invoice_id=invoice_id,
             id_proof=id_proof,
             address_proof=address_proof,
             photo=photo,
-            pan_card=pan_card,
-            banking=banking,
-            others=others,
-            service_notes=service_notes,
         )
 
         messages.success(request, f"Billing added successfully! ₹{service_price} deducted from wallet.")
-        # Redirect to invoice page
-        return redirect('retailer_2_invoice', billing_id=billing.id)
-
-@login_required
-@role_required(['retailer_2'])
-def retailer_2_invoice(request, billing_id):
-    """Generate and display invoice for Retailer 2.0 billing"""
-    try:
-        billing = Retailer2BillingDetails.objects.get(id=billing_id, user=request.user)
-    except Retailer2BillingDetails.DoesNotExist:
-        messages.error(request, "Invoice not found.")
         return redirect('retailer_2_view_billing')
-    
-    # Handle POST request for amount update
-    if request.method == 'POST':
-        try:
-            new_amount = float(request.POST.get('amount', 0))
-            if new_amount > 0:
-                billing.amount = new_amount
-                billing.save()
-                messages.success(request, f"Invoice amount updated to ₹{new_amount:.2f}")
-            else:
-                messages.error(request, "Amount must be greater than 0.")
-        except (ValueError, TypeError):
-            messages.error(request, "Invalid amount entered.")
-        return redirect('retailer_2_invoice', billing_id=billing_id)
-    
-    # Get user details (retailer)
-    user = request.user
-    customer = billing.customer
-    
-    # Generate invoice_id if not exists
-    if not billing.invoice_id:
-        import uuid
-        billing.invoice_id = f"INV-{uuid.uuid4().hex[:8].upper()}"
-        billing.save()
-    
-    context = {
-        'billing': billing,
-        'user': user,
-        'customer': customer,
-        'service': billing.service,
-        'invoice_id': billing.invoice_id or billing.ref_no,
-        'billing_date': billing.billing_date,
-    }
-    
-    return render(request, 'retailer_2_dashboard/invoice.html', context)
 
     # Render the form
     customers = Customer.objects.filter(created_by=request.user).order_by('full_name')
@@ -1218,3 +1107,82 @@ def retailer_2_settings(request):
     }
     return render(request, 'retailer_2_dashboard/settings.html', context)
 
+@login_required
+@role_required(['retailer'])
+def retailer_invoice(request, billing_id):
+    """Generate and display invoice for Retailer billing"""
+    try:
+        billing = BillingDetails.objects.get(id=billing_id, user=request.user)
+    except BillingDetails.DoesNotExist:
+        messages.error(request, "Invoice not found.")
+        return redirect('retailer_view_billing')
+    
+    if request.method == 'POST':
+        new_amount = request.POST.get('amount')
+        if new_amount:
+            try:
+                billing.amount = Decimal(new_amount)
+                billing.save()
+                messages.success(request, "Invoice amount updated successfully!")
+                return redirect('retailer_invoice', billing_id=billing.id)
+            except Exception as e:
+                messages.error(request, f"Error updating amount: {e}")
+                return redirect('retailer_invoice', billing_id=billing.id)
+
+    user = request.user
+    customer = billing.customer
+    
+    if not billing.invoice_id:
+        billing.invoice_id = f"INV-{uuid.uuid4().hex[:8].upper()}"
+        billing.save()
+    
+    context = {
+        'billing': billing,
+        'user': user,
+        'customer': customer,
+        'service': billing.service,
+        'invoice_id': billing.invoice_id or billing.ref_no,
+        'billing_date': billing.billing_date,
+    }
+    
+    return render(request, 'retailer_dashboard/invoice.html', context)
+
+@login_required
+@role_required(['retailer_2'])
+def retailer_2_invoice(request, billing_id):
+    """Generate and display invoice for Retailer 2.0 billing"""
+    try:
+        billing = Retailer2BillingDetails.objects.get(id=billing_id, user=request.user)
+    except Retailer2BillingDetails.DoesNotExist:
+        messages.error(request, "Invoice not found.")
+        return redirect('retailer_2_view_billing')
+    
+    if request.method == 'POST':
+        new_amount = request.POST.get('amount')
+        if new_amount:
+            try:
+                billing.amount = Decimal(new_amount)
+                billing.save()
+                messages.success(request, "Invoice amount updated successfully!")
+                return redirect('retailer_2_invoice', billing_id=billing.id)
+            except Exception as e:
+                messages.error(request, f"Error updating amount: {e}")
+                return redirect('retailer_2_invoice', billing_id=billing.id)
+
+    user = request.user
+    customer = billing.customer
+    
+    if not billing.invoice_id:
+        billing.invoice_id = f"INV-R2-{uuid.uuid4().hex[:8].upper()}"
+        billing.save()
+    
+    context = {
+        'billing': billing,
+        'user': user,
+        'customer': customer,
+        'service': billing.service,
+        'invoice_id': billing.invoice_id or billing.ref_no,
+        'billing_date': billing.billing_date,
+    }
+    
+    return render(request, 'retailer_2_dashboard/invoice.html', context)
