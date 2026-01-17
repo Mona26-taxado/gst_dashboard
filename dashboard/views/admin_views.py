@@ -24,7 +24,7 @@ from django.db.models.signals import pre_delete
 from django.db import IntegrityError
 from django.contrib.auth.hashers import make_password
 from django.core.exceptions import PermissionDenied
-from dashboard.models import CSCService, CSCServiceRequest, QRCodeSettings
+from dashboard.models import CSCService, CSCServiceRequest, QRCodeSettings, UserRegistrationInvoice
 from dashboard.forms import CSCServiceForm
 from django.http import Http404
 import os
@@ -95,7 +95,24 @@ def add_gsk(request):
 
                 # Save user
                 user = form.save()
-                messages.success(request, "GSK user added successfully.")
+                
+                # Automatically create registration invoice for the user
+                try:
+                    # Check if invoice already exists (shouldn't, but safety check)
+                    if not hasattr(user, 'registration_invoice'):
+                        invoice = UserRegistrationInvoice.objects.create(
+                            user=user,
+                            amount=Decimal('0.00'),  # Default amount, can be edited later
+                            created_by=request.user,
+                            payment_status='Unpaid',
+                            payment_mode='Cash'
+                        )
+                        messages.success(request, f"GSK user added successfully. Registration invoice {invoice.invoice_id} created.")
+                    else:
+                        messages.success(request, "GSK user added successfully.")
+                except Exception as e:
+                    messages.warning(request, f"GSK user added successfully, but invoice creation failed: {str(e)}")
+                
                 return redirect('admin_view_gsk')
             except CustomUser.DoesNotExist:
                 messages.error(request, "Referred user does not exist.")
@@ -1596,31 +1613,28 @@ def update_qr_code(request):
     """Admin view to update QR code and UPI ID for all users - Requires additional password"""
     QR_PASSWORD = "Arjun@1078Q"  # Special password for QR code update
     
-    # Check if password is verified in session
+    # FIRST: Check if password is verified in session
+    # If NOT verified, show password entry form ONLY (no upload section)
     if not request.session.get('qr_code_password_verified', False):
-        # Show password entry form
+        # Show password entry form first
         if request.method == 'POST':
             entered_password = request.POST.get('qr_password', '')
             if entered_password == QR_PASSWORD:
+                # Password correct - set session and redirect to show upload form
                 request.session['qr_code_password_verified'] = True
                 messages.success(request, "Password verified. You can now update QR code.")
                 return redirect('update_qr_code')
             else:
                 messages.error(request, "Invalid password. Access denied.")
         
+        # Return password entry form (NO upload section shown)
         return render(request, 'admin_dashboard/qr_password_entry.html', {
             'title': 'QR Code Update - Password Required'
         })
     
-    # Password verified, show the update form
+    # SECOND: Password verified - NOW show the upload form
     qr_settings, created = QRCodeSettings.objects.get_or_create(pk=1)
     if request.method == 'POST':
-        # Check if user wants to logout from QR update session
-        if 'logout_qr_session' in request.POST:
-            request.session['qr_code_password_verified'] = False
-            messages.info(request, "Session ended. Please enter password again to update QR code.")
-            return redirect('update_qr_code')
-        
         if 'qr_code_image' in request.FILES:
             if qr_settings.qr_code_image:
                 try:
@@ -1643,6 +1657,112 @@ def update_qr_code(request):
             except Exception as e:
                 messages.warning(request, f"Error updating QR for {user.full_name}: {str(e)}")
         messages.success(request, f"QR code and UPI ID updated successfully! Updated {updated_count} users.")
+        
+        # Clear session after successful upload - password will be asked again next time
+        if 'qr_code_password_verified' in request.session:
+            del request.session['qr_code_password_verified']
+        
         return redirect('update_qr_code')
     context = {'qr_settings': qr_settings, 'title': 'Update QR Code'}
     return render(request, 'admin_dashboard/update_qr_code.html', context)
+
+
+@login_required
+@role_required(['admin'])
+def view_user_registration_invoice(request, user_id):
+    """View and edit user registration invoice"""
+    try:
+        user = CustomUser.objects.get(id=user_id)
+        invoice, created = UserRegistrationInvoice.objects.get_or_create(
+            user=user,
+            defaults={
+                'amount': Decimal('0.00'),
+                'created_by': request.user,
+                'payment_status': 'Unpaid',
+                'payment_mode': 'Unpaid'
+            }
+        )
+        
+        if request.method == 'POST':
+            # Update invoice details
+            new_amount = request.POST.get('amount')
+            payment_mode = request.POST.get('payment_mode')
+            payment_status = request.POST.get('payment_status')
+            notes = request.POST.get('notes', '')
+            gst_number = request.POST.get('gst_number', '').strip()
+            pan_number = request.POST.get('pan_number', '').strip()
+            
+            if new_amount:
+                try:
+                    invoice.amount = Decimal(new_amount)
+                except:
+                    messages.error(request, "Invalid amount format.")
+            
+            if payment_mode:
+                invoice.payment_mode = payment_mode
+            
+            if payment_status:
+                invoice.payment_status = payment_status
+                if payment_status == 'Paid' and not invoice.payment_date:
+                    from django.utils import timezone
+                    invoice.payment_date = timezone.now()
+                elif payment_status == 'Unpaid':
+                    invoice.payment_date = None
+            
+            invoice.notes = notes
+            invoice.gst_number = gst_number if gst_number else None
+            invoice.pan_number = pan_number if pan_number else None
+            
+            # Handle image uploads
+            if 'company_stamp' in request.FILES:
+                invoice.company_stamp = request.FILES['company_stamp']
+            if 'signature' in request.FILES:
+                invoice.signature = request.FILES['signature']
+            
+            invoice.save()
+            
+            messages.success(request, "Invoice updated successfully!")
+            return redirect('view_user_registration_invoice', user_id=user.id)
+        
+        # Calculate GST only if GST number is provided (Company account payment)
+        # If no GST number, it's personal account payment - no GST calculation
+        if invoice.gst_number:
+            # Calculate GST - Total amount includes GST, so reverse calculate
+            # If total = base + GST, and GST = 18% of base
+            # Then: total = base + (base * 0.18) = base * 1.18
+            # So: base = total / 1.18
+            total_amount = invoice.amount  # Total amount (including GST)
+            gst_rate = Decimal('0.18')  # 18% GST
+            base_amount = total_amount / (Decimal('1') + gst_rate)  # Reverse calculate base amount
+            gst_amount = total_amount - base_amount  # GST = Total - Base
+            
+            # For intra-state: CGST @9% and SGST @9%
+            # For inter-state: IGST @18%
+            cgst_amount = base_amount * Decimal('0.09')  # 9% CGST
+            sgst_amount = base_amount * Decimal('0.09')  # 9% SGST
+            igst_amount = base_amount * Decimal('0.18')  # 18% IGST
+        else:
+            # No GST - Personal account payment
+            total_amount = invoice.amount
+            base_amount = invoice.amount
+            gst_amount = Decimal('0.00')
+            cgst_amount = Decimal('0.00')
+            sgst_amount = Decimal('0.00')
+            igst_amount = Decimal('0.00')
+        
+        context = {
+            'invoice': invoice,
+            'user': user,
+            'title': f'Registration Invoice - {user.full_name}',
+            'base_amount': base_amount,
+            'gst_amount': gst_amount,
+            'total_amount': total_amount,
+            'cgst_amount': cgst_amount,
+            'sgst_amount': sgst_amount,
+            'igst_amount': igst_amount,
+        }
+        return render(request, 'admin_dashboard/user_registration_invoice.html', context)
+        
+    except CustomUser.DoesNotExist:
+        messages.error(request, "User not found.")
+        return redirect('admin_view_gsk')

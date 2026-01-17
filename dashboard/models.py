@@ -463,3 +463,41 @@ class QRCodeSettings(models.Model):
             QRCodeSettings.objects.all().delete()
         super().save(*args, **kwargs)
 
+
+class UserRegistrationInvoice(models.Model):
+    """Model for user registration invoices generated automatically when user is created"""
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='registration_invoice')
+    invoice_id = models.CharField(max_length=100, unique=True, null=True, blank=True)
+    invoice_date = models.DateTimeField(auto_now_add=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    gst_number = models.CharField(max_length=50, blank=True, null=True, help_text="Leave blank for personal account payments")
+    pan_number = models.CharField(max_length=50, blank=True, null=True, help_text="Leave blank for personal account payments")
+    payment_mode = models.CharField(
+        max_length=50, 
+        choices=[('Cash', 'Cash'), ('Online', 'Online'), ('UPI', 'UPI'), ('Bank Transfer', 'Bank Transfer')],
+        default='Cash'
+    )
+    payment_status = models.CharField(
+        max_length=50, 
+        choices=[('Paid', 'Paid'), ('Unpaid', 'Unpaid')], 
+        default='Unpaid'
+    )
+    payment_date = models.DateTimeField(null=True, blank=True)
+    notes = models.TextField(blank=True, null=True)
+    created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='created_invoices')
+    company_stamp = models.ImageField(upload_to='company_stamps/', blank=True, null=True, help_text="Company stamp/seal image")
+    signature = models.ImageField(upload_to='signatures/', blank=True, null=True, help_text="Authorized signature image")
+    
+    def save(self, *args, **kwargs):
+        if not self.invoice_id:
+            import uuid
+            self.invoice_id = f"REG-INV-{uuid.uuid4().hex[:8].upper()}"
+        super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return f"Registration Invoice {self.invoice_id} - {self.user.full_name}"
+    
+    class Meta:
+        verbose_name = "User Registration Invoice"
+        verbose_name_plural = "User Registration Invoices"
+
