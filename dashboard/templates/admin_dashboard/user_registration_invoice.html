@@ -1,0 +1,642 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}GST Tax Invoice - {{ invoice.invoice_id }}{% endblock %}
+
+{% block content %}
+<style>
+    @media print {
+        .no-print {
+            display: none !important;
+        }
+        body {
+            background: white;
+        }
+        .sidebar,
+        .navbar,
+        .navbar-wrapper,
+        .page-body-wrapper > .navbar,
+        footer,
+        .footer,
+        .main-panel > footer {
+            display: none !important;
+        }
+        .container-scroller,
+        .container-fluid,
+        .page-body-wrapper,
+        .main-panel,
+        .content-wrapper {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+        }
+        .invoice-container {
+            box-shadow: none;
+            border: none;
+            margin: 0;
+            padding: 15px !important;
+            max-width: 100% !important;
+            page-break-inside: avoid;
+        }
+        .edit-section {
+            display: none !important;
+        }
+        @page {
+            margin: 1cm;
+            size: A4;
+        }
+    }
+    
+    .invoice-container {
+        max-width: 900px;
+        margin: 30px auto;
+        background: white;
+        padding: 30px;
+        box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        border: 1px solid #000;
+        font-family: Arial, sans-serif;
+        color: #000;
+    }
+    
+    .invoice-container * {
+        color: #000 !important;
+    }
+    
+    .invoice-container a {
+        color: #000 !important;
+    }
+    
+    .company-header {
+        border-bottom: 2px solid #000;
+        padding-bottom: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .company-details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        font-size: 12px;
+        color: #000;
+    }
+    
+    .company-details strong {
+        display: inline-block;
+        width: 140px;
+        color: #000;
+    }
+    
+    .company-details p {
+        color: #000;
+    }
+    
+    .invoice-title-section {
+        text-align: center;
+        margin: 20px 0;
+        border: 2px solid #000;
+        padding: 15px;
+        background: white;
+    }
+    
+    .invoice-title-section h1 {
+        margin: 0;
+        font-size: 28px;
+        font-weight: bold;
+        letter-spacing: 2px;
+        color: #000;
+    }
+    
+    .invoice-meta-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+        border: 1px solid #000;
+    }
+    
+    .invoice-meta-table th,
+    .invoice-meta-table td {
+        border: 1px solid #000;
+        padding: 8px;
+        text-align: left;
+        font-size: 12px;
+        color: #000;
+    }
+    
+    .invoice-meta-table th {
+        background: white;
+        font-weight: bold;
+        width: 30%;
+        color: #000;
+    }
+    
+    .bill-to-section {
+        border: 1px solid #000;
+        padding: 15px;
+        margin: 20px 0;
+        background: white;
+    }
+    
+    .bill-to-section h3 {
+        margin-top: 0;
+        margin-bottom: 10px;
+        font-size: 16px;
+        border-bottom: 1px solid #000;
+        padding-bottom: 5px;
+        color: #000;
+    }
+    
+    .bill-to-section p {
+        margin: 5px 0;
+        font-size: 12px;
+        color: #000;
+    }
+    
+    .service-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+        border: 1px solid #000;
+    }
+    
+    .service-table th,
+    .service-table td {
+        border: 1px solid #000;
+        padding: 8px;
+        text-align: left;
+        font-size: 11px;
+    }
+    
+    .service-table th {
+        background: white;
+        font-weight: bold;
+        text-align: center;
+        color: #000;
+    }
+    
+    .service-table td {
+        text-align: center;
+        color: #000;
+    }
+    
+    .service-table td:last-child,
+    .service-table th:last-child {
+        text-align: right;
+    }
+    
+    .tax-calculation {
+        border: 1px solid #000;
+        padding: 15px;
+        margin: 20px 0;
+        background: white;
+    }
+    
+    .tax-calculation h3 {
+        margin-top: 0;
+        font-size: 14px;
+        border-bottom: 1px solid #000;
+        padding-bottom: 5px;
+        color: #000;
+    }
+    
+    .tax-option {
+        margin: 10px 0;
+        padding: 10px;
+        border: 1px dashed #000;
+        color: #000;
+    }
+    
+    .tax-option p {
+        color: #000;
+    }
+    
+    .total-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+        border: 1px solid #000;
+    }
+    
+    .total-table th,
+    .total-table td {
+        border: 1px solid #000;
+        padding: 10px;
+        font-size: 12px;
+    }
+    
+    .total-table th {
+        background: white;
+        font-weight: bold;
+        text-align: left;
+        width: 70%;
+        color: #000;
+    }
+    
+    .total-table td {
+        text-align: right;
+        font-weight: bold;
+        color: #000;
+    }
+    
+    .total-table tr:last-child th,
+    .total-table tr:last-child td {
+        background: white;
+        font-size: 16px;
+        font-weight: bold;
+        color: #000;
+    }
+    
+    .amount-in-words {
+        border: 1px solid #000;
+        padding: 10px;
+        margin: 20px 0;
+        background: white;
+        font-size: 12px;
+        font-weight: bold;
+        color: #000;
+    }
+    
+    .declaration-section {
+        border: 1px solid #000;
+        padding: 15px;
+        margin: 20px 0;
+        background: white;
+        font-size: 11px;
+        color: #000;
+    }
+    
+    .declaration-section h3 {
+        margin-top: 0;
+        font-size: 14px;
+        border-bottom: 1px solid #000;
+        padding-bottom: 5px;
+        color: #000;
+    }
+    
+    .declaration-section p {
+        color: #000;
+    }
+    
+    .bank-details {
+        border: 1px solid #000;
+        padding: 15px;
+        margin: 20px 0;
+        background: white;
+        font-size: 12px;
+        color: #000;
+    }
+    
+    .bank-details h3 {
+        margin-top: 0;
+        font-size: 14px;
+        border-bottom: 1px solid #000;
+        padding-bottom: 5px;
+        color: #000;
+    }
+    
+    .bank-details p {
+        margin: 5px 0;
+        color: #000;
+    }
+    
+    .signatory-section {
+        margin-top: 40px;
+        text-align: right;
+        font-size: 12px;
+        color: #000;
+        position: relative;
+    }
+    
+    .signatory-section p {
+        color: #000;
+    }
+    
+    .signatory-line {
+        border-top: 1px solid #000;
+        width: 250px;
+        margin: 60px 0 5px auto;
+        padding-top: 5px;
+    }
+    
+    .stamp-signature-container {
+        position: relative;
+        display: inline-block;
+        margin-top: 20px;
+        margin-left: auto;
+        margin-right: 0;
+        width: 300px;
+        height: 200px;
+    }
+    
+    .company-stamp {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 200px;
+        height: 200px;
+        opacity: 0.7;
+        z-index: 1;
+    }
+    
+    .signature-image {
+        position: absolute;
+        bottom: 20px;
+        right: 50px;
+        width: 150px;
+        height: auto;
+        max-height: 80px;
+        z-index: 2;
+    }
+    
+    .invoice-title-section {
+        color: #000;
+    }
+    
+    .invoice-title-section h1 {
+        color: #000;
+    }
+    
+    .edit-section {
+        background: #fff3cd;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+        border: 2px solid #ffc107;
+    }
+    
+    .edit-section h4 {
+        margin-bottom: 15px;
+        color: #856404;
+    }
+    
+    .edit-section form {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        align-items: flex-end;
+    }
+    
+    .edit-section .form-group {
+        flex: 1;
+        min-width: 200px;
+    }
+    
+    .edit-section label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 600;
+        color: #856404;
+    }
+    
+    .edit-section input,
+    .edit-section select,
+    .edit-section textarea {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #000;
+        border-radius: 4px;
+    }
+    
+    .edit-section button {
+        padding: 10px 20px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+    
+    .btn-print {
+        background: #007bff;
+        color: white;
+        padding: 12px 30px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 600;
+        margin-right: 10px;
+    }
+    
+    .btn-back {
+        background: #6c757d;
+        color: white;
+        padding: 12px 30px;
+        text-decoration: none;
+        border-radius: 5px;
+        display: inline-block;
+        font-size: 16px;
+        font-weight: 600;
+    }
+</style>
+
+<div class="invoice-container">
+    <!-- Company Header -->
+    <div class="company-header">
+        <div class="company-details">
+            <div>
+                <p><strong>Company Name:</strong> Grahak Sahaayata Kendra</p>
+                <p><strong>Registered Address:</strong> 385 HIGC Bhagat Choraha Taramandal Gorakhpur Uttar Pradesh 273001</p>
+                {% if invoice.gst_number %}
+                <p><strong>GSTIN:</strong> {{ invoice.gst_number }}</p>
+                {% endif %}
+                {% if invoice.pan_number %}
+                <p><strong>PAN:</strong> {{ invoice.pan_number }}</p>
+                {% endif %}
+                <p><strong>Email:</strong> info@grahaksahaayatakendra.com</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Invoice Meta Information -->
+    <table class="invoice-meta-table">
+        <tr>
+            <th>Invoice No.</th>
+            <td>{{ invoice.invoice_id }}</td>
+        </tr>
+        <tr>
+            <th>Invoice Date</th>
+            <td>{{ invoice.invoice_date|date:"d/m/Y" }}</td>
+        </tr>
+        <tr>
+            <th>Due Date</th>
+            <td>{{ invoice.invoice_date|date:"d/m/Y" }}</td>
+        </tr>
+        <tr>
+            <th>Place of Supply</th>
+            <td>{{ user.state|default:"__________________________" }} (Code: __________)</td>
+        </tr>
+    </table>
+    
+    <!-- Bill To Section -->
+    <div class="bill-to-section">
+        <h3>BILL TO (Customer Details)</h3>
+        <p><strong>Customer Name:</strong> {{ user.full_name }}</p>
+        <p><strong>Address:</strong> {{ user.address|default:"__________________________" }}</p>
+        <p><strong>GSTIN (if applicable):</strong> __________________________</p>
+        <p><strong>State & Code:</strong> {{ user.state|default:"__________________________" }} (Code: __________)</p>
+        <p><strong>Email:</strong> {{ user.email }}</p>
+        <p><strong>Mobile:</strong> {{ user.mobile_number|default:"__________________________" }}</p>
+    </div>
+    
+    <!-- Service Details -->
+    <table class="service-table">
+        <thead>
+            <tr>
+                <th>S. No</th>
+                <th>Description of Services</th>
+                <th>SAC Code</th>
+                <th>Qty</th>
+                <th>Rate (₹)</th>
+                <th>Amount (₹)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>User Registration Fee - {{ user.get_role_display|default:user.role }}</td>
+                <td>998314</td>
+                <td>1</td>
+                <td>{{ base_amount|floatformat:2 }}</td>
+                <td>{{ base_amount|floatformat:2 }}</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <!-- Tax Calculation (Only if GST Number is provided) -->
+    {% if invoice.gst_number %}
+    <div class="tax-calculation">
+        <h3>TAX CALCULATION</h3>
+        <div class="tax-option">
+            <strong>(For Intra-State)</strong>
+            <p>CGST @9%: ₹{{ cgst_amount|floatformat:2 }}</p>
+            <p>SGST @9%: ₹{{ sgst_amount|floatformat:2 }}</p>
+        </div>
+        <div class="tax-option">
+            <strong>OR</strong>
+        </div>
+        <div class="tax-option">
+            <strong>(For Inter-State)</strong>
+            <p>IGST @18%: ₹{{ igst_amount|floatformat:2 }}</p>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Total Amount -->
+    <table class="total-table">
+        <tr>
+            <th>Sub Total</th>
+            <td>₹{{ base_amount|floatformat:2 }}</td>
+        </tr>
+        {% if invoice.gst_number %}
+        <tr>
+            <th>Total GST</th>
+            <td>₹{{ gst_amount|floatformat:2 }}</td>
+        </tr>
+        {% endif %}
+        <tr>
+            <th>Grand Total</th>
+            <td>₹{{ total_amount|floatformat:2 }}</td>
+        </tr>
+    </table>
+    
+    <!-- Amount in Words -->
+    <div class="amount-in-words">
+        <strong>Amount in Words:</strong> Rupees {{ total_amount|floatformat:0|number_to_words }}
+    </div>
+    
+    <!-- Notes Section (Only if notes exist) -->
+    {% if invoice.notes %}
+    <div class="amount-in-words" style="margin-top: 15px;">
+        <strong>Notes:</strong> {{ invoice.notes }}
+    </div>
+    {% endif %}
+    
+    <!-- Declaration Section -->
+    <div class="declaration-section">
+        <h3>DECLARATION / TERMS</h3>
+        <p>All refund-related matters are subject to the Privacy Policy and internal guidelines of the company as displayed on the website.</p>
+        <p>This invoice is generated for record and compliance purposes and does not guarantee refund unless deemed eligible under company policy.</p>
+    </div>
+    
+    <!-- Authorized Signatory -->
+    <div class="signatory-section">
+        <p><strong>For Grahak Sahaayata Kendra</strong></p>
+        <div class="stamp-signature-container">
+            {% if invoice.company_stamp %}
+                <img src="{{ invoice.company_stamp.url }}" alt="Company Stamp" class="company-stamp">
+            {% endif %}
+            {% if invoice.signature %}
+                <img src="{{ invoice.signature.url }}" alt="Signature" class="signature-image">
+            {% endif %}
+        </div>
+        <p style="margin-top: 10px;"><strong>Date:</strong> {{ invoice.invoice_date|date:"d/m/Y" }}</p>
+    </div>
+    
+    <!-- Edit Section (No Print) -->
+    <div class="edit-section no-print">
+        <h4>✏️ Edit Invoice Details</h4>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>Amount (₹):</label>
+                <input type="number" name="amount" value="{{ invoice.amount|floatformat:2 }}" step="0.01" min="0" required>
+            </div>
+            <div class="form-group">
+                <label>Payment Mode:</label>
+                <select name="payment_mode" required>
+                    <option value="Cash" {% if invoice.payment_mode == 'Cash' %}selected{% endif %}>Cash</option>
+                    <option value="Online" {% if invoice.payment_mode == 'Online' %}selected{% endif %}>Online</option>
+                    <option value="UPI" {% if invoice.payment_mode == 'UPI' %}selected{% endif %}>UPI</option>
+                    <option value="Bank Transfer" {% if invoice.payment_mode == 'Bank Transfer' %}selected{% endif %}>Bank Transfer</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Payment Status:</label>
+                <select name="payment_status" required>
+                    <option value="Paid" {% if invoice.payment_status == 'Paid' %}selected{% endif %}>Paid</option>
+                    <option value="Unpaid" {% if invoice.payment_status == 'Unpaid' %}selected{% endif %}>Unpaid</option>
+                </select>
+            </div>
+            <div class="form-group" style="flex-basis: 100%;">
+                <label>GST Number (Leave blank for personal account):</label>
+                <input type="text" name="gst_number" value="{{ invoice.gst_number|default:'' }}" placeholder="Enter GST Number or leave blank">
+                <small style="font-size: 11px; color: #000; display: block; margin-top: 5px;">If payment is in personal account, leave blank. If in company account, enter GST number.</small>
+            </div>
+            <div class="form-group" style="flex-basis: 100%;">
+                <label>PAN Number (Leave blank for personal account):</label>
+                <input type="text" name="pan_number" value="{{ invoice.pan_number|default:'' }}" placeholder="Enter PAN Number or leave blank">
+                <small style="font-size: 11px; color: #000; display: block; margin-top: 5px;">If payment is in personal account, leave blank. If in company account, enter PAN number.</small>
+            </div>
+            <div class="form-group" style="flex-basis: 100%;">
+                <label>Notes:</label>
+                <textarea name="notes" rows="3">{{ invoice.notes|default:'' }}</textarea>
+            </div>
+            <div class="form-group" style="flex-basis: 100%;">
+                <label>Company Stamp (Mohar):</label>
+                <input type="file" name="company_stamp" accept="image/*">
+                {% if invoice.company_stamp %}
+                    <p style="font-size: 12px; color: #000; margin-top: 5px;">Current: <a href="{{ invoice.company_stamp.url }}" target="_blank">View Stamp</a></p>
+                {% endif %}
+            </div>
+            <div class="form-group" style="flex-basis: 100%;">
+                <label>Signature:</label>
+                <input type="file" name="signature" accept="image/*">
+                {% if invoice.signature %}
+                    <p style="font-size: 12px; color: #000; margin-top: 5px;">Current: <a href="{{ invoice.signature.url }}" target="_blank">View Signature</a></p>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                <button type="submit">Update Invoice</button>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="no-print" style="text-align: center; margin-top: 40px;">
+        <button onclick="window.print()" class="btn-print">🖨️ Print Invoice</button>
+        <a href="{% url 'admin_view_gsk' %}" class="btn-back">← Back to Users</a>
+    </div>
+</div>
+{% endblock %}

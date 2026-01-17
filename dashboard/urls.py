@@ -55,6 +55,7 @@ urlpatterns = [
 
     path("admin-view-transactions/", admin_view_transactions, name="view_transactions"),
     path("admin-update-qr-code/", admin_views.update_qr_code, name="update_qr_code"),
+    path("admin/user-registration-invoice/<int:user_id>/", admin_views.view_user_registration_invoice, name="view_user_registration_invoice"),
 
 
      # Admin URLs
