@@ -609,7 +609,11 @@
     <!-- Action Buttons -->
     <div class="no-print" style="text-align: center; margin-top: 40px;">
         <button onclick="window.print()" class="btn-print">🖨️ Print Invoice</button>
-        <a href="{% url 'retailer_view_billing' %}" class="btn-back">← Back to Billing</a>
+        {% if request.path|slice:":12" == "/retailer/in" %}
+            <a href="{% url 'retailer_view_billing' %}" class="btn-back">← Back to Billing</a>
+        {% else %}
+            <a href="{% url 'distributor_view_billing' %}" class="btn-back">← Back to Billing</a>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

@@ -202,4 +202,7 @@ urlpatterns = [
     # Retailer Invoice URL
     path('retailer/invoice/<int:billing_id>/', retailer_views.retailer_invoice, name='retailer_invoice'),
 
+    # Distributor Invoice URL
+    path('distributor/invoice/<int:billing_id>/', distributor_views.distributor_invoice, name='distributor_invoice'),
+
 ]

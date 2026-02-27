@@ -6,27 +6,19 @@ from dashboard.models import Customer, CustomUser
 from django.contrib import messages
 from dashboard.models import Service, BillingDetails,Transaction, Wallet, Transaction
 from dashboard.forms import AddCustomerForm, BillingDetailsForm
-from datetime import date
+from datetime import date, datetime, timedelta
 import random
-from django.http import JsonResponse
+from uuid import uuid4
+from django.http import JsonResponse, HttpResponseForbidden, HttpResponse, Http404
 from decimal import Decimal
 from django.core.paginator import Paginator
-from datetime import datetime
 import json
-from django.db.models import Sum, F
-from django.http import HttpResponseForbidden, HttpResponse
-from dashboard.models import CustomUser
+from django.db.models import Sum, F, Q, Count
+from dashboard.models import CustomUser, BankingPortalAccessRequest
+from django.utils import timezone
 import qrcode
-from django.http import Http404
 import logging
 import os
-from dashboard.models import BankingPortalAccessRequest
-from django.db.models import Q
-from dashboard.forms import AddGSKForm 
-from decimal import Decimal # Ensure this form is defined or imported
-from django.db.models import Count
-from django.utils import timezone
-from datetime import timedelta
 
 
 
@@ -514,14 +506,47 @@ def view_billing(request):
         'page_obj': page_obj,
     })
 
+@login_required
+@role_required(['distributor'])
+def distributor_invoice(request, billing_id):
+    """Generate and display invoice for Distributor billing"""
+    try:
+        billing = BillingDetails.objects.get(id=billing_id, user=request.user)
+    except BillingDetails.DoesNotExist:
+        messages.error(request, "Invoice not found.")
+        return redirect('distributor_view_billing')
+
+    if request.method == 'POST':
+        new_amount = request.POST.get('amount')
+        if new_amount:
+            try:
+                billing.amount = Decimal(new_amount)
+                billing.save()
+                messages.success(request, "Invoice amount updated successfully!")
+                return redirect('distributor_invoice', billing_id=billing.id)
+            except Exception as e:
+                messages.error(request, f"Error updating amount: {e}")
+                return redirect('distributor_invoice', billing_id=billing.id)
+
+    distributor = request.user
+    customer = billing.customer
+
+    if not billing.invoice_id:
+        billing.invoice_id = f"INV-DIS-{uuid4().hex[:8].upper()}"
+        billing.save()
+
+    context = {
+        'billing': billing,
+        'user': distributor,
+        'customer': customer,
+        'service': billing.service,
+        'invoice_id': billing.invoice_id or billing.ref_no,
+        'billing_date': billing.billing_date,
+    }
+
+    return render(request, 'distributor_dashboard/invoice.html', context)
 
 
-
-
-
-
-
-# View for editing billing details
 # View Billing Details
 def view_billing_details(request, billing_id):
     billing_details = get_object_or_404(BillingDetails, id=billing_id)
