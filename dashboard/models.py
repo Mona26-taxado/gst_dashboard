@@ -70,6 +70,8 @@ class CustomUser(AbstractUser):
         "self", on_delete=models.SET_NULL, null=True, blank=True, related_name="referrals"
     )
     wallet_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    first_login_at = models.DateTimeField(null=True, blank=True, help_text="Set on first portal login")
+    wallet_disclaimer_dismissed_at = models.DateTimeField(null=True, blank=True, help_text="When user closed the wallet recharge disclaimer")
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ['username']

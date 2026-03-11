@@ -200,7 +200,7 @@ span.badge.bg-success {
                       </div>
                       <div class="col-3 col-sm-2 col-xl-2 pl-0 text-center">
                         <span>
-                          <a href="#" target="_blank" class="btn btn-outline-light btn-rounded get-started-btn">Upgrade to PRO</a>
+                          <a href="{% url 'upgrade_to_pro' %}" class="btn btn-outline-light btn-rounded get-started-btn">Upgrade to PRO</a>
                         </span>
                       </div>
                     </div>
@@ -286,8 +286,7 @@ span.badge.bg-success {
               
             </div>
             <!-- Support Design Start -->
-            <a href="tel:+91 9129971644" class="whatsApp"><img src="{% static 'assets/images/customer-service.png'%}" class="whtsap-icon" alt="whtsap-icon"/></a>
-            
+            {% include 'dashboard/support_widget.html' %}
             <!-- Support Design End -->
             <div class="row">
               <div class="col-md-4 grid-margin stretch-card">

@@ -72,6 +72,50 @@
         background-color: #218838;
     }
 
+    /* Wallet Disclaimer Card */
+    .wallet-disclaimer-card {
+        position: relative;
+        background: linear-gradient(135deg, #1e3a5f 0%, #0d2137 100%);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 12px;
+        padding: 20px 44px 20px 20px;
+        margin-bottom: 24px;
+        color: #e2e8f0;
+        font-size: 14px;
+        line-height: 1.6;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .wallet-disclaimer-card h3 {
+        font-size: 16px;
+        margin-bottom: 12px;
+        color: #fff;
+    }
+    .wallet-disclaimer-card .disclaimer-hindi { margin-bottom: 14px; }
+    .wallet-disclaimer-card .disclaimer-english { color: #b8c5d6; }
+    .wallet-disclaimer-card .dismiss-btn {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        width: 32px;
+        height: 32px;
+        border: none;
+        background: rgba(255,255,255,0.15);
+        color: #fff;
+        font-size: 20px;
+        line-height: 1;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        transition: background 0.2s;
+    }
+    .wallet-disclaimer-card .dismiss-btn:hover {
+        background: rgba(255,255,255,0.25);
+        color: #fff;
+    }
+
     /* Responsive Design */
     @media (max-width: 768px) {
         .qr-container {
@@ -92,6 +136,25 @@
 
 <div class="container mt-10">
     <div class="cards">
+        {% if show_wallet_disclaimer %}
+        <div class="wallet-disclaimer-card" id="wallet-disclaimer-card">
+            <a href="{% url 'dismiss_wallet_disclaimer' %}?next={{ request.get_full_path|urlencode }}" class="dismiss-btn" aria-label="Close">×</a>
+            <h3>Wallet Recharge Disclaimer</h3>
+            <div class="disclaimer-hindi">
+                आप द्वारा किया गया वॉलेट रिचार्ज पूर्ण रूप से आपके वॉलेट बैलेंस में जोड़ दिया जाएगा।<br>
+                पोर्टल पर उपलब्ध किसी भी सेवा की Government Fees एवं Service Charges केवल आपके वॉलेट बैलेंस से ही काटी जाएगी।<br>
+                हम किसी भी सेवा के लिए आपके बैंक खाते, UPI या अन्य किसी भुगतान माध्यम से सीधे राशि नहीं काटते हैं।<br>
+                सेवा शुरू करने से पहले कृपया सुनिश्चित करें कि आपके वॉलेट में पर्याप्त बैलेंस उपलब्ध हो।
+            </div>
+            <div class="disclaimer-english">
+                <strong>Wallet Recharge Disclaimer</strong><br>
+                The amount recharged will be fully credited to your wallet balance.<br>
+                Government fees and service charges for any service available on the portal will be deducted only from the wallet balance.<br>
+                We do not directly debit any amount from your bank account, UPI, or any other payment method for service processing.<br>
+                Please ensure sufficient wallet balance before initiating any service.
+            </div>
+        </div>
+        {% endif %}
         <div class="d-flex justify-content-between align-items-center">
             <h2 class="card-titles mb-2">Recharge Your Wallet</h2>
             <nav aria-label="breadcrumb">
@@ -105,7 +168,7 @@
             <h2>{{ user_name }}</h2>
     
             <div class="qr-image">
-                <img src="/static/{{ qr_code }}" alt="QR Code" style="width: 300px; height: 300px;">
+                <img src="{{ qr_code_src }}" alt="QR Code" style="width: 300px; height: 300px;">
             </div>
     
     
