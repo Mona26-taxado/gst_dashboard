@@ -1,0 +1,80 @@
+{% load static %}
+<!-- Support widget: number +915517960370, popup on click and recurring reminder -->
+<a href="tel:+915517960370" class="whatsApp" id="support-fab" title="Support: +91 5517960370">
+  <img src="{% static 'assets/images/customer-service.png'%}" class="whtsap-icon" alt="Support"/>
+</a>
+<!-- Support: chota msg/toast style popup -->
+<div id="support-popup" class="support-toast" style="display: none;">
+  <span class="support-toast-text">Support: <a href="tel:+915517960370">+91 5517960370</a></span>
+  <button type="button" class="support-toast-close" id="support-popup-close" aria-label="Close">&times;</button>
+</div>
+<style>
+.support-toast {
+  position: fixed;
+  bottom: 95px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px 8px 14px;
+  background: rgba(30, 58, 95, 0.95);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  color: #e2e8f0;
+  font-size: 13px;
+  animation: supportToastIn 0.2s ease;
+}
+.support-toast-text { line-height: 1.3; }
+.support-toast-text a {
+  color: #34d399;
+  text-decoration: none;
+  font-weight: 600;
+}
+.support-toast-text a:hover { text-decoration: underline; }
+.support-toast-close {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 0 0 4px;
+}
+.support-toast-close:hover { color: #fff; }
+@keyframes supportToastIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+<script>
+(function() {
+  var SUPPORT_NUMBER = '+915517960370';
+  var POPUP_INTERVAL_MS = 60000; // bar bar: har 60 second baad popup
+  var popup = document.getElementById('support-popup');
+  var fab = document.getElementById('support-fab');
+  var closeBtn = document.getElementById('support-popup-close');
+  var intervalId = null;
+
+  function showSupportPopup() {
+    if (popup) popup.style.display = 'block';
+  }
+  function hideSupportPopup() {
+    if (popup) popup.style.display = 'none';
+  }
+
+  if (fab) {
+    fab.addEventListener('click', function(e) {
+      if (fab.classList && fab.classList.contains('demo-disabled')) return;
+      e.preventDefault();
+      showSupportPopup();
+    });
+  }
+  if (closeBtn) closeBtn.addEventListener('click', hideSupportPopup);
+  if (popup) popup.addEventListener('click', function(e) { if (e.target === popup) hideSupportPopup(); });
+
+  // Pehli baar page load par bhi popup dikhao, phir har 60 sec baad (bar bar)
+  if (popup && !document.querySelector('.demo-disabled')) {
+    setTimeout(showSupportPopup, 1500);
+    intervalId = setInterval(showSupportPopup, POPUP_INTERVAL_MS);
+  }
+})();
+</script>

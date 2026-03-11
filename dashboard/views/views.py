@@ -201,6 +201,10 @@ def custom_login_view(request):
         password = request.POST.get("password")
         user = authenticate(request, username=username, password=password)
         if user is not None:
+            # Set first_login_at on first ever portal login
+            if getattr(user, 'first_login_at', None) is None:
+                user.first_login_at = timezone.now()
+                user.save(update_fields=['first_login_at'])
             # If demo user, reset demo_start
             if hasattr(user, 'role') and user.role == 'demo':
                 now = timezone.now().timestamp()
@@ -268,7 +272,10 @@ def retailer_2_login_view(request):
                 del request.session['captcha_text']
             if 'captcha_image' in request.session:
                 del request.session['captcha_image']
-            
+            # Set first_login_at on first ever portal login
+            if getattr(user, 'first_login_at', None) is None:
+                user.first_login_at = timezone.now()
+                user.save(update_fields=['first_login_at'])
             login(request, user)
             # Redirect based on role
             if user.role == 'retailer_2':
@@ -449,27 +456,91 @@ class CustomPasswordChangeView(PasswordChangeView):
 
 
 
+@login_required
+def dismiss_wallet_disclaimer(request):
+    """Hide disclaimer for this session only; will show again after next login."""
+    request.session['wallet_disclaimer_dismissed'] = True
+    next_url = request.GET.get('next') or request.META.get('HTTP_REFERER') or '/'
+    return redirect(next_url)
+
+
+@login_required
+@role_required(['retailer', 'distributor'])
+def upgrade_to_pro(request):
+    """Upgrade options page: Retailer → Distributor, Master Distributor, Whitelabel, API. Buttons send request via WhatsApp."""
+    from urllib.parse import quote
+    role = getattr(request.user, 'role', 'retailer')
+    dashboard_url = 'distributor_dashboard' if role == 'distributor' else 'retailer_dashboard'
+    user_name = getattr(request.user, 'full_name', '') or request.user.email
+    user_role = str(role).replace('_', ' ').title()
+    wa_number = '917880732333'
+    base_msg = "Hi, I would like to request an upgrade.\nName: {}\nCurrent Role: {}\nUpgrade to: {}"
+    cards = [
+        {
+            'title': 'Retailer → Distributor',
+            'desc': 'Become a Distributor from Retailer – onboard retailers under you, manage their billing and earn commission.',
+            'wa_url': f"https://wa.me/{wa_number}?text={quote(base_msg.format(user_name, user_role, 'Retailer to Distributor'))}",
+            'btn_class': 'primary',
+        },
+        {
+            'title': 'Distributor → Master Distributor',
+            'desc': 'Become a Master Distributor – manage multiple Retailers Or Distributors and get higher tier benefits.',
+            'wa_url': f"https://wa.me/{wa_number}?text={quote(base_msg.format(user_name, user_role, 'Distributor to Master Distributor'))}",
+            'btn_class': 'success',
+        },
+        {
+            'title': 'Whitelabel',
+            'desc': 'Use the portal with your own brand – custom branding, domain and full branding control.',
+            'wa_url': f"https://wa.me/{wa_number}?text={quote(base_msg.format(user_name, user_role, 'Whitelabel'))}",
+            'btn_class': 'info',
+        },
+        {
+            'title': 'API',
+            'desc': 'Integrate services via API – API access and documentation for developers.',
+            'wa_url': f"https://wa.me/{wa_number}?text={quote(base_msg.format(user_name, user_role, 'API'))}",
+            'btn_class': 'warning',
+        },
+    ]
+    return render(request, 'dashboard/upgrade_to_pro.html', {
+        'dashboard_url': dashboard_url,
+        'cards': cards,
+    })
+
+
 @role_required(['retailer', 'distributor'])
 def generate_qr_for_recharge(request, user_id):
     try:
+        import base64
+        from io import BytesIO
+        from PIL import Image as PILImage
+
         distributor = CustomUser.objects.get(id=user_id)
         user_name = distributor.full_name
 
         # Check if admin has uploaded a custom QR code
         from dashboard.models import QRCodeSettings
         qr_settings = QRCodeSettings.objects.first()
-        
+
         if qr_settings and qr_settings.qr_code_image:
-            # Use admin's uploaded QR code
-            qr_code_path = qr_settings.qr_code_image.url
+            # Use admin's uploaded QR - embed as base64 so it works without /media/ on production
+            qr_image = PILImage.open(qr_settings.qr_code_image)
+            buffer = BytesIO()
+            qr_image.save(buffer, format="PNG")
+            qr_code_b64 = base64.b64encode(buffer.getvalue()).decode()
+            qr_code_src = f"data:image/png;base64,{qr_code_b64}"
         else:
-            # Generate the QR code dynamically
+            # Generate the QR code dynamically (static file path)
             qr_code_path = generate_qr(user_name)
+            qr_code_src = f"/static/{qr_code_path}"
+
+        # Show disclaimer unless user closed it this session; after next login it will show again.
+        show_wallet_disclaimer = not request.session.get('wallet_disclaimer_dismissed', False)
 
         return render(request, 'recharge_wallet.html', {
             'user_name': user_name,
-            'qr_code': qr_code_path,
-            'user_id': user_id,  # Pass user_id for the form action
+            'qr_code_src': qr_code_src,
+            'user_id': user_id,
+            'show_wallet_disclaimer': show_wallet_disclaimer,
         })
     except Exception as e:
         return HttpResponse(f"An error occurred: {str(e)}")

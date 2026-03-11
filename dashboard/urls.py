@@ -7,7 +7,7 @@ from .views import role_based_redirect
 from .views.admin_views import update_pin  # Correct import for admin_views
 from .views.admin_views import send_notifications, admin_view_transactions
 from .views import pin_entry, account_settings  # Import the pin_entry view
-from .views import additional_services, generate_qr_for_recharge  # Import the additional_services view
+from .views import additional_services, generate_qr_for_recharge, dismiss_wallet_disclaimer, upgrade_to_pro
 from .views.admin_views import add_gsk as admin_add_gsk, view_gsk as admin_view_gsk, add_or_deduct_money, edit_gsk, delete_gsk, service_billing, admin_view_transactions
 from dashboard.views.admin_views import manage_notifications, delete_notification, delete_service_billing, manage_access_requests
 from dashboard.views.admin_views import add_service, edit_service, delete_service # Import the necessary views
@@ -41,6 +41,8 @@ urlpatterns = [
     # Admin URLs
     path('not-authorized/', not_authorized_view, name='not_authorized'),
     path('qr-payment/<int:user_id>/', generate_qr_for_recharge, name='qr_payment'),
+    path('dismiss-wallet-disclaimer/', dismiss_wallet_disclaimer, name='dismiss_wallet_disclaimer'),
+    path('upgrade-to-pro/', upgrade_to_pro, name='upgrade_to_pro'),
 
     path('admin/dashboard/', admin_views.admin_dashboard, name='admin_dashboard'),
     path('admin/add-gsk/', admin_add_gsk, name='admin_add_gsk'),
