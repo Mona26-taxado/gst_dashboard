@@ -95,3 +95,7 @@ class AgreementAcceptanceAdmin(admin.ModelAdmin):
     search_fields = ('user__email', 'user__full_name', 'typed_name')
     readonly_fields = ('accepted_at',)
 
+    def get_model_perms(self, request):
+        # Hide this model from admin index to avoid clutter.
+        return {}
+

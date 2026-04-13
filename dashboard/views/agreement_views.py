@@ -68,6 +68,28 @@ def _sign_context(request, **extra):
     return ctx
 
 
+def _delete_acceptance_files(acc: AgreementAcceptance):
+    """Delete stored media files for old agreement rows."""
+    try:
+        if acc.signature_image:
+            acc.signature_image.delete(save=False)
+    except Exception:
+        pass
+    try:
+        if acc.pdf_file:
+            acc.pdf_file.delete(save=False)
+    except Exception:
+        pass
+
+
+def _cleanup_old_acceptances(user, keep_id: int):
+    """Keep only the latest acceptance row per user to reduce DB growth."""
+    old_rows = AgreementAcceptance.objects.filter(user=user).exclude(pk=keep_id)
+    for old in old_rows:
+        _delete_acceptance_files(old)
+    old_rows.delete()
+
+
 @role_required(ALLOWED_ROLES)
 def sign_agreement_view(request):
     terms_raw = get_terms_plain_text()
@@ -172,6 +194,7 @@ def sign_agreement_view(request):
                 )
                 pdf_name = f"agreement_{request.user.id}_{uuid.uuid4().hex[:12]}.pdf"
                 acc.pdf_file.save(pdf_name, ContentFile(pdf_bytes), save=True)
+                _cleanup_old_acceptances(request.user, keep_id=acc.id)
 
             _send_agreement_emails(request.user, acc, pdf_bytes)
             request.session.pop("agreement_block_notice_shown", None)
