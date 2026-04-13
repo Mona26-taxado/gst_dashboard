@@ -285,6 +285,19 @@ span.badge.bg-success {
               </div>
               
             </div>
+            <div class="row">
+              <div class="col-12 grid-margin stretch-card">
+                <div class="card border-primary">
+                  <div class="card-body d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <div>
+                      <h4 class="card-title mb-1">Agreement</h4>
+                      <p class="text-muted mb-0 small">Read the terms, sign on screen or upload an image, and receive the signed PDF by email.</p>
+                    </div>
+                    <a href="{% url 'sign_agreement' %}" class="btn btn-primary btn-fw">Sign Agreement</a>
+                  </div>
+                </div>
+              </div>
+            </div>
             <!-- Support Design Start -->
             {% include 'dashboard/support_widget.html' %}
             <!-- Support Design End -->

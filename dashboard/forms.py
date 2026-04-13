@@ -54,7 +54,26 @@ class AddGSKForm(forms.ModelForm):
 class ServiceForm(forms.ModelForm):
     class Meta:
         model = Service
-        fields = ['service_name', 'price',  'status']
+        fields = ["service_name", "price", "required_documents", "status"]
+        help_texts = {
+            "required_documents": "Retailers/distributors see this list on View services → View documents. Use one item per line or comma-separated values.",
+        }
+        widgets = {
+            "service_name": forms.TextInput(
+                attrs={"class": "form-control bg-dark text-white", "placeholder": "Service name"}
+            ),
+            "price": forms.NumberInput(
+                attrs={"class": "form-control bg-dark text-white", "step": "0.01", "placeholder": "Price"}
+            ),
+            "required_documents": forms.Textarea(
+                attrs={
+                    "class": "form-control bg-dark text-white",
+                    "rows": 6,
+                    "placeholder": "One document per line, or comma-separated (e.g. Aadhaar, PAN, Photo). Retailers see this on the Required documents page.",
+                }
+            ),
+            "status": forms.Select(attrs={"class": "form-control bg-dark text-white"}),
+        }
 
 
 

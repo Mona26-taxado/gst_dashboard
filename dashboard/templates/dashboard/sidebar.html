@@ -350,6 +350,20 @@
         </ul>
       </div>
     </li>
+    <li class="nav-item menu-items">
+      <a class="nav-link" data-toggle="collapse" href="#agreement-ret" aria-expanded="false" aria-controls="agreement-ret">
+        <span class="menu-icon">
+          <i class="mdi mdi-file-document-edit-outline"></i>
+        </span>
+        <span class="menu-title">Agreement</span>
+        <i class="menu-arrow"></i>
+      </a>
+      <div class="collapse" id="agreement-ret">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item"><a class="nav-link" href="{% url 'sign_agreement' %}">Sign Agreement</a></li>
+        </ul>
+      </div>
+    </li>
   </ul>
   {% endif %}
 
@@ -514,6 +528,20 @@
         <span class="menu-title">Equipment Store</span>
       </a>
     </li>
+    <li class="nav-item menu-items">
+      <a class="nav-link" data-toggle="collapse" href="#agreement-dist" aria-expanded="false" aria-controls="agreement-dist">
+        <span class="menu-icon">
+          <i class="mdi mdi-file-document-edit-outline"></i>
+        </span>
+        <span class="menu-title">Agreement</span>
+        <i class="menu-arrow"></i>
+      </a>
+      <div class="collapse" id="agreement-dist">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item"><a class="nav-link" href="{% url 'sign_agreement' %}">Sign Agreement</a></li>
+        </ul>
+      </div>
+    </li>
   </ul>
   {% endif %}
 
@@ -524,6 +552,7 @@
 
   {% if user.role == 'master_distributor' %}
   <!-- Master Distributor Menu -->
+  <ul class="nav">
   <li class="nav-item menu-items">
       <a class="nav-link" href="{% url 'master_distributor_dashboard' %}">
           <span class="menu-icon"><i class="mdi mdi-trophy"></i></span>
@@ -536,6 +565,33 @@
           <span class="menu-title">View All Services</span>
       </a>
   </li>
+  <li class="nav-item menu-items">
+      <a class="nav-link" href="{% url 'sign_agreement' %}">
+          <span class="menu-icon"><i class="mdi mdi-file-document-edit-outline"></i></span>
+          <span class="menu-title">Sign Agreement</span>
+      </a>
+  </li>
+  </ul>
+  {% endif %}
+
+  {% if user.role == 'distributor_2' %}
+  <ul class="nav">
+    <li class="nav-item nav-category">
+      <span class="nav-link">CSC 2.0</span>
+    </li>
+    <li class="nav-item menu-items">
+      <a class="nav-link" href="{% url 'distributor_2_dashboard' %}">
+        <span class="menu-icon"><i class="mdi mdi-speedometer"></i></span>
+        <span class="menu-title">Dashboard</span>
+      </a>
+    </li>
+    <li class="nav-item menu-items">
+      <a class="nav-link" href="{% url 'sign_agreement' %}">
+        <span class="menu-icon"><i class="mdi mdi-file-document-edit-outline"></i></span>
+        <span class="menu-title">Sign Agreement</span>
+      </a>
+    </li>
+  </ul>
   {% endif %}
 
   {% if user.role == 'demo' %}

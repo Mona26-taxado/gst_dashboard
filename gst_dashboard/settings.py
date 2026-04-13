@@ -51,6 +51,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'dashboard.middleware.DomainAccessMiddleware',  # Add domain access middleware
+    'dashboard.middleware.AgreementRequiredMiddleware',
     'dashboard.middleware.AdminOnlyMiddleware',
 ]
 
@@ -182,6 +183,17 @@ EMAIL_HOST_USER = 'info@grahaksahaayatakendra.com'
 EMAIL_HOST_PASSWORD = 'SAHAAYATA@123'
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = 'info@grahaksahaayatakendra.com'
+
+# Copy of signed agreements (same as portal sender by default; override in production env if needed)
+AGREEMENT_ADMIN_NOTIFY_EMAIL = os.environ.get(
+    'AGREEMENT_ADMIN_NOTIFY_EMAIL',
+    DEFAULT_FROM_EMAIL,
+)
+
+# Franchise fee shown in agreement as {{AMOUNT}} (digits only or with ₹). Leave empty for a blank line placeholder.
+AGREEMENT_FRANCHISE_FEE = os.environ.get('AGREEMENT_FRANCHISE_FEE', '').strip()
+# Optional override when you need full custom text instead of digits, e.g. "As per invoice INV-001"
+AGREEMENT_FRANCHISE_FEE_DISPLAY = os.environ.get('AGREEMENT_FRANCHISE_FEE_DISPLAY', '').strip()
 
 # Domain configuration for multi-domain setup
 # Domain for Admin, Distributor, and Retailer (v1)

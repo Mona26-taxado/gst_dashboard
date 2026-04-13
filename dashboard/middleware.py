@@ -1,7 +1,9 @@
 from django.shortcuts import redirect
 from django.conf import settings
-from django.urls import reverse
 from django.http import HttpResponseForbidden
+from django.contrib import messages
+
+from dashboard.agreement_gate import path_exempt_from_agreement, pending_agreement_signing
 
 
 
@@ -122,3 +124,34 @@ class AdminOnlyMiddleware:
         # Your existing admin middleware logic here
         response = self.get_response(request)
         return response
+
+
+class AgreementRequiredMiddleware:
+    """
+    Block portal URLs until the user has signed the active agreement version.
+    Only sign_agreement and logout (plus static/media) are allowed while pending.
+    """
+
+    _NOTICE = (
+        "Agreement required: You cannot use the rest of the portal until you read and sign "
+        "the Terms & Conditions on this page."
+    )
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        request.agreement_pending = False
+
+        if not request.user.is_authenticated:
+            return self.get_response(request)
+
+        if pending_agreement_signing(request.user):
+            request.agreement_pending = True
+            if not path_exempt_from_agreement(request):
+                if not request.session.get("agreement_block_notice_shown"):
+                    messages.warning(request, self._NOTICE)
+                    request.session["agreement_block_notice_shown"] = True
+                return redirect("sign_agreement")
+
+        return self.get_response(request)
