@@ -1,7 +1,10 @@
+from django import forms
 from django.contrib import admin
+from django.db import models
 from .models import (
     CustomUser, CSCService, CSCServiceRequest, CSCServiceDocument,
-    BillingDetails, Customer, Retailer2BillingDetails
+    BillingDetails, Customer, Retailer2BillingDetails, AgreementAcceptance,
+    PortalAgreementText,
 )
 
 
@@ -58,4 +61,37 @@ class Retailer2BillingDetailsAdmin(admin.ModelAdmin):
     search_fields = ('customer__full_name', 'service__service_name')
     readonly_fields = ('billing_date',)
 
+
+@admin.register(PortalAgreementText)
+class PortalAgreementTextAdmin(admin.ModelAdmin):
+    list_display = ("id", "updated_at")
+    readonly_fields = ("updated_at",)
+    fields = ("terms_body", "updated_at")
+    formfield_overrides = {
+        models.TextField: {
+            "widget": forms.Textarea(
+                attrs={
+                    "rows": 28,
+                    "style": "width:98%;max-width:960px;min-height:420px;font-family:inherit;",
+                }
+            )
+        }
+    }
+
+    def has_add_permission(self, request):
+        return not PortalAgreementText.objects.exists()
+
+    def has_delete_permission(self, request, obj=None):
+        return request.user.is_superuser
+
+
+@admin.register(AgreementAcceptance)
+class AgreementAcceptanceAdmin(admin.ModelAdmin):
+    list_display = (
+        'id', 'user', 'agreement_version', 'accepted_at',
+        'email_sent_status', 'ip_address',
+    )
+    list_filter = ('agreement_version', 'email_sent_status', 'accepted_at')
+    search_fields = ('user__email', 'user__full_name', 'typed_name')
+    readonly_fields = ('accepted_at',)
 

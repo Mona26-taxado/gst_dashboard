@@ -1,0 +1,11 @@
+{% extends 'retailer_2_dashboard/base.html' %}
+{% block title %}Sign Agreement — CSC{% endblock %}
+{% block content %}
+<div class="card shadow-sm border-0 mb-4">
+  <div class="card-body">
+    <h2 class="h4 mb-1">Agreement</h2>
+    <p class="text-muted small mb-0">Sign &amp; receive your copy by email.</p>
+  </div>
+</div>
+{% include 'agreement/_sign_form.html' %}
+{% endblock %}

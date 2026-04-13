@@ -123,7 +123,6 @@ class GSK(models.Model):
 class Service(models.Model):
     service_name = models.CharField(max_length=100)
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    service_charge = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
     required_documents = models.TextField(blank=True, null=True)
     billing_date = models.DateTimeField(auto_now_add=True)  # Ensure this field exists
 
@@ -134,10 +133,14 @@ class Service(models.Model):
     ]
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
 
-
-    def service_charge(self):
-        # Calculate service charge dynamically based on the price
-        return (self.price * self.service_charge_percentage) / 100
+    def required_documents_list(self):
+        """Split admin-entered text into a list (newline or comma separated)."""
+        raw = (self.required_documents or "").strip()
+        if not raw:
+            return []
+        if "\n" in raw:
+            return [line.strip() for line in raw.splitlines() if line.strip()]
+        return [part.strip() for part in raw.split(",") if part.strip()]
 
     def __str__(self):
         return self.service_name
@@ -502,4 +505,56 @@ class UserRegistrationInvoice(models.Model):
     class Meta:
         verbose_name = "User Registration Invoice"
         verbose_name_plural = "User Registration Invoices"
+
+
+class PortalAgreementText(models.Model):
+    """
+    Custom agreement wording shown on the sign page and embedded in signed PDFs.
+    Edit in Django Admin (keep a single record). If empty, built-in fallback text is used.
+    """
+
+    terms_body = models.TextField(
+        blank=True,
+        help_text="Optional: replaces the built-in agreement. Placeholders: {{DATE}} (account / ID first created), "
+        "{{NAME}}, {{USER_ID}}, {{AMOUNT}}, {{IP_ADDRESS}}, {{DEVICE}}.",
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Portal agreement text"
+        verbose_name_plural = "Portal agreement text"
+
+    def __str__(self):
+        return "Portal agreement (custom)"
+
+
+class AgreementAcceptance(models.Model):
+    """Record of a user digitally accepting portal terms (signature + PDF + audit)."""
+
+    EMAIL_STATUS = [
+        ("pending", "Pending"),
+        ("sent", "Sent"),
+        ("failed", "Failed"),
+    ]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="agreement_acceptances",
+    )
+    agreement_version = models.CharField(max_length=32)
+    accepted_at = models.DateTimeField(auto_now_add=True)
+    ip_address = models.CharField(max_length=45, blank=True)
+    user_agent = models.TextField(blank=True)
+    typed_name = models.CharField(max_length=255)
+    signature_image = models.ImageField(upload_to="agreements/signatures/")
+    pdf_file = models.FileField(upload_to="agreements/pdfs/")
+    email_sent_status = models.CharField(max_length=20, choices=EMAIL_STATUS, default="pending")
+    email_error = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["-accepted_at"]
+
+    def __str__(self):
+        return f"Agreement {self.agreement_version} — {self.user_id} @ {self.accepted_at}"
 

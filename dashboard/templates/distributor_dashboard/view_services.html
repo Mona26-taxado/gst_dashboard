@@ -99,6 +99,7 @@
                     <th>Service Name</th>
                     <th>Price</th>
                     <th>Status</th>
+                    <th>Required documents</th>
                     <th>Apply</th>
                 </tr>
             </thead>
@@ -114,12 +115,15 @@
                         </span>
                     </td>
                     <td>
+                        <a href="{% url 'distributor_service_documents' service.id %}" class="btn btn-outline-info btn-sm">View documents</a>
+                    </td>
+                    <td>
                         <a href="{% url 'distributor_add_customer' %}" class="btn btn-success btn-sm">Apply Now</a>
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="5">No services available</td>
+                    <td colspan="6">No services available</td>
                 </tr>
                 {% endfor %}
             </tbody>

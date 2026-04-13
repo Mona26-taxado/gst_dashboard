@@ -285,6 +285,19 @@ def view_services(request):
     return render(request, 'distributor_dashboard/view_services.html', context)
 
 
+@role_required(["distributor", "master_distributor"])
+def distributor_service_documents(request, service_id):
+    service = get_object_or_404(Service, pk=service_id, status="active")
+    return render(
+        request,
+        "distributor_dashboard/service_required_documents.html",
+        {
+            "service": service,
+            "document_items": service.required_documents_list(),
+        },
+    )
+
+
 
 
 

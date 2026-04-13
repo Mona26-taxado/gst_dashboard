@@ -1,0 +1,207 @@
+{% load static %}
+<style>
+  /* Dark panel: matches CRM theme; explicit colors so theme .text-muted does not wash out body text */
+  .agreement-terms-scroll {
+    box-sizing: border-box;
+    max-height: min(55vh, 520px);
+    min-height: 160px;
+    overflow-y: auto;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    padding: 1.25rem 1.2rem 1.2rem 1.2rem;
+    scroll-padding-top: 12px;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 0.375rem;
+    border: 1px solid #3d4152;
+    background: #1e2128 !important;
+    color: #e8eaef !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  }
+</style>
+<div class="row justify-content-center">
+  <div class="col-lg-10">
+    {% if not existing %}
+    <div class="alert alert-warning border-warning shadow-sm mb-4" role="alert">
+      <strong>Action required</strong>
+      <p class="mb-0 small">
+        Portal access is locked until you complete the agreement below. Other menus and pages will stay unavailable until you sign.
+      </p>
+    </div>
+    {% endif %}
+    {% if existing %}
+    <div class="card mb-4 border-success">
+      <div class="card-body">
+        <h4 class="card-title text-success">Agreement already on file</h4>
+        <p class="mb-2">You have already accepted version <strong>{{ existing.agreement_version }}</strong> on {{ existing.accepted_at|date:"d M Y, H:i" }}.</p>
+        <a class="btn btn-primary" href="{% url 'download_my_agreement' existing.id %}">Download signed PDF</a>
+      </div>
+    </div>
+    {% else %}
+    <div class="card mb-3">
+      <div class="card-body">
+        <h3 class="h5 mb-3">Terms &amp; Conditions <span class="text-muted small">(v{{ agreement_version }})</span></h3>
+        <p class="text-muted small mb-2">Please read the full agreement before signing. You must scroll to the end or use the button below.</p>
+        <button type="button" class="btn btn-outline-secondary btn-sm mb-2" id="btnReadFull">Read full agreement</button>
+        <div id="termsScroll" class="border rounded mb-2 agreement-terms-scroll">{{ terms }}</div>
+        <p class="small text-muted mb-0" id="scrollHint">Scroll to the bottom of the terms to confirm you have reviewed them.</p>
+      </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" id="agreementForm" class="card mb-5">
+      {% csrf_token %}
+      <input type="hidden" name="read_confirm" id="readConfirm" value="0" />
+      <input type="hidden" name="signature_data" id="signatureData" value="" />
+
+      <div class="card-body">
+        <div class="form-check mb-3">
+          <input class="form-check-input" type="checkbox" name="agree_terms" id="agreeTerms" value="on" required />
+          <label class="form-check-label" for="agreeTerms">
+            I have read and agree to the Terms &amp; Conditions (version {{ agreement_version }}).
+          </label>
+        </div>
+
+        <div class="mb-3">
+          <label for="typed_name" class="form-label">Type your full name <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" name="typed_name" id="typed_name" maxlength="255" required
+                 value="{{ typed_name_default|default:'' }}" placeholder="Same as you would sign on paper" autocomplete="name" />
+        </div>
+
+        <div class="mb-2">
+          <label class="form-label">Draw your signature <span class="text-danger">*</span></label>
+          <p class="small text-muted">Works with mouse or finger on mobile.</p>
+          <div class="border rounded bg-white position-relative" style="touch-action: none;">
+            <canvas id="sigPad" width="700" height="200" class="w-100" style="max-height: 200px; cursor: crosshair;"></canvas>
+          </div>
+          <button type="button" class="btn btn-link btn-sm px-0" id="clearSig">Clear signature pad</button>
+        </div>
+
+        <div class="mb-3">
+          <label for="signature_upload" class="form-label">Or upload signature image (PNG / JPG)</label>
+          <input type="file" class="form-control" name="signature_upload" id="signature_upload" accept="image/png,image/jpeg,image/jpg" />
+        </div>
+
+        <button type="submit" class="btn btn-success btn-lg" id="btnSubmit">Sign &amp; Generate Agreement</button>
+      </div>
+    </form>
+    {% endif %}
+  </div>
+</div>
+
+{% if not existing %}
+<script>
+(function () {
+  var termsEl = document.getElementById('termsScroll');
+  var readConfirm = document.getElementById('readConfirm');
+  var scrollHint = document.getElementById('scrollHint');
+  var form = document.getElementById('agreementForm');
+  var canvas = document.getElementById('sigPad');
+  if (!canvas || !form) return;
+
+  function markRead() {
+    readConfirm.value = '1';
+    if (scrollHint) {
+      scrollHint.textContent = 'Terms review confirmed. You may complete signature and submit.';
+      scrollHint.classList.remove('text-muted');
+      scrollHint.classList.add('text-success');
+    }
+  }
+
+  function onScrollTerms() {
+    if (!termsEl) return;
+    var nearBottom = termsEl.scrollHeight - termsEl.scrollTop - termsEl.clientHeight < 48;
+    if (nearBottom) markRead();
+  }
+  if (termsEl) {
+    termsEl.addEventListener('scroll', onScrollTerms);
+    // short content: no scroll needed
+    if (termsEl.scrollHeight <= termsEl.clientHeight + 8) markRead();
+  }
+
+  document.getElementById('btnReadFull')?.addEventListener('click', function () {
+    if (!termsEl) return;
+    termsEl.scrollTo({ top: termsEl.scrollHeight, behavior: 'smooth' });
+    setTimeout(markRead, 400);
+  });
+
+  var ctx = canvas.getContext('2d');
+  var hasInk = false;
+  function resizeCanvas() {
+    var r = canvas.parentElement.getBoundingClientRect();
+    var ratio = window.devicePixelRatio || 1;
+    var w = Math.floor(r.width);
+    var h = 200;
+    canvas.width = w * ratio;
+    canvas.height = h * ratio;
+    canvas.style.height = h + 'px';
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(ratio, ratio);
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = '#111';
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, w, h);
+    hasInk = false;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  var drawing = false;
+  function pos(e) {
+    var rect = canvas.getBoundingClientRect();
+    var x, y;
+    if (e.touches && e.touches[0]) {
+      x = e.touches[0].clientX - rect.left;
+      y = e.touches[0].clientY - rect.top;
+    } else {
+      x = e.clientX - rect.left;
+      y = e.clientY - rect.top;
+    }
+    return { x: x, y: y };
+  }
+  function start(e) {
+    drawing = true;
+    var p = pos(e);
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+    e.preventDefault();
+  }
+  function move(e) {
+    if (!drawing) return;
+    var p = pos(e);
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+    hasInk = true;
+    e.preventDefault();
+  }
+  function end() { drawing = false; }
+
+  canvas.addEventListener('mousedown', start);
+  canvas.addEventListener('mousemove', move);
+  window.addEventListener('mouseup', end);
+  canvas.addEventListener('touchstart', start, { passive: false });
+  canvas.addEventListener('touchmove', move, { passive: false });
+  canvas.addEventListener('touchend', end);
+
+  document.getElementById('clearSig')?.addEventListener('click', function () {
+    resizeCanvas();
+    document.getElementById('signatureData').value = '';
+  });
+
+  form.addEventListener('submit', function (e) {
+    var upload = document.getElementById('signature_upload').files.length;
+    if (!upload) {
+      if (!hasInk) {
+        e.preventDefault();
+        alert('Please draw your signature or upload an image.');
+        return;
+      }
+      document.getElementById('signatureData').value = canvas.toDataURL('image/png');
+    }
+  });
+})();
+</script>
+{% endif %}

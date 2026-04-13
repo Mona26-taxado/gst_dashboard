@@ -20,6 +20,7 @@ from .views.equipment_views import equipment_billing, equipment_payment, check_p
 from .views import initiate_upi_payment
 from dashboard.views.admin_views import change_demo_password
 from dashboard.views.views import recharge_plans_view, retailer_2_login_view, refresh_captcha
+from dashboard.views import agreement_views
 
 
  #edit_customer  Import the function from retailer_views
@@ -86,6 +87,7 @@ urlpatterns = [
     path('retailer/edit-customer/<int:customer_id>/', retailer_views.edit_customer, name='retailer_edit_customer'),
     path('retailer/delete-customer/<int:customer_id>/', retailer_views.delete_customer, name='retailer_delete_customer'),
     path('retailer/view-services/', retailer_views.view_services, name='retailer_view_services'),
+    path('retailer/view-services/<int:service_id>/documents/', retailer_views.retailer_service_documents, name='retailer_service_documents'),
     path('retailer/wallet-recharge/', wallet_recharge_view, name='wallet_recharge_page'),
     path('retailer/add-billing/', retailer_views.add_billing, name='retailer_add_billing'),
     path('banking-portal/request/', banking_portal_request, name='banking_portal_request'),
@@ -109,6 +111,7 @@ urlpatterns = [
     path('distributor/edit-customer/<int:customer_id>/', distributor_views.edit_customer, name='distributor_edit_customer'),
     path('distributor/delete-customer/<int:customer_id>/', distributor_views.delete_customer, name='distributor_delete_customer'),
     path('distributor/view-services/', distributor_views.view_services, name='distributor_view_services'),
+    path('distributor/view-services/<int:service_id>/documents/', distributor_views.distributor_service_documents, name='distributor_service_documents'),
     path('distributor/wallet-recharge/', wallet_recharge_view, name='wallet_recharge_page'),
     path('distributor/add-billing/', distributor_views.add_billing, name='distributor_add_billing'),
     path('banking-portal/request/', banking_portal_request, name='banking_portal_request'),
@@ -206,5 +209,9 @@ urlpatterns = [
 
     # Distributor Invoice URL
     path('distributor/invoice/<int:billing_id>/', distributor_views.distributor_invoice, name='distributor_invoice'),
+
+    # Agreement (retailer / distributor / CSC roles)
+    path('agreement/sign/', agreement_views.sign_agreement_view, name='sign_agreement'),
+    path('agreement/download/<int:acceptance_id>/', agreement_views.download_my_agreement, name='download_my_agreement'),
 
 ]

@@ -327,6 +327,10 @@ def admin_redirect_view(request):
 
 def role_based_redirect(request):
     user = request.user
+    from dashboard.agreement_gate import pending_agreement_signing
+
+    if pending_agreement_signing(user):
+        return redirect('sign_agreement')
     if user.role == 'admin':
         return redirect('admin_dashboard')
     elif user.role == 'retailer':

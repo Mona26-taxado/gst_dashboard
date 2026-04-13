@@ -71,33 +71,18 @@ select.form-control.bg-dark.text-white {
 <div class="card-body">
     <form method="POST" action="{% url 'edit_service' service.id %}">
         {% csrf_token %}
-        <div class="form-group">
-            <label for="service_name">Service Name</label>
-            <input type="text" class="form-control bg-dark text-white" name="service_name" placeholder="Enter Service Name"  value="{{ form.service_name.value }}" required>
+        {% for field in form %}
+        <div class="form-group mb-3">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}<small class="form-text text-muted">{{ field.help_text }}</small>{% endif %}
+            {% for err in field.errors %}
+            <div class="text-danger small">{{ err }}</div>
+            {% endfor %}
         </div>
-
-        <div class="form-group">
-            <label for="price">Price</label>
-            <input type="number" class="form-control bg-dark text-white" name="price" placeholder="Enter Price" value="{{ form.price.value }}" required>
-        </div>
-
-
-        <div class="form-group">
-            <label for="required_documents">Required Documents</label>
-            <textarea class="form-control bg-dark text-white" name="required_documents" placeholder="Write required documents" rows="3" ></textarea>
-        </div>
-
-        <div class="form-group">
-            <label for="status">Status</label>
-            <select class="form-control bg-dark text-white" name="status"  required>
-                <option value="" disabled selected>Select</option>
-                <option value="active" {% if service.status == 'active' %}selected{% endif %}>Active</option>
-                <option value="inactive" {% if service.status == 'inactive' %}selected{% endif %}>Inactive</option>
-            </select>
-        </div>
-
+        {% endfor %}
         <div class="text">
-            <button type="submit" class="btn btn-success px-5">Submit</button>
+            <button type="submit" class="btn btn-success px-5">Save</button>
         </div>
     </form>
 </div>

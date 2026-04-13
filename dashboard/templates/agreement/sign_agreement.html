@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}Sign Agreement{% endblock %}
+{% block content %}
+<style>
+  .agreement-sign-page {
+    padding-top: 1.5rem;
+    padding-bottom: 2rem;
+    max-width: 100%;
+  }
+  @media (min-width: 992px) {
+    .agreement-sign-page {
+      padding-top: 2rem;
+    }
+  }
+</style>
+<div class="container-fluid agreement-sign-page">
+  <h2 class="mb-4">Agreement</h2>
+  {% include 'agreement/_sign_form.html' %}
+</div>
+{% endblock %}
