@@ -187,7 +187,7 @@ DEFAULT_FROM_EMAIL = 'info@grahaksahaayatakendra.com'
 # Copy of signed agreements (same as portal sender by default; override in production env if needed)
 AGREEMENT_ADMIN_NOTIFY_EMAIL = os.environ.get(
     'AGREEMENT_ADMIN_NOTIFY_EMAIL',
-    DEFAULT_FROM_EMAIL,
+    'naveeng123gupta@gmail.com',
 )
 
 # Franchise fee shown in agreement as {{AMOUNT}} (digits only or with ₹). Leave empty for a blank line placeholder.
