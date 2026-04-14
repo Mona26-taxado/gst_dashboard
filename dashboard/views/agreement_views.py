@@ -238,6 +238,8 @@ def _send_agreement_emails(user: CustomUser, acc: AgreementAcceptance, pdf_bytes
     from django.core.mail import EmailMessage
 
     admin_copy = getattr(settings, "AGREEMENT_ADMIN_NOTIFY_EMAIL", None) or settings.DEFAULT_FROM_EMAIL
+    admin_cc_raw = getattr(settings, "AGREEMENT_ADMIN_NOTIFY_CC", "") or ""
+    admin_cc_list = [email.strip() for email in str(admin_cc_raw).split(",") if email.strip()]
     subject = f"Signed agreement ({acc.agreement_version}) — {user.full_name or user.email}"
     body = (
         f"Agreement version {acc.agreement_version} was digitally signed on the portal.\n\n"
@@ -249,12 +251,21 @@ def _send_agreement_emails(user: CustomUser, acc: AgreementAcceptance, pdf_bytes
     pdf_name = f"signed_agreement_{user.id}.pdf"
 
     try:
+        to_emails = []
+        for email in [user.email, admin_copy]:
+            if email and email not in to_emails:
+                to_emails.append(email)
+        cc_emails = []
+        for email in admin_cc_list:
+            if email and email not in cc_emails and email not in to_emails:
+                cc_emails.append(email)
+
         msg = EmailMessage(
             subject,
             body,
             settings.DEFAULT_FROM_EMAIL,
-            [user.email],
-            cc=[admin_copy] if admin_copy and admin_copy != user.email else [],
+            to_emails,
+            cc=cc_emails,
         )
         msg.attach(pdf_name, pdf_bytes, "application/pdf")
         msg.send(fail_silently=False)
