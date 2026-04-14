@@ -177,16 +177,20 @@ AUTH_USER_MODEL = 'dashboard.CustomUser'  # Replace 'dashboard' with your app na
 
 # Email settings
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtpout.secureserver.net'
+EMAIL_HOST = 'smtp.hostinger.com'
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'info@grahaksahaayatakendra.com'
-EMAIL_HOST_PASSWORD = 'SAHAAYATA@123'
+EMAIL_HOST_USER = 'care@grahaksahaayatakendra.com'
+EMAIL_HOST_PASSWORD = 'Mona@2603'
 EMAIL_USE_TLS = True
-DEFAULT_FROM_EMAIL = 'info@grahaksahaayatakendra.com'
+DEFAULT_FROM_EMAIL = 'care@grahaksahaayatakendra.com'
 
-# Copy of signed agreements (same as portal sender by default; override in production env if needed)
+# Copy of signed agreements (override via env in production if needed)
 AGREEMENT_ADMIN_NOTIFY_EMAIL = os.environ.get(
     'AGREEMENT_ADMIN_NOTIFY_EMAIL',
+    'care@grahaksahaayatakendra.com',
+)
+AGREEMENT_ADMIN_NOTIFY_CC = os.environ.get(
+    'AGREEMENT_ADMIN_NOTIFY_CC',
     'naveeng123gupta@gmail.com',
 )
 
