@@ -24,6 +24,13 @@
 </style>
 <div class="row justify-content-center">
   <div class="col-lg-10">
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert {% if message.tags == 'error' %}alert-danger{% elif message.tags == 'warning' %}alert-warning{% elif message.tags == 'success' %}alert-success{% else %}alert-info{% endif %} shadow-sm mb-3" role="alert">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
     {% if not existing %}
     <div class="alert alert-warning border-warning shadow-sm mb-4" role="alert">
       <strong>Action required</strong>
@@ -147,7 +154,8 @@
     hasInk = false;
   }
   resizeCanvas();
-  window.addEventListener('resize', resizeCanvas);
+  // Avoid window "resize" here: on phones, keyboard or browser UI fires resize and
+  // resizeCanvas() clears the pad (hasInk false), so submit could fail silently.
 
   var drawing = false;
   function pos(e) {
@@ -192,6 +200,11 @@
   });
 
   form.addEventListener('submit', function (e) {
+    if (readConfirm.value !== '1') {
+      e.preventDefault();
+      alert('Please scroll to the end of the terms (or use "Read full agreement") before signing.');
+      return;
+    }
     var upload = document.getElementById('signature_upload').files.length;
     if (!upload) {
       if (!hasInk) {
