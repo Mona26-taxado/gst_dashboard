@@ -13,7 +13,7 @@ Bump AGREEMENT_VERSION when legal text or meaning changes (users must re-sign).
 from django.conf import settings
 from django.utils import timezone
 
-AGREEMENT_VERSION = "2.0"
+AGREEMENT_VERSION = "2.1"
 
 
 def _user_first_account_datetime(user):
@@ -199,6 +199,9 @@ As a user of our services, you agree to:
 
 Service Fees and Payments
 Our service fees are clearly displayed before the completion of any transaction. By using our services, you agree to pay all applicable fees and charges. We reserve the right to modify our fee structure with prior notice.
+
+Wallet Balance
+Wallet Balance can only be used exclusively for services on the original platform and cannot be transferred, withdrawn, or utilized on any other platform.
 
 Intellectual Property
 All content, logos, trademarks, and other intellectual property on our website are owned by Grahak Sahaayata Kendra and are protected by applicable copyright and trademark laws. You may not use our intellectual property without our express written permission.

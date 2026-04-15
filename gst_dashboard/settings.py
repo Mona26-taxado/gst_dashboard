@@ -175,14 +175,22 @@ AUTHENTICATION_BACKENDS = [
 
 AUTH_USER_MODEL = 'dashboard.CustomUser'  # Replace 'dashboard' with your app name
 
-# Email settings
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.hostinger.com'
-EMAIL_PORT = 587
-EMAIL_HOST_USER = 'care@grahaksahaayatakendra.com'
-EMAIL_HOST_PASSWORD = 'Mona@2603'
-EMAIL_USE_TLS = True
-DEFAULT_FROM_EMAIL = 'care@grahaksahaayatakendra.com'
+# Email settings — override via environment on dev/staging hosts (many block outbound SMTP).
+# Examples (shell or hosting panel env):
+#   Real mail (same as local): set EMAIL_HOST, EMAIL_PORT, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD, DEFAULT_FROM_EMAIL.
+#   No SMTP on server: EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
+#   See mail in a file: EMAIL_BACKEND=django.core.mail.backends.filebased.EmailBackend
+#   and EMAIL_FILE_PATH=/tmp/app-mail (writable path).
+EMAIL_BACKEND = os.environ.get(
+    "EMAIL_BACKEND",
+    "django.core.mail.backends.smtp.EmailBackend",
+)
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.hostinger.com")
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "care@grahaksahaayatakendra.com")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "Mona@2603")
+EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "true").lower() in ("1", "true", "yes")
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER)
 
 # Copy of signed agreements (override via env in production if needed)
 AGREEMENT_ADMIN_NOTIFY_EMAIL = os.environ.get(
