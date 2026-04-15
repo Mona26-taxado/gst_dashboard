@@ -196,12 +196,20 @@ def sign_agreement_view(request):
                 acc.pdf_file.save(pdf_name, ContentFile(pdf_bytes), save=True)
                 _cleanup_old_acceptances(request.user, keep_id=acc.id)
 
-            _send_agreement_emails(request.user, acc, pdf_bytes)
+            email_ok = _send_agreement_emails(request.user, acc, pdf_bytes)
             request.session.pop("agreement_block_notice_shown", None)
-            messages.success(
-                request,
-                "Your agreement has been signed. A copy has been emailed to you and to the administrator.",
-            )
+            if email_ok:
+                messages.success(
+                    request,
+                    "Your agreement has been signed. A copy has been emailed to you and to the administrator.",
+                )
+            else:
+                acc.refresh_from_db(fields=["email_sent_status", "email_error"])
+                messages.warning(
+                    request,
+                    "Your agreement was saved, but we could not send the email copy. "
+                    "You can download the signed PDF from this page. If this continues, contact support.",
+                )
             return redirect("sign_agreement")
         except Exception as exc:
             logger.exception("Agreement signing failed: %s", exc)
@@ -234,7 +242,8 @@ def sign_agreement_view(request):
     )
 
 
-def _send_agreement_emails(user: CustomUser, acc: AgreementAcceptance, pdf_bytes: bytes):
+def _send_agreement_emails(user: CustomUser, acc: AgreementAcceptance, pdf_bytes: bytes) -> bool:
+    """Email signed PDF to the user; BCC admin + CC list. Returns True if SMTP reported success."""
     from django.core.mail import EmailMessage
 
     admin_copy = getattr(settings, "AGREEMENT_ADMIN_NOTIFY_EMAIL", None) or settings.DEFAULT_FROM_EMAIL
@@ -251,32 +260,47 @@ def _send_agreement_emails(user: CustomUser, acc: AgreementAcceptance, pdf_bytes
     pdf_name = f"signed_agreement_{user.id}.pdf"
 
     try:
-        to_emails = []
-        for email in [user.email, admin_copy]:
-            if email and email not in to_emails:
-                to_emails.append(email)
-        cc_emails = []
-        for email in admin_cc_list:
-            if email and email not in cc_emails and email not in to_emails:
-                cc_emails.append(email)
+        signer_email = (user.email or "").strip()
+        admin_norm = (admin_copy or "").strip()
+
+        staff_bcc_raw = []
+        for email in [admin_norm, *admin_cc_list]:
+            e = (email or "").strip()
+            if e and e not in staff_bcc_raw:
+                staff_bcc_raw.append(e)
+
+        if signer_email:
+            to_emails = [signer_email]
+            bcc_emails = [e for e in staff_bcc_raw if e.lower() != signer_email.lower()]
+        elif admin_norm:
+            # User has no email on file: deliver primary copy to admin inbox, rest as BCC.
+            to_emails = [admin_norm]
+            bcc_emails = [e for e in staff_bcc_raw if e.lower() != admin_norm.lower()]
+        else:
+            raise ValueError("No recipient addresses (user email empty and AGREEMENT_ADMIN_NOTIFY_EMAIL unset).")
+
+        if not to_emails and not bcc_emails:
+            raise ValueError("No recipient addresses configured for agreement email.")
 
         msg = EmailMessage(
             subject,
             body,
             settings.DEFAULT_FROM_EMAIL,
             to_emails,
-            cc=cc_emails,
+            bcc=bcc_emails,
         )
         msg.attach(pdf_name, pdf_bytes, "application/pdf")
         msg.send(fail_silently=False)
         acc.email_sent_status = "sent"
         acc.email_error = ""
         acc.save(update_fields=["email_sent_status", "email_error"])
+        return True
     except Exception as exc:
         logger.exception("Agreement email failed: %s", exc)
         acc.email_sent_status = "failed"
         acc.email_error = str(exc)[:500]
         acc.save(update_fields=["email_sent_status", "email_error"])
+        return False
 
 
 @role_required(ALLOWED_ROLES)
