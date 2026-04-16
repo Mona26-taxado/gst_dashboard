@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="120" viewBox="0 0 320 120" role="img" aria-label="Union Bank of India">
+  <rect width="320" height="120" rx="16" fill="#ffffff"/>
+  <g transform="translate(18,18)">
+    <rect x="0" y="0" width="84" height="84" rx="14" fill="#F05A28"/>
+    <path d="M18 52c9 10 21 16 34 16 13 0 25-6 34-16" fill="none" stroke="#1B3B8C" stroke-width="8" stroke-linecap="round"/>
+    <path d="M22 40c8-10 19-16 30-16 11 0 22 6 30 16" fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round" opacity="0.95"/>
+  </g>
+  <text x="118" y="58" font-family="Segoe UI, Roboto, Arial, sans-serif" font-size="26" font-weight="800" fill="#1B3B8C">UNION BANK</text>
+  <text x="118" y="86" font-family="Segoe UI, Roboto, Arial, sans-serif" font-size="18" font-weight="700" fill="#F05A28">OF INDIA</text>
+</svg>

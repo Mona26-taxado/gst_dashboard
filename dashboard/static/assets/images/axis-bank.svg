@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="120" viewBox="0 0 320 120" role="img" aria-label="Axis Bank">
+  <rect width="320" height="120" rx="16" fill="#ffffff"/>
+  <g transform="translate(18,18)">
+    <rect x="0" y="0" width="84" height="84" rx="14" fill="#AE1C3F"/>
+    <path d="M42 18 L64 40 L42 62 L20 40 Z" fill="#ffffff" opacity="0.95"/>
+    <path d="M42 26 L56 40 L42 54 L28 40 Z" fill="#AE1C3F"/>
+  </g>
+  <text x="118" y="58" font-family="Segoe UI, Roboto, Arial, sans-serif" font-size="34" font-weight="700" fill="#AE1C3F">AXIS</text>
+  <text x="118" y="86" font-family="Segoe UI, Roboto, Arial, sans-serif" font-size="22" font-weight="600" fill="#1f2937">BANK</text>
+</svg>
