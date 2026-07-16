@@ -1766,7 +1766,29 @@ from dashboard.forms import WhiteLabelTenantForm, WhiteLabelAdminCreateForm
 @role_required(['admin'])
 def white_label_tenant_list(request):
     tenants = WhiteLabelTenant.objects.all().order_by('name')
-    return render(request, 'admin_dashboard/white_label_tenants.html', {'tenants': tenants})
+    wl_admins = (
+        CustomUser.objects.filter(role='white_label_admin')
+        .select_related('tenant', 'wallet')
+        .order_by('tenant__name', 'full_name')
+    )
+    search_query = request.GET.get('search', '').strip()
+    if search_query:
+        wl_admins = wl_admins.filter(
+            Q(full_name__icontains=search_query)
+            | Q(email__icontains=search_query)
+            | Q(branch_id__icontains=search_query)
+            | Q(tenant__name__icontains=search_query)
+            | Q(tenant__domain__icontains=search_query)
+        )
+    return render(
+        request,
+        'admin_dashboard/white_label_tenants.html',
+        {
+            'tenants': tenants,
+            'wl_admins': wl_admins,
+            'search_query': search_query,
+        },
+    )
 
 
 @login_required

@@ -24,6 +24,11 @@
     flex-wrap: wrap;
     gap: 0.5rem;
 }
+.wl-section-title {
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+    color: #e2e8f0;
+}
 @media (max-width: 767.98px) {
     .container.mt-10 {
         padding-top: 2rem;
@@ -46,7 +51,7 @@
 {% block content %}
 <div class="container mt-10">
     <div class="wl-page-header mb-3">
-        <h2 class="card-titles mb-0">White Label Tenants</h2>
+        <h2 class="card-titles mb-0">White Label</h2>
         <div class="wl-header-actions">
             <a href="{% url 'white_label_tenant_add' %}" class="btn btn-primary">Add Tenant</a>
             <a href="{% url 'white_label_admin_create' %}" class="btn btn-secondary">Create WL Admin</a>
@@ -55,9 +60,11 @@
     <nav aria-label="breadcrumb" class="mb-3">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
-            <li class="breadcrumb-item active" aria-current="page">White Label Tenants</li>
+            <li class="breadcrumb-item active" aria-current="page">White Label</li>
         </ol>
     </nav>
+
+    <h4 class="wl-section-title">Tenants</h4>
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-striped table-bordered">
@@ -89,10 +96,58 @@
                 </tbody>
             </table>
         </div>
+    </div>
+
+    <h4 class="wl-section-title">White Label Admins</h4>
+    <form method="get" class="form-inline mb-3">
+        <input type="text" name="search" value="{{ search_query }}" class="form-control" placeholder="Search WL Admin / tenant">
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>S No</th>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Branch ID</th>
+                        <th>Tenant</th>
+                        <th>Domain</th>
+                        <th>Wallet</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for admin_user in wl_admins %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ admin_user.full_name }}</td>
+                        <td>{{ admin_user.email }}</td>
+                        <td>{{ admin_user.branch_id }}</td>
+                        <td>{% if admin_user.tenant %}{{ admin_user.tenant.name }}{% else %}—{% endif %}</td>
+                        <td>{% if admin_user.tenant %}{{ admin_user.tenant.domain }}{% else %}—{% endif %}</td>
+                        <td>
+                            {% if admin_user.wallet %}
+                                ₹{{ admin_user.wallet.balance }}
+                            {% else %}
+                                ₹0.00
+                            {% endif %}
+                        </td>
+                        <td>{% if admin_user.is_active %}Active{% else %}Inactive{% endif %}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8">No White Label Admins yet. Use "Create WL Admin" to add one.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
         <p class="text-muted mt-3 px-2">
-            After creating a tenant domain, add <code>https://&lt;domain&gt;</code> to
-            <code>CSRF_TRUSTED_ORIGINS</code> in settings for production POSTs.
-            Local test: open <code>/?tenant=&lt;slug&gt;</code>
+            Local test login: <code>/?tenant=&lt;slug&gt;</code>
+            · Production: open the tenant domain (e.g. <code>www.zingofin.in</code>).
+            · Add new domains to <code>CSRF_TRUSTED_ORIGINS</code> in settings.
         </p>
     </div>
 </div>
