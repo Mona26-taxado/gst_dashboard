@@ -20,7 +20,14 @@ from .views.equipment_views import equipment_billing, equipment_payment, check_p
 from .views import initiate_upi_payment
 from dashboard.views.admin_views import change_demo_password
 from dashboard.views.views import recharge_plans_view, retailer_2_login_view, refresh_captcha
-from dashboard.views import agreement_views
+from .views import agreement_views
+from .views import white_label_views
+from dashboard.views.admin_views import (
+    white_label_tenant_list,
+    white_label_tenant_add,
+    white_label_tenant_edit,
+    white_label_admin_create,
+)
 
 
  #edit_customer  Import the function from retailer_views
@@ -59,6 +66,21 @@ urlpatterns = [
     path("admin-view-transactions/", admin_view_transactions, name="view_transactions"),
     path("admin-update-qr-code/", admin_views.update_qr_code, name="update_qr_code"),
     path("admin/user-registration-invoice/<int:user_id>/", admin_views.view_user_registration_invoice, name="view_user_registration_invoice"),
+
+    # White Label — Super Admin
+    path("admin/white-label/tenants/", white_label_tenant_list, name="white_label_tenant_list"),
+    path("admin/white-label/tenants/add/", white_label_tenant_add, name="white_label_tenant_add"),
+    path("admin/white-label/tenants/<int:tenant_id>/edit/", white_label_tenant_edit, name="white_label_tenant_edit"),
+    path("admin/white-label/create-admin/", white_label_admin_create, name="white_label_admin_create"),
+
+    # White Label — WL Admin portal
+    path("wl/dashboard/", white_label_views.white_label_dashboard, name="white_label_dashboard"),
+    path("wl/users/add/", white_label_views.white_label_add_user, name="white_label_add_user"),
+    path("wl/users/", white_label_views.white_label_view_users, name="white_label_view_users"),
+    path("wl/users/<int:user_id>/edit/", white_label_views.white_label_edit_user, name="white_label_edit_user"),
+    path("wl/users/<int:user_id>/delete/", white_label_views.white_label_delete_user, name="white_label_delete_user"),
+    path("wl/transfer-money/", white_label_views.white_label_transfer_money, name="white_label_transfer_money"),
+    path("wl/transactions/", white_label_views.white_label_view_transactions, name="white_label_view_transactions"),
 
 
      # Admin URLs

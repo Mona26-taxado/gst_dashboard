@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load static %}
+
+<style>
+.breadcrumb-item a {
+    color: #63b3ed;
+    text-decoration: none;
+}
+.breadcrumb-item.active {
+    color: #a0aec0;
+}
+.container.mt-10 {
+    padding-top: 4rem;
+}
+.wl-page-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+}
+.wl-header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+@media (max-width: 767.98px) {
+    .container.mt-10 {
+        padding-top: 2rem;
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+    .wl-page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .wl-header-actions {
+        width: 100%;
+    }
+    .wl-header-actions .btn {
+        flex: 1 1 auto;
+    }
+}
+</style>
+
+{% block content %}
+<div class="container mt-10">
+    <div class="wl-page-header mb-3">
+        <h2 class="card-titles mb-0">White Label Tenants</h2>
+        <div class="wl-header-actions">
+            <a href="{% url 'white_label_tenant_add' %}" class="btn btn-primary">Add Tenant</a>
+            <a href="{% url 'white_label_admin_create' %}" class="btn btn-secondary">Create WL Admin</a>
+        </div>
+    </div>
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page">White Label Tenants</li>
+        </ol>
+    </nav>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Slug</th>
+                        <th>Domain</th>
+                        <th>Active</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in tenants %}
+                    <tr>
+                        <td>{{ t.name }}</td>
+                        <td>{{ t.slug }}</td>
+                        <td>{{ t.domain }}</td>
+                        <td>{% if t.is_active %}Yes{% else %}No{% endif %}</td>
+                        <td>
+                            <a href="{% url 'white_label_tenant_edit' t.id %}" class="btn btn-warning btn-sm">Edit</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5">No tenants yet. Add one to start.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <p class="text-muted mt-3 px-2">
+            After creating a tenant domain, add <code>https://&lt;domain&gt;</code> to
+            <code>CSRF_TRUSTED_ORIGINS</code> in settings for production POSTs.
+            Local test: open <code>/?tenant=&lt;slug&gt;</code>
+        </p>
+    </div>
+</div>
+{% endblock %}

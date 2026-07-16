@@ -1,0 +1,43 @@
+{% extends 'white_label_dashboard/base.html' %}
+{% block page_heading %}Transactions{% endblock %}
+{% block content %}
+<div class="wl-card">
+    <form method="get" style="display:flex;gap:0.5rem;margin-bottom:1rem;">
+        <input type="text" name="search" value="{{ search_query }}" placeholder="Search..." class="form-control" style="margin:0;">
+        <button class="btn" type="submit">Search</button>
+    </form>
+    <table>
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Balance after</th>
+                <th>Description</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for t in page_obj %}
+            <tr>
+                <td>{{ t.user.full_name }}</td>
+                <td>{{ t.transaction_type }}</td>
+                <td>₹{{ t.amount }}</td>
+                <td>₹{{ t.balance_after_transaction }}</td>
+                <td>{{ t.description }}</td>
+                <td>{{ t.created_at }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6">No transactions.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% if page_obj.has_other_pages %}
+    <div style="margin-top:1rem;">
+        {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}&search={{ search_query }}">Prev</a>{% endif %}
+        Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+        {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}&search={{ search_query }}">Next</a>{% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

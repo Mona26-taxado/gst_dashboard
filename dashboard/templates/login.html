@@ -261,8 +261,12 @@
             <div class="portal-title" style="text-align:center;">
                 <span style="color:#ff9933;">Grahak</span> <span style="color:#1976d2;">Sahaayata</span> <span style="color:#27ae60;">Kendra</span><br>
             </div>
-            
         </div>
+        {% if error %}
+        <div class="alert alert-danger" style="font-size:12px;padding:8px 12px;margin-bottom:12px;color:#b91c1c;">
+            {{ error }}
+        </div>
+        {% endif %}
         {% if form.errors %}
         <div class="alert alert-danger" style="font-size:11px;padding:8px 12px;margin-bottom:12px;">
             <i class="mdi mdi-alert-circle"></i>

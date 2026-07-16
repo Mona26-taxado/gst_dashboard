@@ -646,6 +646,8 @@ def delete_service_billing(request, billing_id):
 
 User = get_user_model()
 
+@login_required
+@role_required(['admin'])
 def add_or_deduct_money(request):
     if request.method == "POST":
         retailer_id = request.POST.get("retailer_id")
@@ -662,51 +664,36 @@ def add_or_deduct_money(request):
             messages.error(request, "Invalid amount. Please enter a valid number greater than zero.")
             return redirect("add_or_deduct_money")
 
-        # Fetch the retailer and wallet
         try:
-            retailer = User.objects.get(id=retailer_id)
-            wallet, created = Wallet.objects.get_or_create(user=retailer)
+            from dashboard.wallet_ops import WalletError, credit_debit_wallet
 
+            retailer = User.objects.get(id=retailer_id)
             if action == "add":
-                wallet.balance += amount
-                transaction_type = "Credit"
-                success_message = f"₹{amount} added to {retailer.get_full_name()}'s wallet successfully!"
+                credit_debit_wallet(retailer, amount, "Credit", description)
+                success_message = f"₹{amount} added to {retailer.get_full_name() or retailer.full_name}'s wallet successfully!"
             elif action == "deduct":
-                # Ensure sufficient wallet balance
-                if wallet.balance >= amount:
-                    wallet.balance -= amount
-                    transaction_type = "Debit"
-                    success_message = f"₹{amount} deducted from {retailer.get_full_name()}'s wallet successfully!"
-                else:
-                    messages.error(request, "Insufficient wallet balance to complete the deduction.")
-                    return redirect("add_or_deduct_money")
+                credit_debit_wallet(retailer, amount, "Debit", description)
+                success_message = f"₹{amount} deducted from {retailer.get_full_name() or retailer.full_name}'s wallet successfully!"
             else:
                 messages.error(request, "Invalid action specified.")
                 return redirect("add_or_deduct_money")
 
-            # Save wallet changes
-            wallet.save()
-
-            # Log the transaction
-            Transaction.objects.create(
-                user=retailer,
-                transaction_type=transaction_type,
-                amount=amount,
-                balance_after_transaction=wallet.balance,
-                description=description,
-            )
-
             messages.success(request, success_message)
         except User.DoesNotExist:
-            messages.error(request, "Retailer not found!")
+            messages.error(request, "User not found!")
+        except WalletError as e:
+            messages.error(request, str(e))
         except Exception as e:
             messages.error(request, f"An error occurred: {str(e)}")
 
         return redirect("view_transactions")
 
-    # Fetch all users for the dropdown in the template (including new 2.0 roles)
+    # Platform + White Label Admin wallets (Super Admin loads WL admin wallets here)
     users = User.objects.filter(
-        role__in=['retailer', 'distributor', 'master_distributor', 'retailer_2', 'distributor_2']
+        role__in=[
+            'retailer', 'distributor', 'master_distributor',
+            'retailer_2', 'distributor_2', 'white_label_admin',
+        ]
     ).exclude(role='admin').order_by('full_name')
     return render(request, "admin_dashboard/add_money.html", {"users": users})
 
@@ -1766,3 +1753,74 @@ def view_user_registration_invoice(request, user_id):
     except CustomUser.DoesNotExist:
         messages.error(request, "User not found.")
         return redirect('admin_view_gsk')
+
+
+
+# --- White Label (Super Admin) ---
+
+from dashboard.models import WhiteLabelTenant
+from dashboard.forms import WhiteLabelTenantForm, WhiteLabelAdminCreateForm
+
+
+@login_required
+@role_required(['admin'])
+def white_label_tenant_list(request):
+    tenants = WhiteLabelTenant.objects.all().order_by('name')
+    return render(request, 'admin_dashboard/white_label_tenants.html', {'tenants': tenants})
+
+
+@login_required
+@role_required(['admin'])
+def white_label_tenant_add(request):
+    if request.method == 'POST':
+        form = WhiteLabelTenantForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'White Label tenant created.')
+            return redirect('white_label_tenant_list')
+    else:
+        form = WhiteLabelTenantForm()
+    return render(request, 'admin_dashboard/white_label_tenant_form.html', {'form': form, 'title': 'Add White Label Tenant'})
+
+
+@login_required
+@role_required(['admin'])
+def white_label_tenant_edit(request, tenant_id):
+    tenant = get_object_or_404(WhiteLabelTenant, id=tenant_id)
+    if request.method == 'POST':
+        form = WhiteLabelTenantForm(request.POST, request.FILES, instance=tenant)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Tenant updated.')
+            return redirect('white_label_tenant_list')
+    else:
+        form = WhiteLabelTenantForm(instance=tenant)
+    return render(request, 'admin_dashboard/white_label_tenant_form.html', {'form': form, 'title': 'Edit White Label Tenant', 'tenant': tenant})
+
+
+@login_required
+@role_required(['admin'])
+def white_label_admin_create(request):
+    tenants = WhiteLabelTenant.objects.filter(is_active=True).order_by('name')
+    if request.method == 'POST':
+        form = WhiteLabelAdminCreateForm(request.POST)
+        tenant_id = request.POST.get('tenant_id')
+        if form.is_valid() and tenant_id:
+            try:
+                tenant = WhiteLabelTenant.objects.get(id=tenant_id, is_active=True)
+            except WhiteLabelTenant.DoesNotExist:
+                messages.error(request, 'Invalid tenant.')
+                return render(request, 'admin_dashboard/white_label_admin_create.html', {'form': form, 'tenants': tenants})
+            if CustomUser.objects.filter(tenant=tenant, role='white_label_admin').exists():
+                messages.warning(request, 'This tenant already has a White Label Admin. Creating another.')
+            user = form.save(commit=False)
+            user.tenant = tenant
+            user.role = 'white_label_admin'
+            user.save()
+            messages.success(request, 'White Label Admin created for %s.' % tenant.name)
+            return redirect('white_label_tenant_list')
+        if not tenant_id:
+            messages.error(request, 'Please select a tenant.')
+    else:
+        form = WhiteLabelAdminCreateForm()
+    return render(request, 'admin_dashboard/white_label_admin_create.html', {'form': form, 'tenants': tenants})

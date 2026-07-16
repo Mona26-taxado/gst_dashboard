@@ -698,37 +698,18 @@ def transfer_money(request):
                 messages.error(request, "Invalid retailer selected.")
                 return redirect('transfer_money')
 
-            # Validate sufficient wallet balance
-            if distributor_wallet.balance < amount:
-                messages.error(request, f"Insufficient wallet balance. Your current balance is ₹{distributor_wallet.balance}.")
-                return redirect('transfer_money')
-
-            # Get retailer's wallet or create it if not present
-            retailer_wallet, created = Wallet.objects.get_or_create(user=retailer)
-
-            # Perform the money transfer
-            distributor_wallet.balance -= amount
-            retailer_wallet.balance += amount
-            distributor_wallet.save()
-            retailer_wallet.save()
-
-            # Log the transaction
-            Transaction.objects.create(
-                user=request.user,
-                amount=amount,
-                transaction_type="Debit",
-                balance_after_transaction=distributor_wallet.balance,
-                description=f"Transferred to retailer: {retailer.full_name}"
-            )
-            Transaction.objects.create(
-                user=retailer,
-                amount=amount,
-                transaction_type="Credit",
-                balance_after_transaction=retailer_wallet.balance,
-                description=f"Received from distributor: {request.user.full_name}"
-            )
-
-            messages.success(request, f"Successfully transferred ₹{amount} to {retailer.full_name}.")
+            from dashboard.wallet_ops import WalletError, transfer_wallet
+            try:
+                transfer_wallet(
+                    request.user,
+                    retailer,
+                    amount,
+                    debit_description=f"Transferred to retailer: {retailer.full_name}",
+                    credit_description=f"Received from distributor: {request.user.full_name}",
+                )
+                messages.success(request, f"Successfully transferred ₹{amount} to {retailer.full_name}.")
+            except WalletError as e:
+                messages.error(request, str(e))
             return redirect('transfer_money')
 
         # Fetch all retailers created by the logged-in distributor
