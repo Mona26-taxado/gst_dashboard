@@ -1,0 +1,29 @@
+{% extends 'white_label_dashboard/base.html' %}
+{% block page_heading %}Add User{% endblock %}
+{% block content %}
+<div class="wl-card" style="max-width:640px;">
+    <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="form-group">
+            <label>{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}<div style="color:#fca5a5;">{{ field.errors }}</div>{% endif %}
+        </div>
+        {% endfor %}
+        <div class="form-group">
+            <label>Referred by (parent)</label>
+            <select name="referred_by" class="form-control">
+                <option value="{{ request.user.id }}">Me (White Label Admin)</option>
+                {% for p in parents %}
+                    {% if p.id != request.user.id %}
+                    <option value="{{ p.id }}">{{ p.full_name }} ({{ p.role }})</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn">Create user</button>
+        <a href="{% url 'white_label_view_users' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

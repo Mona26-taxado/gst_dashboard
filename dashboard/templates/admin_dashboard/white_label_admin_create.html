@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+{% load static %}
+
+<style>
+.card {
+    background-color: #1e293b;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+.card-header {
+    background-color: #334155;
+    border-bottom: 1px solid #718096;
+}
+.card-title {
+    color: #e2e8f0;
+}
+.form-control {
+    background-color: #2d3748;
+    color: #e2e8f0;
+    border: 1px solid #4a5568;
+    border-radius: 6px;
+    padding: 0.75rem;
+    width: 100%;
+    font-size: 16px;
+}
+.form-control:focus {
+    background-color: #2d3748;
+    border-color: #63b3ed;
+    box-shadow: 0 0 0 0.2rem rgba(99, 179, 237, 0.25);
+}
+.btn-primary {
+    background-color: #2563eb;
+    border-color: #2563eb;
+    color: #fff;
+    padding: 0.5rem 1.25rem;
+}
+.btn-primary:hover {
+    background-color: #1d4ed8;
+}
+.breadcrumb-item a {
+    color: #63b3ed;
+    text-decoration: none;
+}
+.breadcrumb-item.active {
+    color: #a0aec0;
+}
+.container.mt-10 {
+    padding-top: 4rem;
+}
+.wl-page-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+}
+.wl-form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+@media (max-width: 767.98px) {
+    .container.mt-10 {
+        padding-top: 2rem;
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+    .wl-page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .wl-page-header .breadcrumb {
+        margin-bottom: 0;
+        padding-left: 0;
+    }
+    .wl-form-actions {
+        flex-direction: column;
+    }
+    .wl-form-actions .btn {
+        width: 100%;
+    }
+    .form-group.col-md-6 {
+        margin-bottom: 1rem;
+    }
+}
+</style>
+
+{% block content %}
+<div class="container mt-10">
+    <div class="cards">
+        <div class="wl-page-header mb-2">
+            <h2 class="card-titles mb-0">Create White Label Admin</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'white_label_tenant_list' %}">White Label</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Create WL Admin</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label for="tenant_id">Tenant</label>
+                        <select name="tenant_id" id="tenant_id" class="form-control" required>
+                            <option value="">Select tenant</option>
+                            {% for t in tenants %}
+                            <option value="{{ t.id }}">{{ t.name }} ({{ t.domain }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group col-md-6">
+                        <label for="{{ form.full_name.id_for_label }}">Full Name</label>
+                        <input type="text" name="full_name" id="{{ form.full_name.id_for_label }}"
+                               class="form-control" placeholder="Enter full name"
+                               value="{{ form.full_name.value|default_if_none:'' }}" required>
+                        {% if form.full_name.errors %}
+                        <div class="text-danger">{{ form.full_name.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group col-md-6">
+                        <label for="{{ form.email.id_for_label }}">Email</label>
+                        <input type="email" name="email" id="{{ form.email.id_for_label }}"
+                               class="form-control" placeholder="Enter email"
+                               value="{{ form.email.value|default_if_none:'' }}" required>
+                        {% if form.email.errors %}
+                        <div class="text-danger">{{ form.email.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group col-md-6">
+                        <label for="{{ form.branch_id.id_for_label }}">Branch ID</label>
+                        <input type="text" name="branch_id" id="{{ form.branch_id.id_for_label }}"
+                               class="form-control" placeholder="Enter branch ID"
+                               value="{{ form.branch_id.value|default_if_none:'' }}" required>
+                        {% if form.branch_id.errors %}
+                        <div class="text-danger">{{ form.branch_id.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group col-md-6">
+                        <label for="{{ form.mobile_number.id_for_label }}">Mobile</label>
+                        <input type="text" name="mobile_number" id="{{ form.mobile_number.id_for_label }}"
+                               class="form-control" placeholder="Enter mobile number"
+                               value="{{ form.mobile_number.value|default_if_none:'' }}">
+                        {% if form.mobile_number.errors %}
+                        <div class="text-danger">{{ form.mobile_number.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group col-md-6">
+                        <label for="{{ form.dob.id_for_label }}">DOB</label>
+                        <input type="date" name="dob" id="{{ form.dob.id_for_label }}"
+                               class="form-control"
+                               value="{{ form.dob.value|default_if_none:'' }}">
+                        {% if form.dob.errors %}
+                        <div class="text-danger">{{ form.dob.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group col-md-6">
+                        <label for="{{ form.address.id_for_label }}">Address</label>
+                        <input type="text" name="address" id="{{ form.address.id_for_label }}"
+                               class="form-control" placeholder="Enter address"
+                               value="{{ form.address.value|default_if_none:'' }}">
+                        {% if form.address.errors %}
+                        <div class="text-danger">{{ form.address.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group col-md-6">
+                        <label for="{{ form.state.id_for_label }}">State</label>
+                        <input type="text" name="state" id="{{ form.state.id_for_label }}"
+                               class="form-control" placeholder="Enter state"
+                               value="{{ form.state.value|default_if_none:'' }}">
+                        {% if form.state.errors %}
+                        <div class="text-danger">{{ form.state.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group col-md-6">
+                        <label for="{{ form.city.id_for_label }}">City</label>
+                        <input type="text" name="city" id="{{ form.city.id_for_label }}"
+                               class="form-control" placeholder="Enter city"
+                               value="{{ form.city.value|default_if_none:'' }}">
+                        {% if form.city.errors %}
+                        <div class="text-danger">{{ form.city.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group col-md-6">
+                        <label for="{{ form.start_date.id_for_label }}">Start Date</label>
+                        <input type="date" name="start_date" id="{{ form.start_date.id_for_label }}"
+                               class="form-control"
+                               value="{{ form.start_date.value|default_if_none:'' }}">
+                        {% if form.start_date.errors %}
+                        <div class="text-danger">{{ form.start_date.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group col-md-6">
+                        <label for="{{ form.plain_password.id_for_label }}">Password</label>
+                        <input type="text" name="plain_password" id="{{ form.plain_password.id_for_label }}"
+                               class="form-control" placeholder="Enter password" required>
+                        {% if form.plain_password.errors %}
+                        <div class="text-danger">{{ form.plain_password.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="wl-form-actions">
+                    <button type="submit" class="btn btn-primary">Create</button>
+                    <a href="{% url 'white_label_tenant_list' %}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

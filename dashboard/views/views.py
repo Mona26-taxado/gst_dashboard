@@ -196,25 +196,50 @@ def demo_session_check(request):
 
 def custom_login_view(request):
     error = None
+    tenant = getattr(request, "tenant", None)
+    login_template = "white_label_login.html" if tenant is not None else "login.html"
+
     if request.method == "POST":
         username = request.POST.get("username")
         password = request.POST.get("password")
         user = authenticate(request, username=username, password=password)
         if user is not None:
-            # Set first_login_at on first ever portal login
-            if getattr(user, 'first_login_at', None) is None:
+            # White Label domain: only that tenant's users
+            if tenant is not None:
+                if getattr(user, "tenant_id", None) != tenant.id:
+                    error = "Invalid credentials for this portal."
+                    return render(
+                        request,
+                        login_template,
+                        {"error": error, "tenant": tenant},
+                    )
+            else:
+                # Platform login: reject WL-only users (they must use tenant domain)
+                if user.role == "white_label_admin" or (
+                    getattr(user, "tenant_id", None) is not None
+                    and user.role != "admin"
+                ):
+                    portal = getattr(getattr(user, "tenant", None), "domain", None)
+                    error = (
+                        f"Please log in at your White Label portal"
+                        + (f" ({portal})" if portal else "")
+                        + "."
+                    )
+                    return render(request, login_template, {"error": error})
+
+            if getattr(user, "first_login_at", None) is None:
                 user.first_login_at = timezone.now()
-                user.save(update_fields=['first_login_at'])
-            # If demo user, reset demo_start
-            if hasattr(user, 'role') and user.role == 'demo':
+                user.save(update_fields=["first_login_at"])
+            if hasattr(user, "role") and user.role == "demo":
                 now = timezone.now().timestamp()
-                request.session['demo_start'] = now
+                request.session["demo_start"] = now
             login(request, user)
-            return redirect('role_based_redirect')  # Redirect to role-based redirect
+            return redirect("role_based_redirect")
         else:
             error = "Invalid username or password. Please try again."
-            print("DEBUG: Error set in view")  # Debug print
-    return render(request, "login.html", {"error": error})
+
+    return render(request, login_template, {"error": error, "tenant": tenant})
+
 
 def retailer_2_login_view(request):
     """Universal login view for both Retailer 2.0 and Distributor 2.0 with domain validation and captcha."""
@@ -333,6 +358,8 @@ def role_based_redirect(request):
         return redirect('sign_agreement')
     if user.role == 'admin':
         return redirect('admin_dashboard')
+    elif user.role == 'white_label_admin':
+        return redirect('white_label_dashboard')
     elif user.role == 'retailer':
         return redirect('retailer_dashboard')
     elif user.role == 'distributor':

@@ -1,7 +1,8 @@
 from django import forms
-from dashboard.models import CustomUser
+from dashboard.models import CustomUser, WhiteLabelTenant
 from .models import Service, Customer, CSCService, CSCServiceDocument, CSCServiceRequest, Retailer2BillingDetails, BillingDetails
 from django.contrib.auth.hashers import make_password
+from django.utils.text import slugify
 
 
 
@@ -20,9 +21,19 @@ class AddGSKForm(forms.ModelForm):
         fields = ['full_name', 'email', 'role', 'branch_id', 'mobile_number', 'dob', 'address', 'state', 'city', 'start_date', 'plain_password']
 
     def __init__(self, *args, **kwargs):
+        self.allowed_roles = kwargs.pop(
+            'allowed_roles',
+            ['retailer', 'distributor', 'master_distributor', 'retailer_2', 'distributor_2'],
+        )
         super().__init__(*args, **kwargs)
         if self.instance and self.instance.pk:
             self.fields['plain_password'].initial = self.instance.plain_password
+        if 'role' in self.fields:
+            self.fields['role'].choices = [
+                (value, label)
+                for value, label in CustomUser._meta.get_field('role').choices
+                if value in self.allowed_roles
+            ]
 
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -39,9 +50,65 @@ class AddGSKForm(forms.ModelForm):
 
     def clean_role(self):
         role = self.cleaned_data.get('role')
-        if role not in ['retailer', 'distributor', 'master_distributor', 'retailer_2', 'distributor_2']:
+        if role not in self.allowed_roles:
             raise forms.ValidationError("Invalid role selected.")
         return role
+
+
+class WhiteLabelTenantForm(forms.ModelForm):
+    class Meta:
+        model = WhiteLabelTenant
+        fields = [
+            'name', 'slug', 'domain', 'logo', 'favicon',
+            'primary_color', 'secondary_color', 'is_active',
+        ]
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Company name'}),
+            'slug': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'client-slug'}),
+            'domain': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'portal.client.com'}
+            ),
+            'logo': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+            'favicon': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+            'primary_color': forms.TextInput(attrs={'class': 'form-control wl-color-input', 'type': 'color'}),
+            'secondary_color': forms.TextInput(attrs={'class': 'form-control wl-color-input', 'type': 'color'}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+    def clean_domain(self):
+        domain = (self.cleaned_data.get('domain') or '').strip().lower()
+        domain = domain.replace('https://', '').replace('http://', '').rstrip('/')
+        if '/' in domain:
+            raise forms.ValidationError("Enter host only, e.g. portal.client.com")
+        return domain
+
+    def clean_slug(self):
+        slug = self.cleaned_data.get('slug') or ''
+        if not slug and self.cleaned_data.get('name'):
+            slug = slugify(self.cleaned_data['name'])
+        return slug
+
+
+class WhiteLabelAdminCreateForm(AddGSKForm):
+    """Super Admin creates a white_label_admin linked to a tenant."""
+
+    class Meta(AddGSKForm.Meta):
+        fields = [
+            'full_name', 'email', 'branch_id', 'mobile_number',
+            'dob', 'address', 'state', 'city', 'start_date', 'plain_password',
+        ]
+
+    def __init__(self, *args, **kwargs):
+        kwargs['allowed_roles'] = ['white_label_admin']
+        super().__init__(*args, **kwargs)
+        self.fields.pop('role', None)
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.role = 'white_label_admin'
+        if commit:
+            user.save()
+        return user
 
 
 

@@ -1,0 +1,25 @@
+{% extends 'white_label_dashboard/base.html' %}
+{% block page_heading %}Transfer Wallet{% endblock %}
+{% block content %}
+<div class="wl-card" style="max-width:520px;">
+    <p style="margin-bottom:1rem;">Available balance: <strong>₹{{ wallet_balance }}</strong></p>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label>Recipient</label>
+            <select name="recipient_id" required class="form-control">
+                {% for r in recipients %}
+                <option value="{{ r.id }}">{{ r.full_name }} ({{ r.role }})</option>
+                {% empty %}
+                <option value="">No users available</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Amount</label>
+            <input type="number" step="0.01" min="0.01" name="amount" required class="form-control">
+        </div>
+        <button type="submit" class="btn">Transfer</button>
+    </form>
+</div>
+{% endblock %}

@@ -71,6 +71,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'dashboard.context_processors.tenant_branding',
             ],
         },
     },
@@ -237,7 +238,8 @@ CSC_ALLOWED_DOMAINS = [
 RETAILER_2_ALLOWED_DOMAINS = CSC_ALLOWED_DOMAINS
 REGULAR_LOGIN_DOMAINS = CRM_ALLOWED_DOMAINS
 
-# CSRF Trusted Origins - Required for CSRF protection
+# CSRF Trusted Origins - Required for CSRF protection.
+# When adding a White Label tenant domain, also add https://<domain> here.
 CSRF_TRUSTED_ORIGINS = [
     'https://crm.grahaksahaayatakendra.com',
     'https://www.crm.grahaksahaayatakendra.com',

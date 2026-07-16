@@ -1,0 +1,12 @@
+{% extends 'white_label_dashboard/base.html' %}
+{% block page_heading %}Delete User{% endblock %}
+{% block content %}
+<div class="wl-card" style="max-width:480px;">
+    <p>Delete <strong>{{ gsk.full_name }}</strong> ({{ gsk.role }})?</p>
+    <form method="post" style="margin-top:1rem;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Confirm delete</button>
+        <a href="{% url 'white_label_view_users' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

@@ -24,6 +24,29 @@ class ServiceRequest(models.Model):
 # Role Based Access
 
 
+class WhiteLabelTenant(models.Model):
+    """White-label client: own domain + branding. Platform users keep tenant=NULL."""
+
+    name = models.CharField(max_length=255)
+    slug = models.SlugField(max_length=100, unique=True)
+    domain = models.CharField(
+        max_length=255,
+        unique=True,
+        help_text="Host only, e.g. portal.client.com (no https://)",
+    )
+    logo = models.ImageField(upload_to="white_label/logos/", null=True, blank=True)
+    favicon = models.ImageField(upload_to="white_label/favicons/", null=True, blank=True)
+    primary_color = models.CharField(max_length=20, default="#0d9488")
+    secondary_color = models.CharField(max_length=20, default="#0ea5e9")
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return f"{self.name} ({self.domain})"
+
 
 class CustomUser(AbstractUser):
     # Use email as the login identifier
@@ -55,6 +78,7 @@ class CustomUser(AbstractUser):
         max_length=50,
         choices=[
             ("admin", "Admin"),
+            ("white_label_admin", "White Label Admin"),
             ("retailer", "Retailer"),
             ("distributor", "Distributor"),
             ("master_distributor", "Master Distributor"),
@@ -68,6 +92,14 @@ class CustomUser(AbstractUser):
     
     referred_by = models.ForeignKey(
         "self", on_delete=models.SET_NULL, null=True, blank=True, related_name="referrals"
+    )
+    tenant = models.ForeignKey(
+        WhiteLabelTenant,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="users",
+        help_text="NULL = platform (existing GSK). Set for white-label subtree users.",
     )
     wallet_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     first_login_at = models.DateTimeField(null=True, blank=True, help_text="Set on first portal login")

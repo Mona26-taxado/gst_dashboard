@@ -7,13 +7,13 @@ Placeholders in admin or default text (replaced at view/PDF time):
 
 Custom body: Django Admin → Portal agreement text (overrides default).
 
-Bump AGREEMENT_VERSION when legal text or meaning changes (users must re-sign).
+Bump AGREEMENT_VERSION when legal text or meaning changes.
 """
 
 from django.conf import settings
 from django.utils import timezone
 
-AGREEMENT_VERSION = "2.1"
+AGREEMENT_VERSION = "2.2"
 
 
 def _user_first_account_datetime(user):
@@ -111,15 +111,9 @@ TAXADO TECHNOLOGY PRIVATE LIMITED
 385 HIGC, Sidharth Enclave, Taramandal,
 Gorakhpur, Uttar Pardesh - 273001.
 
-Subject: Franchise Agreement
+Subject: Franchise Service Agreement
 
-Dear Taxado Technology Private Limited,
-
-I am writing to express my interest in entering into a franchise agreement with TAXADO TECHNOLOGY PRIVATE LIMITED for the operation of a GRAHAK SAHAAYATA KENDRA franchise. As per our discussions and negotiations, I believe this agreement will provide a mutually beneficial opportunity for both parties.
-
-I have thoroughly reviewed the franchise disclosure document and other relevant materials provided by TAXADO TECHNOLOGY PRIVATE LIMITED, and I am confident in the potential success of the GRAHAK SAHAAYATA KENDRA franchise in my desired location.
-
-To proceed with the franchise, I would like to propose the following terms and conditions for the franchise agreement:
+This Franchise Service Agreement ("Agreement") is entered into by and between TAXADO TECHNOLOGY PRIVATE LIMITED ("Company") and {{NAME}} ("Franchisee") on {{DATE}}. By signing and digitally accepting this Agreement, the Franchisee confirms that all terms have been read, understood, and accepted.
 
 1. Territory:
 - The designated territory for the franchise will be {{STATE}}.
@@ -149,12 +143,12 @@ To proceed with the franchise, I would like to propose the following terms and c
 - I will promptly report and address any operational issues or concerns that may arise.
 - I will maintain accurate records of sales, expenses, and other financial data as required by TAXADO TECHNOLOGY PRIVATE LIMITED.
 
-7. Termination:
+7. Termination and Fees:
 - Either party may terminate this agreement upon providing 25 Year written notice to the other party.
 - Termination may occur in the event of a material breach of the franchise agreement, failure to meet performance standards, or other specified circumstances as outlined in the agreement.
-- The specific circumstances under which an amount may be deemed non-refundable can vary depending on the terms and conditions set by the company. It's important for customers to carefully read and understand the terms and conditions or any agreements they enter into with a company to be aware of any non-refundable amounts.
-- Certain services: Some services, such as consultations, professional advice, or specialized services, may be subject to non-refundable fees due to the time and expertise involved. If the customer cancels or decides not to proceed with the service, the company may retain the non-refundable portion of the payment.
-- It's crucial for both companies and customers to have clear communication and understanding regarding non-refundable amounts to avoid any misunderstandings or disputes.
+- Franchise activation fees, onboarding charges, processing fees, and wallet top-ups are strictly non-refundable once paid, except where refund is expressly required under applicable law.
+- Fees paid toward services already initiated, submitted, or delivered (fully or partially) are non-refundable.
+- The Franchisee acknowledges and agrees that this non-refundable commitment is a material and binding term of this Agreement.
 
 8. Services:
 The Service Provider agrees to provide the following services to the Client by GRAHAK SAHAAYATA KENDRA:
@@ -163,19 +157,26 @@ Pan Card, GST Registration, Ration Card, Government to Citizens Service, Voter I
 9. Governing Law and Dispute Resolution:
 This Agreement shall be governed by and construed in accordance with the laws of . Any disputes arising out of or relating to this Agreement shall be resolved through good-faith negotiations between the Parties. If the Parties are unable to reach a resolution, the dispute shall be referred to mediation or arbitration in accordance with the laws of [Jurisdiction].
 
-10. Entire Agreement:
+10. Service Delivery:
+- The Company shall use reasonable efforts to provide the listed services through the GRAHAK SAHAAYATA KENDRA platform and support channels.
+- Service timelines are indicative and may vary based on government authority processing time, third-party systems, technical downtime, document quality, or legal verification requirements.
+- Delivery of service shall be treated as completed when the application/request is submitted, processed, or actioned by the Company or relevant authority, as applicable.
+- The Franchisee shall provide complete and correct documents/information; delays or rejection caused by incorrect or incomplete information shall not be treated as service deficiency by the Company.
+
+11. Electronic Acceptance, OTP, Timestamp, and IP Logging:
+- The Franchisee expressly agrees that digital acceptance through OTP verification on the registered mobile number shall be treated as valid and legally enforceable execution of this Agreement.
+- The platform records transaction timestamp, source IP address ({{IP_ADDRESS}}), and device/user-agent details ({{DEVICE}}) for authentication, audit, and legal compliance.
+- Such electronic records shall be admissible evidence of acceptance, consent, and execution by the Franchisee, subject to applicable law.
+
+12. Entire Agreement:
 This Agreement constitutes the entire understanding and agreement between the Parties and supersedes any prior agreements, whether written or oral, relating to the subject matter herein.
 
-11. Amendment and Waiver:
+13. Amendment and Waiver:
 Any amendment or waiver of this Agreement must be in writing and signed by both Parties.
 
 Please indicate your acceptance of the terms and conditions outlined in this Agreement by signing below. This Agreement may be executed in counterparts, each of which shall be deemed an original, but all of which together shall constitute one and the same instrument.
 
-This letter represents a preliminary proposal for the franchise agreement, and I am open to further negotiations and discussions to finalize the terms and conditions. I kindly request your review and consideration of the proposed terms. If you agree, I would be grateful if you could provide a franchise agreement draft based on these terms, or suggest any modifications or additions that you deem necessary.
-
-Thank you for considering my application. I look forward to the opportunity to become a valued franchisee of Taxado Technology Private Limited. Should you require any additional information or documentation, please do not hesitate to contact me.
-
-12. Terms and Conditions:
+14. Terms and Conditions:
 These Terms and Conditions govern your use of our website and services. By accessing or using our services, you agree to be bound by these terms.
 
 Acceptance of Terms
@@ -218,7 +219,7 @@ These Terms and Conditions shall be governed by and construed in accordance with
 Changes to Terms
 We reserve the right to modify these Terms and Conditions at any time. We will notify users of any material changes by posting the updated terms on our website. Your continued use of our services after such modifications constitutes your acceptance of the updated terms.
 
-13. Privacy Policy:
+15. Privacy Policy:
 This Privacy Policy explains how we collect, use, disclose, and safeguard your personal information when you visit or use our Service.
 
 Information We Collect
@@ -275,7 +276,7 @@ Our Service is not directed to children under 18. We do not knowingly collect pe
 Changes to This Policy
 We may update this Privacy Policy from time to time. We will notify you of material changes by posting the new policy on this page with a revised "Last updated" date.
 
-14. Refund and Return Policy:
+16. Refund and Return Policy:
 This Refund & Return Policy outlines when and how you may request refunds or returns, and the process we follow to address them.
 
 Scope
@@ -344,7 +345,7 @@ Cancellations
 Chargebacks
 If you dispute a transaction with your bank or payment provider, we may suspend your account until the investigation is resolved. If the chargeback is found invalid, we reserve the right to recover the disputed amount and any associated fees.
 
-15. Cancellation Policy:
+17. Cancellation Policy:
 This Cancellation Policy explains when and how you can cancel, any applicable fees, and our rights to cancel services.
 
 Scope

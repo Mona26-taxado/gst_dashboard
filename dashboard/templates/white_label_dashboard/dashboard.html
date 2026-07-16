@@ -1,0 +1,32 @@
+{% extends 'white_label_dashboard/base.html' %}
+{% block title %}Dashboard — {{ tenant.name }}{% endblock %}
+{% block page_heading %}Overview{% endblock %}
+{% block content %}
+<div class="wl-grid">
+    <div class="wl-card stat">
+        <h3>₹{{ wallet_balance }}</h3>
+        <p>Your wallet balance</p>
+    </div>
+    <div class="wl-card stat">
+        <h3>{{ total_users }}</h3>
+        <p>Total users</p>
+    </div>
+    <div class="wl-card stat">
+        <h3>{{ total_md }}</h3>
+        <p>Master distributors</p>
+    </div>
+    <div class="wl-card stat">
+        <h3>{{ total_distributors }}</h3>
+        <p>Distributors</p>
+    </div>
+    <div class="wl-card stat">
+        <h3>{{ total_retailers }}</h3>
+        <p>Retailers</p>
+    </div>
+</div>
+<div class="wl-card">
+    <p style="color:#94a3b8;margin-bottom:1rem;">Quick actions</p>
+    <a class="btn" href="{% url 'white_label_add_user' %}">Add MD / Distributor / Retailer</a>
+    <a class="btn btn-secondary" href="{% url 'white_label_transfer_money' %}" style="margin-left:0.5rem;">Transfer wallet</a>
+</div>
+{% endblock %}

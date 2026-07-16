@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+{% load static %}
+
+<style>
+.card {
+    background-color: #1e293b;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+.form-control {
+    background-color: #2d3748;
+    color: #e2e8f0;
+    border: 1px solid #4a5568;
+    border-radius: 6px;
+    padding: 0.75rem;
+    width: 100%;
+    font-size: 16px;
+}
+.form-control:focus {
+    background-color: #2d3748;
+    border-color: #63b3ed;
+    box-shadow: 0 0 0 0.2rem rgba(99, 179, 237, 0.25);
+}
+.btn-primary {
+    background-color: #2563eb;
+    border-color: #2563eb;
+    color: #fff;
+    padding: 0.5rem 1.25rem;
+}
+.breadcrumb-item a {
+    color: #63b3ed;
+    text-decoration: none;
+}
+.breadcrumb-item.active {
+    color: #a0aec0;
+}
+.container.mt-10 {
+    padding-top: 4rem;
+}
+.wl-page-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+}
+.wl-form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+.wl-color-input {
+    height: 48px;
+    padding: 0.35rem;
+    cursor: pointer;
+}
+.wl-check-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 48px;
+    margin-top: 1.75rem;
+}
+@media (max-width: 767.98px) {
+    .container.mt-10 {
+        padding-top: 2rem;
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+    .wl-page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .wl-page-header .breadcrumb {
+        margin-bottom: 0;
+        padding-left: 0;
+    }
+    .wl-form-actions {
+        flex-direction: column;
+    }
+    .wl-form-actions .btn {
+        width: 100%;
+    }
+    .wl-check-row {
+        margin-top: 0.5rem;
+    }
+}
+</style>
+
+{% block content %}
+<div class="container mt-10">
+    <div class="cards">
+        <div class="wl-page-header mb-2">
+            <h2 class="card-titles mb-0">{{ title }}</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'white_label_tenant_list' %}">White Label</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{% if tenant %}Edit{% else %}Add{% endif %}</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label for="{{ form.name.id_for_label }}">Name</label>
+                        {{ form.name }}
+                        {% if form.name.errors %}<div class="text-danger">{{ form.name.errors|join:", " }}</div>{% endif %}
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="{{ form.slug.id_for_label }}">Slug</label>
+                        {{ form.slug }}
+                        {% if form.slug.errors %}<div class="text-danger">{{ form.slug.errors|join:", " }}</div>{% endif %}
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="{{ form.domain.id_for_label }}">Domain</label>
+                        {{ form.domain }}
+                        {% if form.domain.help_text %}<small class="form-text text-muted">{{ form.domain.help_text }}</small>{% endif %}
+                        {% if form.domain.errors %}<div class="text-danger">{{ form.domain.errors|join:", " }}</div>{% endif %}
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="{{ form.logo.id_for_label }}">Logo</label>
+                        {{ form.logo }}
+                        {% if form.logo.errors %}<div class="text-danger">{{ form.logo.errors|join:", " }}</div>{% endif %}
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="{{ form.favicon.id_for_label }}">Favicon</label>
+                        {{ form.favicon }}
+                        {% if form.favicon.errors %}<div class="text-danger">{{ form.favicon.errors|join:", " }}</div>{% endif %}
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="{{ form.primary_color.id_for_label }}">Primary color</label>
+                        {{ form.primary_color }}
+                        {% if form.primary_color.errors %}<div class="text-danger">{{ form.primary_color.errors|join:", " }}</div>{% endif %}
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="{{ form.secondary_color.id_for_label }}">Secondary color</label>
+                        {{ form.secondary_color }}
+                        {% if form.secondary_color.errors %}<div class="text-danger">{{ form.secondary_color.errors|join:", " }}</div>{% endif %}
+                    </div>
+                    <div class="form-group col-md-6">
+                        <div class="wl-check-row">
+                            {{ form.is_active }}
+                            <label for="{{ form.is_active.id_for_label }}" class="mb-0">Active</label>
+                        </div>
+                        {% if form.is_active.errors %}<div class="text-danger">{{ form.is_active.errors|join:", " }}</div>{% endif %}
+                    </div>
+                </div>
+                <div class="wl-form-actions">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <a href="{% url 'white_label_tenant_list' %}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+(function () {
+    document.querySelectorAll('.wl-tenant-form input, .card-body input, .card-body select').forEach(function (el) {
+        if (el.type === 'checkbox') return;
+        el.classList.add('form-control');
+        if (el.type === 'color') el.classList.add('wl-color-input');
+    });
+})();
+</script>
+{% endblock %}

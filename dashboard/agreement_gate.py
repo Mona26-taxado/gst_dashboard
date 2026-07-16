@@ -20,9 +20,17 @@ def user_has_signed_current_agreement(user):
     from dashboard.agreement_content import AGREEMENT_VERSION
     from dashboard.models import AgreementAcceptance
 
-    return AgreementAcceptance.objects.filter(
+    if AgreementAcceptance.objects.filter(
         user=user, agreement_version=AGREEMENT_VERSION
-    ).exists()
+    ).exists():
+        return True
+
+    # Grandfather logic: if enabled, users who signed any previous agreement
+    # version are exempt from re-signing the latest version.
+    if getattr(settings, "AGREEMENT_GRANDFATHER_SIGNED_USERS", True):
+        return AgreementAcceptance.objects.filter(user=user).exists()
+
+    return False
 
 
 def pending_agreement_signing(user):
