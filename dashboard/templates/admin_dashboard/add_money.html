@@ -1,40 +1,6 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<style>
-.wallet-send-card {
-    max-width: 720px;
-    background: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 12px;
-    padding: 1.5rem;
-}
-.wallet-send-card .form-group { margin-bottom: 1.1rem; }
-.wallet-send-card label { font-weight: 600; color: #cbd5e1; margin-bottom: 0.4rem; display: block; }
-.wallet-balance-box {
-    margin-top: 8px;
-    padding: 10px 12px;
-    border-radius: 8px;
-    background: rgba(37, 99, 235, 0.12);
-    border: 1px solid rgba(37, 99, 235, 0.25);
-    color: #93c5fd;
-    font-size: 0.9rem;
-    font-weight: 600;
-}
-.wallet-action-row { display: flex; gap: 1.25rem; flex-wrap: wrap; }
-.wallet-action-row label {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 500;
-    cursor: pointer;
-    margin: 0;
-    color: #e2e8f0;
-}
-.wallet-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
-#retailer_id { min-height: 46px; }
-</style>
-
 <div class="container mt-10">
     <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
         <h2 class="card-titles mb-2">Send Money (Add / Deduct Wallet)</h2>
@@ -46,17 +12,17 @@
         </nav>
     </div>
 
-    <div class="wallet-send-card">
+    <div class="card-body">
         <form method="post" id="admin-wallet-form" autocomplete="off">
             {% csrf_token %}
 
             <div class="form-group">
-                <label for="user_search">1. Search user</label>
+                <label for="user_search">Search user</label>
                 <input type="text" id="user_search" class="form-control" placeholder="Type name, email, role or tenant…">
             </div>
 
             <div class="form-group">
-                <label for="retailer_id">2. Select customer (must click / choose one)</label>
+                <label for="retailer_id">Select Customer</label>
                 <select name="retailer_id" id="retailer_id" class="form-control" required>
                     <option value="" disabled selected>— Choose a customer —</option>
                     {% for user in users %}
@@ -71,31 +37,31 @@
                     <option value="" disabled>No users found</option>
                     {% endfor %}
                 </select>
-                <div class="wallet-balance-box" id="selected-balance">Please select a customer from the dropdown.</div>
+                <small class="text-muted d-block mt-2" id="selected-balance">Please select a customer from the dropdown.</small>
             </div>
 
             <div class="form-group">
-                <label for="amount">3. Amount (₹)</label>
+                <label for="amount">Amount</label>
                 <input type="number" step="0.01" min="0.01" name="amount" id="amount" class="form-control" placeholder="e.g. 500" required>
             </div>
 
             <div class="form-group">
-                <label>4. Action</label>
-                <div class="wallet-action-row">
-                    <label><input type="radio" name="action" value="add" checked required> Add Balance</label>
-                    <label><input type="radio" name="action" value="deduct" required> Deduct Balance</label>
-                </div>
+                <label>Action</label><br>
+                <label class="mr-3 mb-0">
+                    <input type="radio" name="action" value="add" checked required> Add Balance
+                </label>
+                <label class="mb-0">
+                    <input type="radio" name="action" value="deduct" required> Deduct Balance
+                </label>
             </div>
 
             <div class="form-group">
-                <label for="description">5. Description (optional)</label>
+                <label for="description">Description</label>
                 <input type="text" name="description" id="description" class="form-control" placeholder="Optional note">
             </div>
 
-            <div class="wallet-actions">
-                <button type="submit" class="btn btn-primary" id="wallet-submit-btn">Submit</button>
-                <a href="{% url 'view_transactions' %}" class="btn btn-secondary">View Transactions</a>
-            </div>
+            <button type="submit" class="btn btn-primary" id="wallet-submit-btn">Submit</button>
+            <a href="{% url 'view_transactions' %}" class="btn btn-secondary">View Transactions</a>
         </form>
     </div>
 </div>
@@ -115,7 +81,7 @@
             balHint.textContent = 'Please select a customer from the dropdown.';
             return;
         }
-        balHint.textContent = 'Selected: ' + opt.textContent.trim() + ' | Current balance: ₹' + (opt.getAttribute('data-balance') || '0');
+        balHint.textContent = 'Current wallet balance: ₹' + (opt.getAttribute('data-balance') || '0');
     }
 
     select.addEventListener('change', updateBalance);
