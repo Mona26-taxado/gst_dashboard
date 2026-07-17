@@ -1,0 +1,55 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>{% block title %}{{ tenant.name|default:"Partner Portal" }}{% endblock %}</title>
+    {% if tenant and tenant.favicon %}
+    <link rel="icon" href="{{ tenant.favicon.url }}" type="image/png">
+    {% endif %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/vendors/mdi/css/materialdesignicons.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/wl-saas.css' %}">
+    <script>
+    (function () {
+        var theme = localStorage.getItem('wl-theme') || 'dark';
+        document.documentElement.setAttribute('data-wl-theme', theme);
+    })();
+    </script>
+    {% if tenant and tenant.primary_color or tenant and tenant.secondary_color %}
+    <style>
+    :root {
+        {% if tenant.primary_color %}--wl-primary: {{ tenant.primary_color }};{% endif %}
+        {% if tenant.secondary_color %}--wl-secondary: {{ tenant.secondary_color }};{% endif %}
+    }
+    </style>
+    {% endif %}
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="wl-saas-app">
+<div class="wl-saas-shell">
+    <div class="wl-saas-drawer-overlay" id="wlSidebarOverlay"></div>
+    {% include 'white_label_dashboard/_wl_sidebar.html' %}
+    <div class="wl-saas-main">
+        {% include 'white_label_dashboard/_wl_topbar.html' %}
+        <main class="wl-saas-content wl-page-enter">
+            {% if messages %}
+            <ul class="wl-saas-messages">
+                {% for message in messages %}
+                <li class="{{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            {% block content %}{% endblock %}
+        </main>
+        {% include 'white_label_dashboard/_wl_footer.html' %}
+    </div>
+</div>
+{% include 'white_label_dashboard/_wl_support_widget.html' %}
+<script src="{% static 'assets/js/wl-saas.js' %}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

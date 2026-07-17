@@ -1,0 +1,41 @@
+{% extends 'white_label_dashboard/wl_layout.html' %}
+{% block title %}Banking Portal — {{ tenant.name }}{% endblock %}
+{% block content %}
+<div class="wl-saas-page-header">
+    <div>
+        <h1>Banking Portal</h1>
+        <div class="wl-saas-breadcrumb">
+            <a href="{% url 'white_label_dashboard' %}">Dashboard</a><span>/</span><span>Banking</span>
+        </div>
+    </div>
+</div>
+<div class="wl-saas-card">
+    {% if access_request %}
+        {% if access_request.is_active %}
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+            <div class="wl-saas-stat-icon" style="margin:0;background:rgba(34,197,94,.15);color:var(--wl-success);"><i class="mdi mdi-check-circle-outline"></i></div>
+            <div>
+                <strong style="display:block;color:var(--wl-success);">Banking portal access is active</strong>
+                <span style="font-size:.85rem;color:var(--wl-text-muted);">Requested on {{ access_request.request_date|date:"d M Y, H:i" }}</span>
+            </div>
+        </div>
+        {% else %}
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+            <div class="wl-saas-stat-icon" style="margin:0;background:rgba(245,158,11,.15);color:var(--wl-warning);"><i class="mdi mdi-clock-outline"></i></div>
+            <div>
+                <strong style="display:block;color:var(--wl-warning);">Access request pending approval</strong>
+                <span style="font-size:.85rem;color:var(--wl-text-muted);">Submitted on {{ access_request.request_date|date:"d M Y, H:i" }}. Super Admin will activate this.</span>
+            </div>
+        </div>
+        {% endif %}
+    {% else %}
+    <p style="margin:0 0 20px;color:var(--wl-text-muted);line-height:1.6;">
+        Request access to the banking portal. Approval is handled by Super Admin.
+    </p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="wl-saas-btn wl-saas-btn-primary"><i class="mdi mdi-bank-outline"></i> Request access</button>
+    </form>
+    {% endif %}
+</div>
+{% endblock %}

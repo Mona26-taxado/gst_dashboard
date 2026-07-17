@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% load static %}
+
+<style>
+.breadcrumb-item a {
+    color: #63b3ed;
+    text-decoration: none;
+}
+.breadcrumb-item.active {
+    color: #a0aec0;
+}
+.container.mt-10 {
+    padding-top: 4rem;
+}
+.wl-page-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+}
+.wl-header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+ul.pagination {
+    margin-top: 23px;
+}
+@media (max-width: 767.98px) {
+    .container.mt-10 {
+        padding-top: 2rem;
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+    .wl-page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .wl-header-actions {
+        width: 100%;
+    }
+    .wl-header-actions .btn {
+        flex: 1 1 auto;
+    }
+}
+</style>
+
+{% block content %}
+<div class="container mt-10">
+    <div class="wl-page-header mb-3">
+        <h2 class="card-titles mb-0">White Label Admins</h2>
+        <div class="wl-header-actions">
+            <a href="{% url 'white_label_admin_create' %}" class="btn btn-primary">Add WL Admin</a>
+            <a href="{% url 'white_label_tenant_list' %}" class="btn btn-secondary">View Tenants</a>
+        </div>
+    </div>
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page">White Label Admins</li>
+        </ol>
+    </nav>
+
+    <form method="get" class="form-inline mb-3">
+        <input type="text" name="search" value="{{ search_query }}" class="form-control" placeholder="Search WL Admin / tenant / domain">
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>S No</th>
+                    <th>Full Name</th>
+                    <th>Email</th>
+                    <th>Branch ID</th>
+                    <th>Tenant</th>
+                    <th>Domain</th>
+                    <th>Wallet</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for admin_user in page_obj %}
+                <tr>
+                    <td>{{ serial_start|add:forloop.counter }}</td>
+                    <td>{{ admin_user.full_name }}</td>
+                    <td>{{ admin_user.email }}</td>
+                    <td>{{ admin_user.branch_id }}</td>
+                    <td>{% if admin_user.tenant %}{{ admin_user.tenant.name }}{% else %}—{% endif %}</td>
+                    <td>{% if admin_user.tenant %}{{ admin_user.tenant.domain }}{% else %}—{% endif %}</td>
+                    <td>
+                        {% if admin_user.wallet %}
+                            ₹{{ admin_user.wallet.balance }}
+                        {% else %}
+                            ₹0.00
+                        {% endif %}
+                    </td>
+                    <td>{% if admin_user.is_active %}Active{% else %}Inactive{% endif %}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8">No White Label Admins yet. Use "Add WL Admin" to create one.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if page_obj.has_other_pages %}
+    <nav aria-label="WL Admins pagination">
+        <ul class="pagination">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}&search={{ search_query }}">Previous</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled"><span class="page-link">Previous</span></li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}&search={{ search_query }}">{{ num }}</a>
+                </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}&search={{ search_query }}">Next</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled"><span class="page-link">Next</span></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    <p class="text-muted mt-3">
+        Local test login: <code>/?tenant=&lt;slug&gt;</code>
+        · Production: open the tenant domain.
+    </p>
+</div>
+{% endblock %}

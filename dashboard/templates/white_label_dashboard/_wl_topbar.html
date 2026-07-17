@@ -1,0 +1,80 @@
+<header class="wl-saas-topbar">
+    <div class="wl-saas-topbar-left">
+        <button type="button" class="wl-saas-icon-btn wl-saas-mobile-toggle" id="wlSidebarMobile" aria-label="Menu">
+            <i class="mdi mdi-menu"></i>
+        </button>
+        <form class="wl-saas-search" method="get" action="{% if user.role == 'white_label_admin' %}{% url 'white_label_view_users' %}{% else %}{{ tenant_dashboard_url }}{% endif %}" role="search">
+            <i class="mdi mdi-magnify"></i>
+            <input type="search" name="search" placeholder="Search users, services, billing…" aria-label="Search">
+            <kbd class="wl-saas-search-kbd">⌘K</kbd>
+        </form>
+    </div>
+
+    <div class="wl-saas-topbar-right">
+        <div class="wl-saas-dropdown" data-wl-dropdown>
+            <button type="button" class="wl-saas-icon-btn wl-saas-dropdown-trigger" aria-label="Notifications" title="Notifications">
+                <i class="mdi mdi-bell-outline"></i>
+                <span class="wl-dot"></span>
+            </button>
+            <div class="wl-saas-dropdown-menu wl-saas-dropdown-menu--notifications">
+                <div class="wl-saas-dropdown-head">Notifications</div>
+                {% if recent_billings %}
+                {% for b in recent_billings|slice:":3" %}
+                <div class="wl-saas-notif-item">
+                    <i class="mdi mdi-receipt"></i>
+                    <div><strong>New billing</strong><span>{{ b.customer.full_name }} · ₹{{ b.amount }}</span></div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="wl-saas-dropdown-empty">No new notifications</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="wl-saas-dropdown" data-wl-dropdown>
+            <button type="button" class="wl-saas-icon-btn wl-saas-dropdown-trigger" id="wlThemeToggle" aria-label="Theme" title="Theme">
+                <i class="mdi mdi-palette-outline"></i>
+            </button>
+            <div class="wl-saas-dropdown-menu wl-saas-dropdown-menu--themes">
+                <div class="wl-saas-dropdown-head">Appearance</div>
+                <button type="button" data-wl-theme="light"><span class="wl-theme-swatch" style="background:#F8FAFC"></span> Light</button>
+                <button type="button" data-wl-theme="dark"><span class="wl-theme-swatch" style="background:#0F172A"></span> Dark</button>
+                <button type="button" data-wl-theme="blue"><span class="wl-theme-swatch" style="background:#2563EB"></span> Blue</button>
+                <button type="button" data-wl-theme="purple"><span class="wl-theme-swatch" style="background:#7C3AED"></span> Purple</button>
+                <button type="button" data-wl-theme="emerald"><span class="wl-theme-swatch" style="background:#059669"></span> Emerald</button>
+                <button type="button" data-wl-theme="orange"><span class="wl-theme-swatch" style="background:#EA580C"></span> Orange</button>
+                <button type="button" data-wl-theme="black"><span class="wl-theme-swatch" style="background:#09090B"></span> Black</button>
+            </div>
+        </div>
+
+        <div class="wl-saas-dropdown wl-saas-topbar-pill--hide-sm" data-wl-dropdown>
+            <button type="button" class="wl-saas-topbar-text-btn wl-saas-dropdown-trigger" aria-expanded="false">
+                <i class="mdi mdi-web"></i><span>EN</span><i class="mdi mdi-chevron-down"></i>
+            </button>
+            <div class="wl-saas-dropdown-menu">
+                <button type="button" class="active">English</button>
+                <button type="button">हिन्दी</button>
+            </div>
+        </div>
+
+        <div class="wl-saas-dropdown" data-wl-dropdown>
+            <button type="button" class="wl-saas-profile wl-saas-dropdown-trigger" id="wlProfileToggle" aria-expanded="false">
+                <div class="wl-saas-avatar">{{ request.user.full_name|slice:":1"|upper }}</div>
+                <span class="wl-saas-profile-name">{{ request.user.full_name|truncatewords:1 }}</span>
+                <i class="mdi mdi-chevron-down"></i>
+            </button>
+            <div class="wl-saas-dropdown-menu wl-saas-dropdown-menu--profile" id="wlProfileMenu">
+                <div class="wl-saas-profile-card">
+                    <div class="wl-saas-avatar wl-saas-avatar--lg">{{ request.user.full_name|slice:":1"|upper }}</div>
+                    <div>
+                        <strong>{{ request.user.full_name }}</strong>
+                        <span>{{ request.user.email }}</span>
+                    </div>
+                </div>
+                <a href="{{ tenant_dashboard_url|default:'/' }}"><i class="mdi mdi-view-dashboard-outline"></i> Dashboard</a>
+                <a href="{% url 'password_change' %}"><i class="mdi mdi-lock-reset"></i> Change Password</a>
+                <a href="{% url 'logout' %}" class="wl-saas-dropdown-danger"><i class="mdi mdi-logout"></i> Sign out</a>
+            </div>
+        </div>
+    </div>
+</header>

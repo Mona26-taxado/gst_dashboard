@@ -1,0 +1,44 @@
+{% extends 'white_label_dashboard/wl_layout.html' %}
+{% block title %}View Services — {{ tenant.name }}{% endblock %}
+{% block content %}
+<div class="wl-saas-page-header">
+    <div>
+        <h1>Services</h1>
+        <div class="wl-saas-breadcrumb">
+            <a href="{% url 'white_label_dashboard' %}">Dashboard</a><span>/</span><span>Services</span>
+        </div>
+    </div>
+</div>
+<form method="get" class="wl-saas-toolbar">
+    <input type="text" name="search" value="{{ search_query }}" class="wl-saas-input" placeholder="Search services…">
+    <button type="submit" class="wl-saas-btn wl-saas-btn-primary">Search</button>
+</form>
+<div class="wl-saas-card" style="padding:0;overflow:hidden;">
+    <div class="wl-saas-table-wrap" style="border:none;">
+        <table class="wl-saas-table">
+            <thead>
+                <tr><th>#</th><th>Service</th><th>Price</th><th>Status</th><th>Documents</th></tr>
+            </thead>
+            <tbody>
+                {% for s in page_obj %}
+                <tr>
+                    <td>{{ serial_start|add:forloop.counter }}</td>
+                    <td>{{ s.service_name }}</td>
+                    <td>₹{{ s.price }}</td>
+                    <td><span class="wl-saas-badge wl-saas-badge-success">{{ s.status }}</span></td>
+                    <td><a href="{% url 'white_label_service_documents' s.id %}" style="color:var(--wl-primary);font-weight:600;text-decoration:none;">Required docs →</a></td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="wl-saas-empty"><i class="mdi mdi-briefcase-off-outline"></i>No active services found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% if page_obj.has_other_pages %}
+<div class="wl-saas-pagination">
+    {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}&search={{ search_query }}">← Previous</a>{% endif %}
+    {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}&search={{ search_query }}">Next →</a>{% endif %}
+</div>
+{% endif %}
+{% endblock %}

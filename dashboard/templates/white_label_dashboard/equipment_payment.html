@@ -1,0 +1,52 @@
+{% extends 'white_label_dashboard/wl_layout.html' %}
+{% block title %}Payment — {{ tenant.name|default:"Partner Portal" }}{% endblock %}
+{% block content %}
+<div class="wl-saas-page-header">
+    <div>
+        <h1>Complete Payment</h1>
+        <div class="wl-saas-breadcrumb">
+            <a href="{% url 'equipment_store' %}">Equipment Store</a><span>/</span><span>Payment</span>
+        </div>
+    </div>
+</div>
+<div class="wl-saas-card" style="max-width:520px;margin:0 auto;text-align:center;">
+    <h2 style="font-size:1.25rem;margin:0 0 8px;">Amount to Pay</h2>
+    <p style="font-size:1.75rem;font-weight:800;margin:0 0 20px;color:var(--wl-primary);">₹{{ total_amount }}</p>
+    <div style="background:#fff;border-radius:12px;padding:16px;display:inline-block;margin-bottom:20px;">
+        <img src="data:image/png;base64,{{ qr_code }}" alt="Payment QR Code" style="max-width:260px;width:100%;">
+    </div>
+    <a href="upi://pay?pa={{ upi_id|default:'9336323478@okbizaxis' }}&pn=Partner&am={{ total_amount }}&tn=Order%20{{ order_id }}"
+       class="wl-saas-btn wl-saas-btn-primary" style="width:100%;margin-bottom:12px;">
+        <i class="mdi mdi-cellphone-link"></i> Pay with UPI App
+    </a>
+    <p style="font-size:.84rem;color:var(--wl-text-muted);margin:0 0 16px;">Or scan the QR code with any UPI app</p>
+    <div id="payment-status" class="wl-saas-messages" style="margin:0;">
+        <li style="list-style:none;background:rgba(37,99,235,.12);color:var(--wl-text);border:1px solid rgba(37,99,235,.2);">
+            <i class="mdi mdi-clock-outline"></i> Waiting for payment…
+        </li>
+    </div>
+</div>
+<input type="hidden" id="order-id" value="{{ order_id }}">
+{% endblock %}
+{% block extra_js %}
+<script>
+(function () {
+    function checkPaymentStatus() {
+        var orderId = document.getElementById('order-id').value;
+        fetch('/equipment-store/check-payment-status/' + orderId + '/')
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                var box = document.getElementById('payment-status');
+                if (data.status === 'success') {
+                    box.innerHTML = '<li style="list-style:none;background:rgba(34,197,94,.12);color:#86efac;border:1px solid rgba(34,197,94,.25);">Payment successful! Redirecting…</li>';
+                    window.location.href = data.redirect_url;
+                } else {
+                    setTimeout(checkPaymentStatus, 3000);
+                }
+            })
+            .catch(function () { setTimeout(checkPaymentStatus, 3000); });
+    }
+    checkPaymentStatus();
+})();
+</script>
+{% endblock %}

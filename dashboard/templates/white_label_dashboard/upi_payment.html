@@ -1,0 +1,28 @@
+{% extends 'white_label_dashboard/wl_layout.html' %}
+{% block title %}UPI Payment — {{ tenant.name|default:"Partner Portal" }}{% endblock %}
+{% block content %}
+<div class="wl-saas-page-header">
+    <div>
+        <h1>UPI Payment</h1>
+        <div class="wl-saas-breadcrumb">
+            <a href="{% if user.role == 'white_label_admin' %}{% url 'white_label_add_wallet' %}{% else %}{% url 'qr_payment' user_id=request.user.id %}{% endif %}">Add Wallet</a><span>/</span>
+            <a href="{% url 'recharge_plans' %}">Recharge Plans</a><span>/</span><span>Payment</span>
+        </div>
+    </div>
+</div>
+<div class="wl-saas-card" style="max-width:480px;margin:0 auto;text-align:center;">
+    <p style="font-size:.88rem;color:var(--wl-text-muted);margin:0 0 4px;">Recharge amount</p>
+    <p style="font-size:1.75rem;font-weight:800;margin:0 0 4px;color:var(--wl-primary);">₹{{ amount }}</p>
+    <p style="font-size:.84rem;color:var(--wl-text-muted);margin:0 0 20px;">Plan: {{ plan_id }}</p>
+    <div style="background:#fff;border-radius:12px;padding:16px;display:inline-block;margin-bottom:20px;">
+        <img src="data:image/png;base64,{{ qr_code }}" alt="UPI QR Code" style="max-width:260px;width:100%;">
+    </div>
+    <a href="{{ upi_link }}" class="wl-saas-btn wl-saas-btn-primary" style="width:100%;margin-bottom:12px;">
+        <i class="mdi mdi-cellphone-link"></i> Pay with UPI
+    </a>
+    <p style="font-size:.84rem;color:var(--wl-text-muted);margin:0 0 16px;">Scan the QR code or open your UPI app</p>
+    <a href="{% url 'recharge_plans' %}" class="wl-saas-btn wl-saas-btn-secondary" style="width:100%;">
+        <i class="mdi mdi-arrow-left"></i> Back to Plans
+    </a>
+</div>
+{% endblock %}

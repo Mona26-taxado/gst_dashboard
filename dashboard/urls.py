@@ -26,6 +26,7 @@ from dashboard.views.admin_views import (
     white_label_tenant_list,
     white_label_tenant_add,
     white_label_tenant_edit,
+    white_label_admin_list,
     white_label_admin_create,
 )
 
@@ -71,6 +72,7 @@ urlpatterns = [
     path("admin/white-label/tenants/", white_label_tenant_list, name="white_label_tenant_list"),
     path("admin/white-label/tenants/add/", white_label_tenant_add, name="white_label_tenant_add"),
     path("admin/white-label/tenants/<int:tenant_id>/edit/", white_label_tenant_edit, name="white_label_tenant_edit"),
+    path("admin/white-label/admins/", white_label_admin_list, name="white_label_admin_list"),
     path("admin/white-label/create-admin/", white_label_admin_create, name="white_label_admin_create"),
 
     # White Label — WL Admin portal
@@ -79,8 +81,18 @@ urlpatterns = [
     path("wl/users/", white_label_views.white_label_view_users, name="white_label_view_users"),
     path("wl/users/<int:user_id>/edit/", white_label_views.white_label_edit_user, name="white_label_edit_user"),
     path("wl/users/<int:user_id>/delete/", white_label_views.white_label_delete_user, name="white_label_delete_user"),
+    path("wl/add-wallet/", white_label_views.white_label_add_wallet, name="white_label_add_wallet"),
     path("wl/transfer-money/", white_label_views.white_label_transfer_money, name="white_label_transfer_money"),
     path("wl/transactions/", white_label_views.white_label_view_transactions, name="white_label_view_transactions"),
+    path("wl/services/", white_label_views.white_label_view_services, name="white_label_view_services"),
+    path(
+        "wl/services/<int:service_id>/documents/",
+        white_label_views.white_label_service_documents,
+        name="white_label_service_documents",
+    ),
+    path("wl/billing/", white_label_views.white_label_view_billing, name="white_label_view_billing"),
+    path("wl/reports/", white_label_views.white_label_reports, name="white_label_reports"),
+    path("wl/banking/", white_label_views.white_label_banking, name="white_label_banking"),
 
 
      # Admin URLs

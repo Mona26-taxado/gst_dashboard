@@ -1,117 +1,124 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <!-- Required meta tags -->
+<html lang="en"
+    {% if uses_wl_theme %}
+    data-wl-theme="dark"
+    {% if tenant and tenant.primary_color %}data-wl-primary="{{ tenant.primary_color }}"{% endif %}
+    {% if tenant and tenant.secondary_color %}data-wl-secondary="{{ tenant.secondary_color }}"{% endif %}
+    {% endif %}>
+<head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>{% block title %}{% if uses_wl_theme %}{{ tenant.name|default:"Partner Portal" }}{% else %}Grahak Sahaayata Kendra{% endif %}{% endblock %}</title>
+
+    {% if uses_wl_theme %}
+    {% if tenant and tenant.favicon %}
+    <link rel="icon" href="{{ tenant.favicon.url }}" type="image/png">
+    {% endif %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/vendors/mdi/css/materialdesignicons.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/wl-saas.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/vendors/css/vendor.bundle.base.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/custom.css' %}">
+    <script>
+    (function () {
+        var root = document.documentElement;
+        var theme = localStorage.getItem('wl-theme') || 'dark';
+        root.setAttribute('data-wl-theme', theme);
+        var primary = root.getAttribute('data-wl-primary');
+        var secondary = root.getAttribute('data-wl-secondary');
+        if (primary) root.style.setProperty('--wl-primary', primary);
+        if (secondary) root.style.setProperty('--wl-secondary', secondary);
+    })();
+    </script>
+    {% else %}
+    <script>
+    (function () {
+        var theme = localStorage.getItem('theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', theme);
+    })();
+    </script>
     <link rel="manifest" href="{% static 'manifest.json' %}">
     <meta name="theme-color" content="#0047ab">
-    
-    <!-- PWA icons -->
-    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'assets/images/Sahaayata-pay-logo.png' %}">
-    <link rel="icon" type="image/png" sizes="48x48" href="{% static 'assets/images/Sahaayata-pay-logo.png' %}">
-    <link rel="icon" type="image/png" sizes="128x128" href="{% static 'assets/images/Sahaayata-pay-logo.png' %}">
-    <link rel="icon" type="image/png" sizes="192x192" href="{% static 'assets/images/Sahaayata-pay-logo.png' %}">
-    <link rel="icon" type="image/png" sizes="512x512" href="{% static 'assets/images/Sahaayata-pay-logo.png' %}">
-    
-    <!-- Apple specific -->
-    <link rel="apple-touch-icon" sizes="192x192" href="{% static 'Sahaayata-pay-logo.png' %}">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="apple-mobile-web-app-title" content="GSK">
-    
-    <title>{% block title %}Grahak Sahaayata Kendra{% endblock %}</title>
-    <!-- Plugins: CSS -->
+    <link rel="icon" type="image/png" href="{% static 'assets/images/Sahaayata-pay-logo.png' %}">
+    <link rel="apple-touch-icon" href="{% static 'Sahaayata-pay-logo.png' %}">
+    <link rel="shortcut icon" href="{% static 'Sahaayata-pay-logo.png' %}">
     <link rel="stylesheet" href="{% static 'assets/vendors/mdi/css/materialdesignicons.min.css' %}">
     <link rel="stylesheet" href="{% static 'assets/vendors/css/vendor.bundle.base.css' %}">
-    <!-- Layout styles -->
     <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
     <link rel="stylesheet" href="{% static 'assets/css/custom.css' %}">
     <link rel="stylesheet" href="{% static 'assets/css/themes.css' %}">
-    <link rel="shortcut icon" href="{% static 'Sahaayata-pay-logo.png' %}" />
+    {% endif %}
 
-    
-  </head>
-  <body>
+    {% block extra_css %}{% endblock %}
+</head>
+<body{% if uses_wl_theme %} class="wl-saas-app"{% endif %}>
 
-    <div class="container-scroller">
-      {% include 'dashboard/sidebar.html' %}
-
-      <div class="container-fluid page-body-wrapper">
+{% if uses_wl_theme %}
+<div class="wl-saas-shell">
+    <div class="wl-saas-drawer-overlay" id="wlSidebarOverlay"></div>
+    {% include 'white_label_dashboard/_wl_sidebar.html' %}
+    <div class="wl-saas-main">
+        {% include 'white_label_dashboard/_wl_topbar.html' %}
+        <main class="wl-saas-content wl-page-enter wl-legacy-content">
+            {% if messages %}
+            <ul class="wl-saas-messages">
+                {% for message in messages %}
+                <li class="{{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+{% else %}
+<div class="container-scroller">
+    {% include 'dashboard/sidebar.html' %}
+    <div class="container-fluid page-body-wrapper">
         {% include 'dashboard/header.html' %}
         <div class="main-panel">
-          <div class="content-wrapper">
+            <div class="content-wrapper">
+            {% if messages %}
+            <ul class="gsk-flash-messages">
+                {% for message in messages %}
+                <li class="gsk-flash {{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+{% endif %}
+
             {% block content %}{% endblock %}
-          </div>
-          {% include 'dashboard/footer.html' %}
-        </div>
-      </div>
+
+{% if uses_wl_theme %}
+        </main>
+        {% include 'white_label_dashboard/_wl_footer.html' %}
     </div>
-    
-    <script src="{% static 'assets/vendors/js/vendor.bundle.base.js'%}"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{% static 'assets/vendors/progressbar.js/progressbar.min.js'%}"></script>
-    <script src="{% static 'assets/vendors/jvectormap/jquery-jvectormap.min.js'%}"></script>
-    <script src="{% static 'assets/vendors/jvectormap/jquery-jvectormap-world-mill-en.js'%}"></script>
-    <script src="{% static 'assets/vendors/owl-carousel-2/owl.carousel.min.js'%}"></script>
-    <script src="{% static 'assets/js/off-canvas.js'%}"></script>
-    <script src="{% static 'assets/js/hoverable-collapse.js'%}"></script>
-    <script src="{% static 'assets/js/misc.js'%}"></script>
-    <script src="{% static 'assets/js/settings.js'%}"></script>
-    <script src="{% static 'assets/js/todolist.js'%}"></script>
-    <script src="{% static 'service-worker.js'%}"></script>
+</div>
+{% include 'white_label_dashboard/_wl_support_widget.html' %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{% static 'assets/js/wl-saas.js' %}"></script>
+{% else %}
+            </div>
+            {% include 'dashboard/footer.html' %}
+        </div>
+    </div>
+</div>
+<script src="{% static 'assets/vendors/js/vendor.bundle.base.js' %}"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{% static 'assets/vendors/progressbar.js/progressbar.min.js' %}"></script>
+<script src="{% static 'assets/vendors/jvectormap/jquery-jvectormap.min.js' %}"></script>
+<script src="{% static 'assets/vendors/jvectormap/jquery-jvectormap-world-mill-en.js' %}"></script>
+<script src="{% static 'assets/vendors/owl-carousel-2/owl.carousel.min.js' %}"></script>
+<script src="{% static 'assets/js/off-canvas.js' %}"></script>
+<script src="{% static 'assets/js/hoverable-collapse.js' %}"></script>
+<script src="{% static 'assets/js/misc.js' %}"></script>
+<script src="{% static 'assets/js/settings.js' %}"></script>
+<script src="{% static 'assets/js/todolist.js' %}"></script>
+<script src="{% static 'service-worker.js' %}"></script>
+{% endif %}
 
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function() {
-          navigator.serviceWorker.register('{% static "service-worker.js" %}')
-            .then(function(registration) {
-              console.log('ServiceWorker registration successful');
-            })
-            .catch(function(err) {
-              console.log('ServiceWorker registration failed: ', err);
-            });
-        });
-      }
-    </script>
-
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
-        var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
-          return new bootstrap.Dropdown(dropdownToggleEl);
-        });
-        console.log("Dropdowns initialized!");
-      });
-
-      let deferredInstallPrompt;
-
-window.addEventListener('beforeinstallprompt', e => {
-  // Prevent Chrome's mini-infobar from appearing
-  e.preventDefault();
-  // Stash the event so you can trigger it later.
-  deferredInstallPrompt = e;
-  // Show your "Install" button
-  const btnInstall = document.querySelector('#btn-install');
-  if (btnInstall) {
-    btnInstall.style.display = 'block';
-  }
-});
-
-const btnInstall = document.querySelector('#btn-install');
-if (btnInstall) {
-  btnInstall.addEventListener('click', async () => {
-    btnInstall.style.display = 'none';
-    deferredInstallPrompt.prompt();
-    const { outcome } = await deferredInstallPrompt.userChoice;
-    console.log('User response to the install prompt:', outcome);
-    deferredInstallPrompt = null;
-  });
-}
-    </script>
-
-    {% block extra_js %}{% endblock %}
-  </body>
+{% block extra_js %}{% endblock %}
+</body>
 </html>

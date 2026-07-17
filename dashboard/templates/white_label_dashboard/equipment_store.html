@@ -1,0 +1,27 @@
+{% extends 'white_label_dashboard/wl_layout.html' %}
+{% load static %}
+{% block title %}Equipment Store — {{ tenant.name }}{% endblock %}
+{% block extra_css %}
+{% include 'partials/equipment_store_styles.html' %}
+<style>
+.wl-equipment-store .product-card { background: var(--wl-card); border: 1px solid var(--wl-border); }
+.wl-equipment-store .product-name { color: var(--wl-text) !important; }
+.wl-equipment-store .product-description { color: var(--wl-text-muted) !important; }
+.wl-equipment-store .product-image { background: rgba(148,163,184,0.08); }
+.wl-equipment-store .filter-input { background: var(--wl-bg); border-color: var(--wl-border); color: var(--wl-text); }
+html[data-wl-mode="light"] .wl-equipment-store .filter-input { background: #EEF2F6; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="wl-saas-page-header">
+    <div>
+        <h1>Equipment Store</h1>
+        <div class="wl-saas-breadcrumb">
+            <a href="{% url 'white_label_dashboard' %}">Dashboard</a><span>/</span><span>Equipment Store</span>
+        </div>
+    </div>
+</div>
+<div class="wl-saas-card wl-equipment-store">
+    {% include 'partials/equipment_store_products.html' %}
+</div>
+{% endblock %}

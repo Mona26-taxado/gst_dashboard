@@ -1,0 +1,48 @@
+{% extends 'white_label_dashboard/wl_layout.html' %}
+{% load static %}
+{% block title %}Add Wallet — {{ tenant.name }}{% endblock %}
+{% block content %}
+<div class="wl-saas-page-header">
+    <div>
+        <h1>Add Wallet</h1>
+        <div class="wl-saas-breadcrumb">
+            <a href="{% url 'white_label_dashboard' %}">Dashboard</a><span>/</span><span>Add Wallet</span>
+        </div>
+    </div>
+</div>
+
+{% if show_wallet_disclaimer %}
+<div class="wl-wallet-disclaimer" id="wallet-disclaimer-card">
+    <a href="{% url 'dismiss_wallet_disclaimer' %}?next={{ request.get_full_path|urlencode }}" class="wl-wallet-disclaimer-close" aria-label="Close">×</a>
+    <h3>Wallet Recharge Disclaimer</h3>
+    <p>
+        The amount recharged will be fully credited to your wallet balance.
+        Government fees and service charges for any service available on the portal will be deducted only from the wallet balance.
+        We do not directly debit any amount from your bank account, UPI, or any other payment method for service processing.
+        Please ensure sufficient wallet balance before initiating any service.
+    </p>
+</div>
+{% endif %}
+
+<div class="wl-saas-card wl-add-wallet-card">
+    <div class="wl-saas-wallet-pill" style="margin-bottom:20px;display:inline-flex;">
+        <i class="mdi mdi-wallet-outline"></i>
+        <span>Current balance: <strong>₹{{ wallet_balance }}</strong></span>
+    </div>
+
+    <div class="wl-qr-recharge">
+        <h2>{{ user_name }}</h2>
+        <p class="wl-qr-hint">Scan the QR code below to recharge your wallet via UPI</p>
+        <div class="wl-qr-image">
+            <img src="{{ qr_code_src }}" alt="Wallet recharge QR code">
+        </div>
+        <div class="wl-upi-logos">
+            <img src="{% static 'assets/images/google (1).svg' %}" alt="Google Pay">
+            <img src="{% static 'assets/images/paytm.svg' %}" alt="Paytm">
+            <img src="{% static 'assets/images/phonepe.svg' %}" alt="PhonePe">
+            <img src="{% static 'assets/images/bhim.svg' %}" alt="BHIM">
+        </div>
+        <a href="{% url 'recharge_plans' %}" class="wl-saas-btn wl-saas-btn-primary">View Recharge Plans</a>
+    </div>
+</div>
+{% endblock %}

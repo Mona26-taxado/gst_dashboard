@@ -1,32 +1,209 @@
-{% extends 'white_label_dashboard/base.html' %}
-{% block title %}Dashboard — {{ tenant.name }}{% endblock %}
-{% block page_heading %}Overview{% endblock %}
+{% extends 'white_label_dashboard/wl_layout.html' %}
+{% block title %}Dashboard — {{ tenant.name|default:"Partner Portal" }}{% endblock %}
 {% block content %}
-<div class="wl-grid">
-    <div class="wl-card stat">
-        <h3>₹{{ wallet_balance }}</h3>
-        <p>Your wallet balance</p>
+<section class="wl-hero wl-animate-in">
+    <div class="wl-hero-content">
+        <p class="wl-hero-greeting">{{ greeting|default:"Welcome back" }}</p>
+        <h1 class="wl-hero-title">Welcome back,<br><span>{{ tenant.name|default:"Partner Portal" }}</span></h1>
+        <p class="wl-hero-sub">Your White Label Enterprise Platform</p>
+        <div class="wl-hero-badges">
+            <span class="wl-hero-badge"><i class="mdi mdi-office-building"></i> {{ total_centers }} Network Centers</span>
+            <span class="wl-hero-badge"><i class="mdi mdi-briefcase-outline"></i> {{ total_services }} Active Services</span>
+            <span class="wl-hero-badge"><i class="mdi mdi-swap-horizontal"></i> {{ txn_count }} Transactions</span>
+            <span class="wl-hero-badge wl-hero-badge--accent"><i class="mdi mdi-shield-check"></i> Enterprise</span>
+        </div>
     </div>
-    <div class="wl-card stat">
-        <h3>{{ total_users }}</h3>
-        <p>Total users</p>
+    <div class="wl-hero-actions">
+        <a href="{% url 'white_label_add_user' %}" class="wl-saas-btn wl-saas-btn-primary"><i class="mdi mdi-account-plus-outline"></i> Invite User</a>
+        <a href="{% url 'white_label_add_wallet' %}" class="wl-saas-btn wl-saas-btn-secondary"><i class="mdi mdi-wallet-plus"></i> Add Wallet</a>
     </div>
-    <div class="wl-card stat">
-        <h3>{{ total_md }}</h3>
-        <p>Master distributors</p>
+</section>
+
+<div class="wl-metrics-grid wl-animate-in wl-animate-in--delay">
+    <div class="wl-metric-card">
+        <div class="wl-metric-top">
+            <div class="wl-metric-icon"><i class="mdi mdi-office-building"></i></div>
+            <span class="wl-metric-trend wl-metric-trend--up"><i class="mdi mdi-trending-up"></i> Network</span>
+        </div>
+        <div class="wl-metric-value" data-count="{{ total_centers }}">0</div>
+        <div class="wl-metric-label">Network Centers</div>
+        <svg class="wl-metric-spark" viewBox="0 0 80 24" preserveAspectRatio="none"><polyline points="0,20 12,16 24,18 36,10 48,12 60,6 80,8" /></svg>
     </div>
-    <div class="wl-card stat">
-        <h3>{{ total_distributors }}</h3>
-        <p>Distributors</p>
+    <div class="wl-metric-card">
+        <div class="wl-metric-top">
+            <div class="wl-metric-icon wl-metric-icon--green"><i class="mdi mdi-wallet-outline"></i></div>
+            <span class="wl-metric-trend wl-metric-trend--up"><i class="mdi mdi-trending-up"></i> Balance</span>
+        </div>
+        <div class="wl-metric-value">₹<span data-count="{{ wallet_balance|floatformat:0 }}">0</span></div>
+        <div class="wl-metric-label">Wallet Balance</div>
+        <svg class="wl-metric-spark wl-metric-spark--green" viewBox="0 0 80 24"><polyline points="0,18 16,14 32,16 48,8 64,10 80,4" /></svg>
     </div>
-    <div class="wl-card stat">
-        <h3>{{ total_retailers }}</h3>
-        <p>Retailers</p>
+    <div class="wl-metric-card">
+        <div class="wl-metric-top">
+            <div class="wl-metric-icon wl-metric-icon--purple"><i class="mdi mdi-briefcase-outline"></i></div>
+            <span class="wl-metric-trend"><i class="mdi mdi-check-circle-outline"></i> Active</span>
+        </div>
+        <div class="wl-metric-value" data-count="{{ total_services }}">0</div>
+        <div class="wl-metric-label">Active Services</div>
+        <svg class="wl-metric-spark wl-metric-spark--purple" viewBox="0 0 80 24"><polyline points="0,16 20,12 40,14 60,6 80,8" /></svg>
+    </div>
+    <div class="wl-metric-card">
+        <div class="wl-metric-top">
+            <div class="wl-metric-icon wl-metric-icon--amber"><i class="mdi mdi-currency-inr"></i></div>
+            <span class="wl-metric-trend wl-metric-trend--up"><i class="mdi mdi-trending-up"></i> Revenue</span>
+        </div>
+        <div class="wl-metric-value">₹<span data-count="{{ total_customer_billing|floatformat:0 }}">0</span></div>
+        <div class="wl-metric-label">Total Revenue</div>
+        <svg class="wl-metric-spark wl-metric-spark--amber" viewBox="0 0 80 24"><polyline points="0,20 14,16 28,12 42,14 56,8 70,6 80,4" /></svg>
     </div>
 </div>
-<div class="wl-card">
-    <p style="color:#94a3b8;margin-bottom:1rem;">Quick actions</p>
-    <a class="btn" href="{% url 'white_label_add_user' %}">Add MD / Distributor / Retailer</a>
-    <a class="btn btn-secondary" href="{% url 'white_label_transfer_money' %}" style="margin-left:0.5rem;">Transfer wallet</a>
+
+<div class="wl-analytics-grid wl-animate-in wl-animate-in--delay2">
+    <div class="wl-saas-card wl-dash-panel">
+        <div class="wl-saas-card-header">
+            <div><h2>Revenue Analytics</h2><p class="wl-card-sub">6-month billing trend</p></div>
+        </div>
+        <div class="wl-saas-chart wl-saas-chart--modern" id="billingChart"></div>
+    </div>
+    <div class="wl-saas-card wl-dash-panel">
+        <div class="wl-saas-card-header">
+            <div><h2>Network Distribution</h2><p class="wl-card-sub">Role breakdown</p></div>
+        </div>
+        {% if role_chart %}
+        <div class="wl-network-chart wl-network-chart--compact">
+            <div class="wl-network-donut-wrap">
+                <svg class="wl-network-donut-svg" viewBox="0 0 200 200" id="networkDonutSvg" aria-hidden="true">
+                    <circle class="wl-network-donut-bg" cx="100" cy="100" r="72"></circle>
+                </svg>
+                <div class="wl-network-donut-center">
+                    <strong id="networkDonutTotal">{{ total_centers }}</strong>
+                    <span>Centers</span>
+                </div>
+            </div>
+            <div class="wl-network-legend" id="networkLegend"></div>
+        </div>
+        {% else %}
+        <div class="wl-saas-empty"><i class="mdi mdi-account-off-outline"></i>No users yet.</div>
+        {% endif %}
+    </div>
 </div>
+
+<div class="wl-saas-feature-section wl-animate-in wl-animate-in--delay3">
+    <div class="wl-saas-feature-grid">
+        <a href="{% url 'pin_entry' %}" class="wl-saas-feature-card">
+            <div class="wl-saas-feature-card-icon"><i class="mdi mdi-codepen"></i></div>
+            <div class="wl-saas-feature-card-body">
+                <h3>Additional Services</h3>
+                <p>Premium add-ons and extra tools for your business network</p>
+            </div>
+            <span class="wl-saas-feature-card-link">Explore <i class="mdi mdi-arrow-right"></i></span>
+        </a>
+        <a href="{% url 'equipment_store' %}" class="wl-saas-feature-card wl-saas-feature-card--green">
+            <div class="wl-saas-feature-card-icon"><i class="mdi mdi-monitor"></i></div>
+            <div class="wl-saas-feature-card-body">
+                <h3>Equipment Store</h3>
+                <p>POS devices, printers and business equipment for your centers</p>
+            </div>
+            <span class="wl-saas-feature-card-link">Browse <i class="mdi mdi-arrow-right"></i></span>
+        </a>
+    </div>
+</div>
+
+<div class="wl-saas-card wl-billing-card wl-animate-in wl-animate-in--delay3">
+    <div class="wl-saas-card-header">
+        <div><h2>Latest Billing</h2><p class="wl-card-sub">Network transactions</p></div>
+        <a href="{% url 'white_label_view_billing' %}">View all →</a>
+    </div>
+    <div class="wl-saas-table-wrap wl-saas-table-wrap--premium">
+        <table class="wl-saas-table">
+            <thead><tr><th>Ref</th><th>Customer</th><th>Service</th><th>Amount</th><th>Status</th></tr></thead>
+            <tbody>
+                {% for b in recent_billings %}
+                <tr>
+                    <td><code class="wl-table-code">{{ b.ref_no }}</code></td>
+                    <td>{{ b.customer.full_name }}</td>
+                    <td>{{ b.service.service_name }}</td>
+                    <td><strong>₹{{ b.amount }}</strong></td>
+                    <td><span class="wl-saas-badge wl-saas-badge-neutral">{{ b.payment_status }}</span></td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="wl-saas-empty">No billing records yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    var roleData = [
+        {% for item in role_chart %}
+        { label: "{{ item.label|escapejs }}", value: {{ item.value }}, color: "{{ item.color }}" }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+
+    function buildNetworkDonut() {
+        var svg = document.getElementById('networkDonutSvg');
+        var legend = document.getElementById('networkLegend');
+        if (!svg || !legend) return;
+        var total = roleData.reduce(function (s, d) { return s + d.value; }, 0);
+        var r = 72, cx = 100, cy = 100, C = 2 * Math.PI * r, offset = 0;
+        roleData.forEach(function (d) {
+            var pct = total ? d.value / total : 0;
+            var dash = pct * C;
+            var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circle.setAttribute('cx', cx); circle.setAttribute('cy', cy); circle.setAttribute('r', r);
+            circle.setAttribute('fill', 'none'); circle.setAttribute('stroke', d.color);
+            circle.setAttribute('stroke-width', '22');
+            circle.setAttribute('stroke-dasharray', '0 ' + C);
+            circle.setAttribute('stroke-dashoffset', String(-offset));
+            circle.setAttribute('transform', 'rotate(-90 ' + cx + ' ' + cy + ')');
+            circle.classList.add('wl-network-segment');
+            svg.appendChild(circle);
+            requestAnimationFrame(function () {
+                circle.setAttribute('stroke-dasharray', dash + ' ' + (C - dash));
+            });
+            offset += dash;
+            var row = document.createElement('div');
+            row.className = 'wl-network-legend-item';
+            row.innerHTML =
+                '<span class="wl-network-legend-dot" style="background:' + d.color + '"></span>' +
+                '<span class="wl-network-legend-label">' + d.label + '</span>' +
+                '<span class="wl-network-legend-bar"><span style="width:' + Math.round(pct * 100) + '%;background:' + d.color + '"></span></span>' +
+                '<strong class="wl-network-legend-value">' + d.value + '</strong>' +
+                '<em class="wl-network-legend-pct">' + Math.round(pct * 100) + '%</em>';
+            legend.appendChild(row);
+        });
+        if (!total) {
+            var empty = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            empty.setAttribute('cx', cx); empty.setAttribute('cy', cy); empty.setAttribute('r', r);
+            empty.setAttribute('fill', 'none'); empty.setAttribute('stroke', 'rgba(148,163,184,0.2)');
+            empty.setAttribute('stroke-width', '22');
+            svg.appendChild(empty);
+        }
+    }
+    buildNetworkDonut();
+
+    var data = {{ monthly_trend_json|safe }};
+    var wrap = document.getElementById('billingChart');
+    if (wrap && data.length) {
+        var max = Math.max.apply(null, data.map(function (d) { return d.amount; })) || 1;
+        data.forEach(function (d, i) {
+            var h = Math.max(12, (d.amount / max) * 140);
+            var col = document.createElement('div');
+            col.className = 'wl-saas-chart-col';
+            col.style.animationDelay = (i * 0.06) + 's';
+            col.innerHTML = '<div class="wl-saas-chart-bar" style="height:0" data-h="' + h + '"></div><small>' + d.label + '</small><small class="wl-chart-val">₹' + d.amount.toLocaleString('en-IN') + '</small>';
+            wrap.appendChild(col);
+            requestAnimationFrame(function () {
+                col.querySelector('.wl-saas-chart-bar').style.height = h + 'px';
+            });
+        });
+    } else if (wrap) {
+        wrap.innerHTML = '<div class="wl-saas-empty" style="padding:24px;"><i class="mdi mdi-chart-bar"></i>No billing data yet.</div>';
+    }
+})();
+</script>
 {% endblock %}

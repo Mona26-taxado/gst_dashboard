@@ -24,10 +24,8 @@
     flex-wrap: wrap;
     gap: 0.5rem;
 }
-.wl-section-title {
-    margin-top: 2rem;
-    margin-bottom: 0.75rem;
-    color: #e2e8f0;
+ul.pagination {
+    margin-top: 23px;
 }
 @media (max-width: 767.98px) {
     .container.mt-10 {
@@ -51,104 +49,92 @@
 {% block content %}
 <div class="container mt-10">
     <div class="wl-page-header mb-3">
-        <h2 class="card-titles mb-0">White Label</h2>
+        <h2 class="card-titles mb-0">White Label Tenants</h2>
         <div class="wl-header-actions">
             <a href="{% url 'white_label_tenant_add' %}" class="btn btn-primary">Add Tenant</a>
-            <a href="{% url 'white_label_admin_create' %}" class="btn btn-secondary">Create WL Admin</a>
+            <a href="{% url 'white_label_admin_list' %}" class="btn btn-secondary">View WL Admins</a>
         </div>
     </div>
     <nav aria-label="breadcrumb" class="mb-3">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
-            <li class="breadcrumb-item active" aria-current="page">White Label</li>
+            <li class="breadcrumb-item active" aria-current="page">White Label Tenants</li>
         </ol>
     </nav>
 
-    <h4 class="wl-section-title">Tenants</h4>
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-striped table-bordered">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Slug</th>
-                        <th>Domain</th>
-                        <th>Active</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for t in tenants %}
-                    <tr>
-                        <td>{{ t.name }}</td>
-                        <td>{{ t.slug }}</td>
-                        <td>{{ t.domain }}</td>
-                        <td>{% if t.is_active %}Yes{% else %}No{% endif %}</td>
-                        <td>
-                            <a href="{% url 'white_label_tenant_edit' t.id %}" class="btn btn-warning btn-sm">Edit</a>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5">No tenants yet. Add one to start.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <h4 class="wl-section-title">White Label Admins</h4>
     <form method="get" class="form-inline mb-3">
-        <input type="text" name="search" value="{{ search_query }}" class="form-control" placeholder="Search WL Admin / tenant">
+        <input type="text" name="search" value="{{ search_query }}" class="form-control" placeholder="Search tenant name / slug / domain">
         <button type="submit" class="btn btn-primary">Search</button>
     </form>
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-striped table-bordered">
-                <thead>
-                    <tr>
-                        <th>S No</th>
-                        <th>Full Name</th>
-                        <th>Email</th>
-                        <th>Branch ID</th>
-                        <th>Tenant</th>
-                        <th>Domain</th>
-                        <th>Wallet</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for admin_user in wl_admins %}
-                    <tr>
-                        <td>{{ forloop.counter }}</td>
-                        <td>{{ admin_user.full_name }}</td>
-                        <td>{{ admin_user.email }}</td>
-                        <td>{{ admin_user.branch_id }}</td>
-                        <td>{% if admin_user.tenant %}{{ admin_user.tenant.name }}{% else %}—{% endif %}</td>
-                        <td>{% if admin_user.tenant %}{{ admin_user.tenant.domain }}{% else %}—{% endif %}</td>
-                        <td>
-                            {% if admin_user.wallet %}
-                                ₹{{ admin_user.wallet.balance }}
-                            {% else %}
-                                ₹0.00
-                            {% endif %}
-                        </td>
-                        <td>{% if admin_user.is_active %}Active{% else %}Inactive{% endif %}</td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="8">No White Label Admins yet. Use "Create WL Admin" to add one.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        <p class="text-muted mt-3 px-2">
-            Local test login: <code>/?tenant=&lt;slug&gt;</code>
-            · Production: open the tenant domain (e.g. <code>www.zingofin.in</code>).
-            · Add new domains to <code>CSRF_TRUSTED_ORIGINS</code> in settings.
-        </p>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>S No</th>
+                    <th>Name</th>
+                    <th>Slug</th>
+                    <th>Domain</th>
+                    <th>Active</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in page_obj %}
+                <tr>
+                    <td>{{ serial_start|add:forloop.counter }}</td>
+                    <td>{{ t.name }}</td>
+                    <td>{{ t.slug }}</td>
+                    <td>{{ t.domain }}</td>
+                    <td>{% if t.is_active %}Yes{% else %}No{% endif %}</td>
+                    <td>
+                        <a href="{% url 'white_label_tenant_edit' t.id %}" class="btn btn-warning btn-sm">Edit</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6">No tenants yet. Use "Add Tenant" to create one.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
+
+    {% if page_obj.has_other_pages %}
+    <nav aria-label="Tenants pagination">
+        <ul class="pagination">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}&search={{ search_query }}">Previous</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled"><span class="page-link">Previous</span></li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}&search={{ search_query }}">{{ num }}</a>
+                </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}&search={{ search_query }}">Next</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled"><span class="page-link">Next</span></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    <p class="text-muted mt-3">
+        Local test: <code>/?tenant=&lt;slug&gt;</code>
+        · Add production domains to <code>CSRF_TRUSTED_ORIGINS</code>.
+    </p>
 </div>
 {% endblock %}

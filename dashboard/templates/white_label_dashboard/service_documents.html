@@ -1,0 +1,29 @@
+{% extends 'white_label_dashboard/wl_layout.html' %}
+{% block title %}Documents — {{ service.service_name }}{% endblock %}
+{% block content %}
+<div class="wl-saas-page-header">
+    <div>
+        <h1>{{ service.service_name }}</h1>
+        <div class="wl-saas-breadcrumb">
+            <a href="{% url 'white_label_dashboard' %}">Dashboard</a><span>/</span>
+            <a href="{% url 'white_label_view_services' %}">Services</a><span>/</span><span>Documents</span>
+        </div>
+    </div>
+</div>
+<div class="wl-saas-card" style="max-width:640px;">
+    <p style="margin:0 0 20px;color:var(--wl-text-muted);">Price: <strong style="color:var(--wl-text);font-size:1.1rem;">₹{{ service.price }}</strong></p>
+    {% if document_items %}
+    <ul style="margin:0;padding:0;list-style:none;">
+        {% for item in document_items %}
+        <li style="display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--wl-border);">
+            <i class="mdi mdi-file-document-outline" style="color:var(--wl-primary);"></i>
+            <span>{{ item }}</span>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <div class="wl-saas-empty" style="padding:24px;"><i class="mdi mdi-file-off-outline"></i>No required documents listed.</div>
+    {% endif %}
+    <a href="{% url 'white_label_view_services' %}" class="wl-saas-btn wl-saas-btn-secondary" style="margin-top:20px;">← Back to services</a>
+</div>
+{% endblock %}

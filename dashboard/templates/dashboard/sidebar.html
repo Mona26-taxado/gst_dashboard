@@ -8,12 +8,26 @@
 </style>
 
 <!-- Admin Menu -->
-<nav class="sidebar sidebar-offcanvas" id="sidebar">
-    <div class="sidebar-brand-wrapper d-none d-lg-flex align-items-center justify-content-center fixed-top">
+<nav class="sidebar sidebar-offcanvas{% if user.role == 'white_label_admin' %} wl-sidebar{% endif %}" id="sidebar">
+    <div class="sidebar-brand-wrapper d-none d-lg-flex align-items-center justify-content-center fixed-top{% if user.role == 'white_label_admin' %} wl-sidebar-brand{% endif %}">
+      {% if user.role == 'white_label_admin' and tenant %}
+      <a href="{% url 'white_label_dashboard' %}" class="logo d-flex align-items-center wl-brand-link">
+        {% if tenant.logo %}
+        <img src="{{ tenant.logo.url }}" alt="{{ tenant.name }}" class="wl-brand-logo">
+        {% else %}
+        <div class="wl-brand-mark">{{ tenant.name|slice:":1"|upper }}</div>
+        {% endif %}
+        <span class="d-none d-lg-block wl-brand-text">
+            <strong>{{ tenant.name }}</strong>
+            <small>Partner Console</small>
+        </span>
+      </a>
+      {% else %}
       <a href="#" class="logo d-flex align-items-center">
         <img src="{% static 'assets/images/Sahaayata-pay-logo.png'%}" alt="logo-1" width="20%">
         <span class="d-none d-lg-block"><span style="color:#16ff25;">GRAHAK</span> <br/>SAHAAYATA<br/><span style="color:#ff6416;">KENDRA</span></span>
       </a>
+      {% endif %}
     </div>
     {% if user.role == 'admin' %}
     <ul class="nav">
@@ -92,6 +106,7 @@
             <li class="nav-item"> <a class="nav-link" href="{% url 'admin_add_gsk' %}">Add GSK</a></li>
             <li class="nav-item"> <a class="nav-link" href="{% url 'admin_view_gsk' %}">View GSK's</a></li>
             <li class="nav-item"> <a class="nav-link" href="{% url 'white_label_tenant_list' %}">White Label Tenants</a></li>
+            <li class="nav-item"> <a class="nav-link" href="{% url 'white_label_admin_list' %}">View WL Admins</a></li>
             <li class="nav-item"> <a class="nav-link" href="{% url 'white_label_admin_create' %}">Add WL Admin</a></li>
            
           </ul>
@@ -551,6 +566,10 @@
 
 
 
+
+  {% if user.role == 'white_label_admin' %}
+  {% include 'white_label_dashboard/_sidebar_nav.html' %}
+  {% endif %}
 
   {% if user.role == 'master_distributor' %}
   <!-- Master Distributor Menu -->

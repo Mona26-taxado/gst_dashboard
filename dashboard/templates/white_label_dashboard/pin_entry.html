@@ -1,0 +1,25 @@
+{% extends 'white_label_dashboard/wl_layout.html' %}
+{% block title %}Enter PIN — {{ tenant.name }}{% endblock %}
+{% block content %}
+<div class="wl-saas-page-header">
+    <div>
+        <h1>Additional Services</h1>
+        <div class="wl-saas-breadcrumb">
+            <a href="{{ tenant_dashboard_url|default:'/' }}">Dashboard</a><span>/</span><span>PIN verification</span>
+        </div>
+    </div>
+</div>
+<div class="wl-saas-card">
+    <p style="margin:0 0 20px;color:var(--wl-text-muted);line-height:1.6;">
+        This section is PIN-protected. Enter your 4-digit security PIN to continue.
+    </p>
+    <form method="post" style="max-width:320px;">
+        {% csrf_token %}
+        <div class="wl-saas-form-group">
+            <label class="wl-saas-label" for="pin">4-Digit PIN</label>
+            <input type="password" name="pin" id="pin" class="wl-saas-input" maxlength="4" placeholder="Enter your PIN" required autocomplete="off">
+        </div>
+        <button type="submit" class="wl-saas-btn wl-saas-btn-primary">Verify &amp; continue</button>
+    </form>
+</div>
+{% endblock %}

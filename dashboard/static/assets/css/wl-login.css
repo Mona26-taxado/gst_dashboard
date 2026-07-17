@@ -1,0 +1,196 @@
+/* White Label Login — Enterprise dark SaaS */
+:root {
+  --wl-bg: #0F172A;
+  --wl-card: #1E293B;
+  --wl-border: rgba(148, 163, 184, 0.12);
+  --wl-text: #F8FAFC;
+  --wl-muted: #94A3B8;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+  background: var(--wl-bg);
+  color: var(--wl-text);
+}
+
+.wl-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  width: min(1200px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 32px 0;
+}
+
+.wl-main {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+.wl-left h3 {
+  font-size: clamp(1.45rem, 2.5vw, 1.85rem);
+  font-weight: 700;
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+}
+
+.wl-left .wl-sub { color: var(--wl-muted); font-size: 0.95rem; margin-bottom: 24px; }
+
+.wl-services { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.wl-service {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--wl-card); border: 1px solid var(--wl-border);
+  border-radius: 12px; padding: 14px; min-height: 72px;
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.wl-service:hover { border-color: rgba(37, 99, 235, 0.35); transform: translateY(-2px); }
+
+.wl-service-icon {
+  width: 42px; height: 42px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.15rem; flex-shrink: 0; color: #fff; background: var(--wl-primary);
+}
+
+.wl-service-text { flex: 1; min-width: 0; }
+.wl-service-text strong { display: block; font-size: 0.92rem; font-weight: 600; margin-bottom: 2px; }
+.wl-service-text span { display: block; font-size: 0.75rem; color: var(--wl-muted); }
+.wl-service-arrow { color: var(--wl-muted); font-size: 1.1rem; flex-shrink: 0; }
+
+.wl-right { display: flex; align-items: stretch; }
+
+.wl-login-panel {
+  width: 100%; background: var(--wl-card);
+  border-radius: 16px; border: 1px solid var(--wl-border);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  padding: 36px 32px 28px;
+  display: flex; flex-direction: column; justify-content: center;
+}
+
+.wl-login-brand {
+  display: flex; flex-direction: column; align-items: center;
+  margin-bottom: 28px; text-align: center;
+}
+
+.wl-login-brand img {
+  width: 72px; height: 72px; object-fit: contain;
+  border-radius: 12px; background: #fff; border: 1px solid var(--wl-border);
+  padding: 8px; margin-bottom: 16px;
+}
+
+.wl-brand-mark {
+  width: 72px; height: 72px; border-radius: 12px;
+  background: var(--wl-primary); color: #fff;
+  display: grid; place-items: center; font-size: 1.75rem; font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.wl-login-brand h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 4px; }
+.wl-login-brand p { color: var(--wl-muted); font-size: 0.9rem; }
+
+.wl-error {
+  background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #fca5a5; border-radius: 10px; padding: 12px 14px; margin-bottom: 16px; font-size: 0.88rem;
+}
+
+.wl-field { position: relative; margin-bottom: 14px; }
+.wl-field .mdi-left {
+  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+  color: var(--wl-muted); font-size: 1.1rem;
+}
+
+.wl-field input {
+  width: 100%; height: 48px; border: 1px solid var(--wl-border);
+  border-radius: 10px; background: var(--wl-bg); font-family: inherit;
+  font-size: 16px; color: var(--wl-text); padding: 0 42px;
+}
+
+.wl-field input:focus {
+  outline: none; border-color: var(--wl-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.wl-toggle-pass {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  border: none; background: transparent; color: var(--wl-muted);
+  font-size: 1.15rem; cursor: pointer; padding: 4px;
+}
+
+.wl-meta {
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 10px; flex-wrap: wrap; margin-bottom: 20px; font-size: 0.88rem;
+}
+
+.wl-check { display: inline-flex; align-items: center; gap: 8px; color: var(--wl-muted); cursor: pointer; }
+.wl-check input { accent-color: var(--wl-primary); width: 15px; height: 15px; }
+.wl-link { color: var(--wl-primary); text-decoration: none; font-weight: 600; }
+
+.wl-submit {
+  width: 100%; height: 48px; border: none; border-radius: 10px;
+  background: var(--wl-primary); color: #fff; font-family: inherit;
+  font-weight: 600; font-size: 1rem; cursor: pointer;
+}
+
+.wl-submit:hover { filter: brightness(1.08); }
+
+.wl-bottom {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+  margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--wl-border);
+}
+
+.wl-feature { display: flex; align-items: flex-start; gap: 12px; }
+.wl-feature-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: rgba(37, 99, 235, 0.12); color: var(--wl-primary);
+  display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0;
+}
+
+.wl-feature strong { display: block; font-size: 0.88rem; font-weight: 600; margin-bottom: 2px; }
+.wl-feature span { display: block; font-size: 0.75rem; color: var(--wl-muted); line-height: 1.4; }
+
+@media (max-width: 960px) {
+  .wl-main { grid-template-columns: 1fr; gap: 24px; }
+  .wl-right { order: -1; }
+  .wl-login-panel { padding: 28px 20px 22px; }
+  .wl-bottom { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 560px) {
+  .wl-page { width: calc(100% - 20px); padding: 16px 0; }
+  .wl-services { grid-template-columns: 1fr; }
+  .wl-bottom { grid-template-columns: 1fr; }
+}
+
+.wl-company-footer {
+  margin-top: 20px;
+  padding: 18px 0 8px;
+  border-top: 1px solid var(--wl-border);
+  text-align: center;
+}
+.wl-company-name {
+  margin: 0 0 6px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--wl-text);
+}
+.wl-company-email {
+  display: inline-block;
+  margin-bottom: 8px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--wl-primary);
+  text-decoration: none;
+}
+.wl-company-email:hover { text-decoration: underline; }
+.wl-company-copy {
+  margin: 0;
+  font-size: 0.72rem;
+  color: var(--wl-muted);
+}

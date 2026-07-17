@@ -1,0 +1,77 @@
+{% load static %}
+<ul class="nav wl-nav">
+    <li class="wl-user-card">
+        <div class="wl-user-avatar">{{ user.full_name|slice:":1"|upper }}</div>
+        <div class="wl-user-meta">
+            <strong>{{ user.full_name }}</strong>
+            <span>White Label Admin</span>
+        </div>
+    </li>
+
+    <li class="wl-nav-section">Overview</li>
+    <li class="nav-item menu-items">
+        <a class="nav-link wl-nav-link {% if request.resolver_match.url_name == 'white_label_dashboard' %}active{% endif %}" href="{% url 'white_label_dashboard' %}">
+            <span class="wl-icon"><i class="mdi mdi-view-dashboard-outline"></i></span>
+            <span class="menu-title">Dashboard</span>
+        </a>
+    </li>
+    <li class="nav-item menu-items">
+        <a class="nav-link wl-nav-link {% if request.resolver_match.url_name == 'white_label_reports' %}active{% endif %}" href="{% url 'white_label_reports' %}">
+            <span class="wl-icon"><i class="mdi mdi-chart-box-outline"></i></span>
+            <span class="menu-title">Reports</span>
+        </a>
+    </li>
+
+    <li class="wl-nav-section">Network</li>
+    <li class="nav-item menu-items">
+        <a class="nav-link wl-nav-link {% if request.resolver_match.url_name == 'white_label_add_user' %}active{% endif %}" href="{% url 'white_label_add_user' %}">
+            <span class="wl-icon"><i class="mdi mdi-account-plus-outline"></i></span>
+            <span class="menu-title">Add User</span>
+        </a>
+    </li>
+    <li class="nav-item menu-items">
+        <a class="nav-link wl-nav-link {% if request.resolver_match.url_name == 'white_label_view_users' or request.resolver_match.url_name == 'white_label_edit_user' or request.resolver_match.url_name == 'white_label_delete_user' %}active{% endif %}" href="{% url 'white_label_view_users' %}">
+            <span class="wl-icon"><i class="mdi mdi-account-group-outline"></i></span>
+            <span class="menu-title">View Users</span>
+        </a>
+    </li>
+
+    <li class="wl-nav-section">Wallet</li>
+    <li class="nav-item menu-items">
+        <a class="nav-link wl-nav-link {% if request.resolver_match.url_name == 'white_label_transfer_money' %}active{% endif %}" href="{% url 'white_label_transfer_money' %}">
+            <span class="wl-icon"><i class="mdi mdi-swap-horizontal"></i></span>
+            <span class="menu-title">Transfer Wallet</span>
+        </a>
+    </li>
+    <li class="nav-item menu-items">
+        <a class="nav-link wl-nav-link {% if request.resolver_match.url_name == 'white_label_view_transactions' %}active{% endif %}" href="{% url 'white_label_view_transactions' %}">
+            <span class="wl-icon"><i class="mdi mdi-history"></i></span>
+            <span class="menu-title">Transactions</span>
+        </a>
+    </li>
+
+    <li class="wl-nav-section">Operations</li>
+    <li class="nav-item menu-items">
+        <a class="nav-link wl-nav-link {% if request.resolver_match.url_name == 'white_label_view_services' or request.resolver_match.url_name == 'white_label_service_documents' %}active{% endif %}" href="{% url 'white_label_view_services' %}">
+            <span class="wl-icon"><i class="mdi mdi-briefcase-outline"></i></span>
+            <span class="menu-title">View Services</span>
+        </a>
+    </li>
+    <li class="nav-item menu-items">
+        <a class="nav-link wl-nav-link {% if request.resolver_match.url_name == 'white_label_view_billing' %}active{% endif %}" href="{% url 'white_label_view_billing' %}">
+            <span class="wl-icon"><i class="mdi mdi-receipt-text-outline"></i></span>
+            <span class="menu-title">Network Billing</span>
+        </a>
+    </li>
+    <li class="nav-item menu-items">
+        <a class="nav-link wl-nav-link {% if request.resolver_match.url_name == 'white_label_banking' %}active{% endif %}" href="{% url 'white_label_banking' %}">
+            <span class="wl-icon"><i class="mdi mdi-bank-outline"></i></span>
+            <span class="menu-title">Banking Portal</span>
+        </a>
+    </li>
+
+    <li class="wl-sidebar-foot">
+        <a class="wl-foot-link" href="{% url 'password_change' %}"><i class="mdi mdi-lock-reset"></i> Change Password</a>
+        <a class="wl-foot-link wl-foot-logout" href="{% url 'logout' %}"><i class="mdi mdi-logout"></i> Logout</a>
+    </li>
+</ul>
