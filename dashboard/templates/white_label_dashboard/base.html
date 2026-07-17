@@ -4,154 +4,471 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}{{ tenant.name|default:"White Label" }}{% endblock %}</title>
+    <title>{% block title %}{{ tenant.name|default:"Partner Portal" }}{% endblock %}</title>
     {% if tenant and tenant.favicon %}
     <link rel="shortcut icon" href="{{ tenant.favicon.url }}" />
     {% endif %}
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
+    <meta name="theme-color" content="{{ tenant.primary_color|default:'#0f766e' }}">
     <style>
         :root {
             --wl-primary: {{ tenant.primary_color|default:"#0f766e" }};
-            --wl-secondary: {{ tenant.secondary_color|default:"#0369a1" }};
+            --wl-secondary: {{ tenant.secondary_color|default:"#0891b2" }};
+            --wl-navy: #0f2744;
+            --wl-ink: #1e293b;
+            --wl-muted: #64748b;
+            --wl-line: #e8edf3;
+            --wl-bg: #f4f7fb;
+            --wl-card: #ffffff;
+            --wl-sidebar: #0c1a2e;
+            --wl-radius: 16px;
+            --wl-shadow: 0 4px 24px rgba(15, 39, 68, 0.06);
+            --wl-shadow-lg: 0 12px 40px rgba(15, 39, 68, 0.1);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            font-family: 'DM Sans', sans-serif;
+            font-family: 'Inter', sans-serif;
             min-height: 100vh;
             display: flex;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
-            color: #e2e8f0;
+            background: var(--wl-bg);
+            color: var(--wl-ink);
+            -webkit-font-smoothing: antialiased;
         }
+
+        /* ── Sidebar ── */
         .wl-sidebar {
-            width: 260px;
-            background: #0b1220;
-            border-right: 1px solid rgba(255,255,255,0.06);
-            padding: 1.5rem 1rem;
+            width: 280px;
+            flex-shrink: 0;
+            background: var(--wl-sidebar);
+            color: #fff;
             display: flex;
             flex-direction: column;
-            gap: 0.25rem;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            z-index: 100;
+            transition: transform .25s ease;
+        }
+        .wl-sidebar-inner {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.35rem 1rem 1rem;
         }
         .wl-brand {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            padding: 0.5rem 0.75rem 1.5rem;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-            margin-bottom: 1rem;
+            gap: 0.85rem;
+            padding: 0.25rem 0.5rem 1.35rem;
+            margin-bottom: 0.25rem;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
         }
-        .wl-brand img { width: 40px; height: 40px; object-fit: contain; border-radius: 8px; }
-        .wl-brand span { font-weight: 700; font-size: 1rem; line-height: 1.2; }
+        .wl-brand img {
+            width: 44px; height: 44px;
+            object-fit: contain;
+            border-radius: 12px;
+            background: #fff;
+            padding: 4px;
+        }
+        .wl-brand-mark {
+            width: 44px; height: 44px;
+            border-radius: 12px;
+            display: grid; place-items: center;
+            font-weight: 800; font-size: 1.1rem;
+            background: linear-gradient(135deg, var(--wl-primary), var(--wl-secondary));
+        }
+        .wl-brand-name { font-weight: 700; font-size: 1rem; line-height: 1.3; }
+        .wl-brand-tag { font-size: 0.72rem; color: #94a3b8; font-weight: 500; margin-top: 1px; }
+
+        .wl-nav-label {
+            font-size: 0.65rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: #475569;
+            padding: 1.1rem 0.75rem 0.45rem;
+        }
         .wl-nav a {
-            display: block;
-            padding: 0.7rem 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.72rem 0.85rem;
             color: #94a3b8;
             text-decoration: none;
-            border-radius: 8px;
-            font-size: 0.95rem;
+            border-radius: 11px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 2px;
+            transition: all .15s ease;
         }
-        .wl-nav a:hover, .wl-nav a.active {
-            background: color-mix(in srgb, var(--wl-primary) 25%, transparent);
+        .wl-nav a i { font-size: 1.2rem; width: 22px; text-align: center; }
+        .wl-nav a:hover { background: rgba(255,255,255,0.06); color: #e2e8f0; }
+        .wl-nav a.active {
+            background: linear-gradient(135deg, color-mix(in srgb, var(--wl-primary) 90%, #000), color-mix(in srgb, var(--wl-secondary) 85%, #000));
             color: #fff;
+            font-weight: 600;
+            box-shadow: 0 4px 16px color-mix(in srgb, var(--wl-primary) 40%, transparent);
         }
+
+        .wl-user-card {
+            margin: 1rem 0.5rem 0;
+            padding: 0.85rem;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .wl-user-avatar {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--wl-primary), var(--wl-secondary));
+            display: grid; place-items: center;
+            font-weight: 700; font-size: 0.95rem;
+            flex-shrink: 0;
+        }
+        .wl-user-name { font-size: 0.88rem; font-weight: 600; color: #f1f5f9; }
+        .wl-user-role { font-size: 0.72rem; color: #64748b; margin-top: 1px; }
+
+        /* ── Main ── */
         .wl-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
         .wl-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1rem 1.75rem;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
-            background: rgba(15,23,42,0.6);
-        }
-        .wl-top .balance {
-            background: color-mix(in srgb, var(--wl-primary) 30%, #0f172a);
-            padding: 0.4rem 0.9rem;
-            border-radius: 999px;
-            font-weight: 600;
-            color: #fff;
-        }
-        .wl-content { padding: 1.75rem; flex: 1; }
-        .messages { list-style: none; margin-bottom: 1rem; }
-        .messages li {
-            padding: 0.75rem 1rem;
-            border-radius: 8px;
-            margin-bottom: 0.5rem;
-        }
-        .messages .success { background: #14532d; color: #bbf7d0; }
-        .messages .error, .messages .warning { background: #7f1d1d; color: #fecaca; }
-        .wl-card {
-            background: #1e293b;
-            border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 12px;
-            padding: 1.25rem;
-            margin-bottom: 1rem;
-        }
-        .wl-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
             gap: 1rem;
+            padding: 1rem 1.75rem;
+            background: var(--wl-card);
+            border-bottom: 1px solid var(--wl-line);
+            position: sticky;
+            top: 0;
+            z-index: 50;
         }
-        .stat h3 { font-size: 1.6rem; color: #fff; }
-        .stat p { color: #94a3b8; font-size: 0.85rem; margin-top: 0.25rem; }
+        .wl-top-left { display: flex; align-items: center; gap: 0.85rem; }
+        .wl-top h1 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--wl-navy);
+            letter-spacing: -0.02em;
+        }
+        .wl-top .sub { font-size: 0.8rem; color: var(--wl-muted); margin-top: 2px; }
+        .wl-top-actions { display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap; }
+
+        .wl-wallet-pill {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, color-mix(in srgb, var(--wl-primary) 8%, #fff), color-mix(in srgb, var(--wl-secondary) 6%, #fff));
+            border: 1px solid color-mix(in srgb, var(--wl-primary) 20%, var(--wl-line));
+            padding: 0.5rem 1rem;
+            border-radius: 999px;
+            font-size: 0.88rem;
+            font-weight: 600;
+        }
+        .wl-wallet-pill i { color: var(--wl-primary); font-size: 1.1rem; }
+        .wl-wallet-pill strong { color: var(--wl-primary); font-size: 0.95rem; }
+
+        .wl-icon-btn {
+            width: 40px; height: 40px;
+            border-radius: 11px;
+            border: 1px solid var(--wl-line);
+            background: var(--wl-card);
+            display: grid; place-items: center;
+            color: var(--wl-muted);
+            text-decoration: none;
+            font-size: 1.15rem;
+            transition: all .15s;
+        }
+        .wl-icon-btn:hover { border-color: var(--wl-primary); color: var(--wl-primary); }
+
+        .wl-content { padding: 1.5rem 1.75rem 2.5rem; flex: 1; }
+
+        /* ── Shared components ── */
+        .messages { list-style: none; margin-bottom: 1.25rem; }
+        .messages li {
+            padding: 0.85rem 1.1rem;
+            border-radius: 12px;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .messages .success { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+        .messages .error, .messages .warning { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+        .messages .info { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+
+        .wl-card {
+            background: var(--wl-card);
+            border: 1px solid var(--wl-line);
+            border-radius: var(--wl-radius);
+            padding: 1.35rem;
+            margin-bottom: 1.25rem;
+            box-shadow: var(--wl-shadow);
+        }
+        .wl-card-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--wl-navy);
+            margin-bottom: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+        }
+        .wl-card-title a { font-size: 0.82rem; font-weight: 600; color: var(--wl-primary); text-decoration: none; }
+
+        .wl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.25rem; }
+
+        .stat-card {
+            background: var(--wl-card);
+            border: 1px solid var(--wl-line);
+            border-radius: var(--wl-radius);
+            padding: 1.25rem;
+            box-shadow: var(--wl-shadow);
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--wl-primary), var(--wl-secondary));
+            opacity: 0;
+            transition: opacity .2s;
+        }
+        .stat-card:hover::before { opacity: 1; }
+        .stat-card .stat-icon {
+            width: 42px; height: 42px;
+            border-radius: 12px;
+            display: grid; place-items: center;
+            font-size: 1.25rem;
+            margin-bottom: 0.9rem;
+        }
+        .stat-card .stat-icon.teal { background: #ecfdf5; color: #0f766e; }
+        .stat-card .stat-icon.blue { background: #eff6ff; color: #2563eb; }
+        .stat-card .stat-icon.cyan { background: #ecfeff; color: #0891b2; }
+        .stat-card .stat-icon.green { background: #f0fdf4; color: #16a34a; }
+        .stat-card .stat-icon.amber { background: #fffbeb; color: #d97706; }
+        .stat-card .stat-icon.purple { background: #faf5ff; color: #9333ea; }
+        .stat-card h3 { font-size: 1.65rem; font-weight: 800; letter-spacing: -0.03em; color: var(--wl-navy); }
+        .stat-card p { color: var(--wl-muted); font-size: 0.82rem; font-weight: 500; margin-top: 0.25rem; }
+
         table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 0.7rem 0.5rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.06); }
-        th { color: #94a3b8; font-weight: 500; font-size: 0.85rem; }
-        .btn {
+        th, td {
+            padding: 0.8rem 0.6rem;
+            text-align: left;
+            border-bottom: 1px solid var(--wl-line);
+            font-size: 0.875rem;
+        }
+        th {
+            color: var(--wl-muted);
+            font-weight: 600;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover { background: #f8fafc; }
+
+        .badge {
             display: inline-block;
-            background: var(--wl-primary);
+            padding: 0.2rem 0.6rem;
+            border-radius: 999px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+        .badge-md { background: #ecfeff; color: #0e7490; }
+        .badge-dist { background: #eff6ff; color: #1d4ed8; }
+        .badge-ret { background: #f0fdf4; color: #15803d; }
+        .badge-credit { background: #ecfdf5; color: #047857; }
+        .badge-debit { background: #fef2f2; color: #b91c1c; }
+        .badge-neutral { background: #f1f5f9; color: #475569; }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: linear-gradient(135deg, var(--wl-primary), var(--wl-secondary));
             color: #fff;
             border: none;
-            padding: 0.55rem 1.1rem;
-            border-radius: 8px;
+            padding: 0.6rem 1.2rem;
+            border-radius: 11px;
             text-decoration: none;
             cursor: pointer;
             font-weight: 600;
+            font-size: 0.875rem;
+            font-family: inherit;
+            box-shadow: 0 4px 14px color-mix(in srgb, var(--wl-primary) 30%, transparent);
+            transition: filter .15s, transform .1s;
         }
-        .btn-secondary { background: #334155; }
-        .btn-danger { background: #b91c1c; }
-        .form-control, select, input[type=text], input[type=email], input[type=number], input[type=date], input[type=password], textarea {
+        .btn:hover { filter: brightness(1.06); }
+        .btn:active { transform: scale(0.98); }
+        .btn-secondary {
+            background: var(--wl-card);
+            color: var(--wl-ink);
+            border: 1px solid var(--wl-line);
+            box-shadow: none;
+        }
+        .btn-secondary:hover { border-color: var(--wl-primary); color: var(--wl-primary); filter: none; }
+        .btn-danger { background: #dc2626; box-shadow: 0 4px 14px rgba(220,38,38,0.25); }
+        .btn-sm { padding: 0.35rem 0.75rem; font-size: 0.8rem; box-shadow: none; }
+
+        .form-control, select, input[type=text], input[type=email], input[type=number],
+        input[type=date], input[type=password], textarea {
             width: 100%;
-            padding: 0.55rem 0.75rem;
-            border-radius: 8px;
-            border: 1px solid #475569;
-            background: #0f172a;
-            color: #e2e8f0;
+            padding: 0.65rem 0.85rem;
+            border-radius: 11px;
+            border: 1px solid #cbd5e1;
+            background: #fff;
+            color: var(--wl-ink);
             margin-bottom: 0.75rem;
+            font-family: inherit;
+            font-size: 0.925rem;
+            transition: border-color .15s, box-shadow .15s;
         }
-        label { display: block; margin-bottom: 0.35rem; color: #cbd5e1; font-size: 0.9rem; }
-        .form-group { margin-bottom: 0.75rem; }
-        @media (max-width: 800px) {
-            body { flex-direction: column; }
-            .wl-sidebar { width: 100%; }
+        .form-control:focus, select:focus, input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--wl-primary);
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--wl-primary) 15%, transparent);
+        }
+        label { display: block; margin-bottom: 0.35rem; color: #334155; font-size: 0.84rem; font-weight: 600; }
+        .form-group { margin-bottom: 0.85rem; }
+
+        .toolbar { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; align-items: center; }
+        .toolbar .form-control { margin: 0; max-width: 320px; }
+        .pagination { display: flex; gap: 0.75rem; align-items: center; margin-top: 1rem; color: var(--wl-muted); font-size: 0.85rem; }
+        .pagination a { color: var(--wl-primary); font-weight: 600; text-decoration: none; }
+        .empty { text-align: center; padding: 2.5rem 1rem; color: var(--wl-muted); font-size: 0.9rem; }
+        .link-action { color: var(--wl-primary); font-weight: 600; text-decoration: none; }
+        .link-action.danger { color: #dc2626; }
+
+        .wl-menu-btn {
+            display: none;
+            width: 40px; height: 40px;
+            border: 1px solid var(--wl-line);
+            background: var(--wl-card);
+            border-radius: 11px;
+            font-size: 1.3rem;
+            cursor: pointer;
+            color: var(--wl-navy);
+        }
+        .wl-overlay {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 90;
+        }
+        .wl-overlay.show { display: block; }
+
+        @media (max-width: 960px) {
+            .wl-sidebar {
+                position: fixed;
+                left: 0; top: 0;
+                transform: translateX(-100%);
+            }
+            .wl-sidebar.open { transform: translateX(0); }
+            .wl-menu-btn { display: grid; place-items: center; }
+            .wl-content, .wl-top { padding-left: 1rem; padding-right: 1rem; }
         }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <aside class="wl-sidebar">
-        <div class="wl-brand">
-            {% if tenant and tenant.logo %}
-            <img src="{{ tenant.logo.url }}" alt="{{ tenant.name }}">
-            {% endif %}
-            <span>{{ tenant.name|default:"White Label Portal" }}</span>
+    <div class="wl-overlay" id="wlOverlay"></div>
+    <aside class="wl-sidebar" id="wlSidebar">
+        <div class="wl-sidebar-inner">
+            <div class="wl-brand">
+                {% if tenant and tenant.logo %}
+                <img src="{{ tenant.logo.url }}" alt="{{ tenant.name }}">
+                {% else %}
+                <div class="wl-brand-mark">{{ tenant.name|default:"P"|slice:":1"|upper }}</div>
+                {% endif %}
+                <div>
+                    <div class="wl-brand-name">{{ tenant.name|default:"Partner Portal" }}</div>
+                    <div class="wl-brand-tag">White Label Console</div>
+                </div>
+            </div>
+
+            <nav class="wl-nav">
+                <div class="wl-nav-label">Overview</div>
+                <a href="{% url 'white_label_dashboard' %}" class="{% if request.resolver_match.url_name == 'white_label_dashboard' %}active{% endif %}">
+                    <i class="mdi mdi-view-dashboard-outline"></i> Dashboard
+                </a>
+                <a href="{% url 'white_label_reports' %}" class="{% if request.resolver_match.url_name == 'white_label_reports' %}active{% endif %}">
+                    <i class="mdi mdi-chart-box-outline"></i> Reports
+                </a>
+
+                <div class="wl-nav-label">Network</div>
+                <a href="{% url 'white_label_add_user' %}" class="{% if request.resolver_match.url_name == 'white_label_add_user' %}active{% endif %}">
+                    <i class="mdi mdi-account-plus-outline"></i> Add User
+                </a>
+                <a href="{% url 'white_label_view_users' %}" class="{% if request.resolver_match.url_name == 'white_label_view_users' or request.resolver_match.url_name == 'white_label_edit_user' or request.resolver_match.url_name == 'white_label_delete_user' %}active{% endif %}">
+                    <i class="mdi mdi-account-group-outline"></i> View Users
+                </a>
+
+                <div class="wl-nav-label">Wallet</div>
+                <a href="{% url 'white_label_transfer_money' %}" class="{% if request.resolver_match.url_name == 'white_label_transfer_money' %}active{% endif %}">
+                    <i class="mdi mdi-swap-horizontal"></i> Transfer Wallet
+                </a>
+                <a href="{% url 'white_label_view_transactions' %}" class="{% if request.resolver_match.url_name == 'white_label_view_transactions' %}active{% endif %}">
+                    <i class="mdi mdi-history"></i> Transactions
+                </a>
+
+                <div class="wl-nav-label">Operations</div>
+                <a href="{% url 'white_label_view_services' %}" class="{% if request.resolver_match.url_name == 'white_label_view_services' or request.resolver_match.url_name == 'white_label_service_documents' %}active{% endif %}">
+                    <i class="mdi mdi-briefcase-outline"></i> View Services
+                </a>
+                <a href="{% url 'white_label_view_billing' %}" class="{% if request.resolver_match.url_name == 'white_label_view_billing' %}active{% endif %}">
+                    <i class="mdi mdi-receipt-text-outline"></i> Network Billing
+                </a>
+                <a href="{% url 'white_label_banking' %}" class="{% if request.resolver_match.url_name == 'white_label_banking' %}active{% endif %}">
+                    <i class="mdi mdi-bank-outline"></i> Banking Portal
+                </a>
+            </nav>
+
+            <div class="wl-user-card">
+                <div class="wl-user-avatar">{{ request.user.full_name|slice:":1"|upper }}</div>
+                <div>
+                    <div class="wl-user-name">{{ request.user.full_name }}</div>
+                    <div class="wl-user-role">White Label Admin</div>
+                </div>
+            </div>
         </div>
-        <nav class="wl-nav">
-            <a href="{% url 'white_label_dashboard' %}">Dashboard</a>
-            <a href="{% url 'white_label_add_user' %}">Add User</a>
-            <a href="{% url 'white_label_view_users' %}">View Users</a>
-            <a href="{% url 'white_label_transfer_money' %}">Transfer Wallet</a>
-            <a href="{% url 'white_label_view_transactions' %}">Transactions</a>
-            <a href="{% url 'logout' %}">Logout</a>
-        </nav>
     </aside>
+
     <div class="wl-main">
         <header class="wl-top">
-            <div>
-                <strong>{% block page_heading %}Dashboard{% endblock %}</strong>
-                <div style="font-size:0.85rem;color:#94a3b8;">{{ request.user.full_name }} · White Label Admin</div>
+            <div class="wl-top-left">
+                <button type="button" class="wl-menu-btn" id="wlMenuBtn" aria-label="Menu">
+                    <i class="mdi mdi-menu"></i>
+                </button>
+                <div>
+                    <h1>{% block page_heading %}Dashboard{% endblock %}</h1>
+                    <div class="sub">{{ request.user.full_name }} · White Label Admin</div>
+                </div>
             </div>
-            {% if wallet_balance != None %}
-            <div class="balance">Wallet: ₹{{ wallet_balance }}</div>
-            {% endif %}
+            <div class="wl-top-actions">
+                {% if wallet_balance != None %}
+                <div class="wl-wallet-pill">
+                    <i class="mdi mdi-wallet-outline"></i>
+                    <span>Wallet</span>
+                    <strong>₹{{ wallet_balance }}</strong>
+                </div>
+                {% endif %}
+                <a href="{% url 'white_label_transfer_money' %}" class="wl-icon-btn" title="Transfer">
+                    <i class="mdi mdi-swap-horizontal"></i>
+                </a>
+                <a href="{% url 'password_change' %}" class="wl-icon-btn" title="Settings">
+                    <i class="mdi mdi-cog-outline"></i>
+                </a>
+                <a href="{% url 'logout' %}" class="wl-icon-btn" title="Logout">
+                    <i class="mdi mdi-logout"></i>
+                </a>
+            </div>
         </header>
         <main class="wl-content">
             {% if messages %}
@@ -164,5 +481,19 @@
             {% block content %}{% endblock %}
         </main>
     </div>
+    <script>
+        (function () {
+            var btn = document.getElementById('wlMenuBtn');
+            var side = document.getElementById('wlSidebar');
+            var overlay = document.getElementById('wlOverlay');
+            function toggle(open) {
+                side.classList.toggle('open', open);
+                overlay.classList.toggle('show', open);
+            }
+            if (btn) btn.addEventListener('click', function () { toggle(!side.classList.contains('open')); });
+            if (overlay) overlay.addEventListener('click', function () { toggle(false); });
+        })();
+    </script>
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

@@ -3,7 +3,7 @@ from django.db.models import Count, Sum
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required 
 from django.contrib.auth import authenticate, login, logout
-from dashboard.utils import role_required, generate_qr
+from dashboard.utils import role_required, generate_qr, wl_template_for, is_wl_tenant_user
 from django.contrib import messages
 from dashboard.models import Notification, CustomUser, Equipment, EquipmentOrder, Service, Transaction, BillingDetails
 from django.contrib.auth import logout
@@ -405,18 +405,24 @@ def pin_entry(request):
         # If the PIN doesn't match, show an error message
         messages.error(request, 'Invalid PIN. Please try again.')
 
-    return render(request, 'dashboard/pin_entry.html')  # Render the PIN entry page
+    return render(
+        request,
+        wl_template_for(request, 'dashboard/pin_entry.html', 'white_label_dashboard/pin_entry.html'),
+    )
 
 
 
 
 @login_required
-@role_required(['retailer', 'distributor', 'master_distributor', 'admin'])  # Add roles allowed to access
+@role_required(['retailer', 'distributor', 'master_distributor', 'admin', 'white_label_admin'])
 def additional_services(request):
     """
     View for managing additional services.
     """
-    return render(request, 'additional_services.html')
+    return render(
+        request,
+        wl_template_for(request, 'additional_services.html', 'white_label_dashboard/additional_services.html'),
+    )
 
 
 
@@ -469,6 +475,18 @@ from django.contrib.auth.views import PasswordChangeView
 from django.http import JsonResponse
 
 class CustomPasswordChangeView(PasswordChangeView):
+    def get_template_names(self):
+        if is_wl_tenant_user(self.request.user):
+            return ['white_label_dashboard/password_change.html']
+        return [self.template_name]
+
+    def get_success_url(self):
+        if is_wl_tenant_user(self.request.user):
+            from dashboard.context_processors import TENANT_DASHBOARD_URLS
+            role = getattr(self.request.user, 'role', None)
+            return TENANT_DASHBOARD_URLS.get(role, '/')
+        return super().get_success_url()
+
     def form_valid(self, form):
         if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             form.save()
@@ -582,9 +600,15 @@ def generate_qr_for_recharge(request, user_id):
 @login_required
 def equipment_store(request):
     equipment_list = Equipment.objects.all()
-    return render(request, 'equipment_store/equipment_store.html', {
-        'equipment_list': equipment_list
-    })
+    return render(
+        request,
+        wl_template_for(
+            request,
+            'equipment_store/equipment_store.html',
+            'white_label_dashboard/equipment_store.html',
+        ),
+        {'equipment_list': equipment_list},
+    )
 
 
 
@@ -810,12 +834,15 @@ def dummy_page(request):
     return render(request, 'demo_pages/dummy_page.html')
 
 
-@role_required(['retailer', 'distributor', 'master_distributor'])
+@role_required(['retailer', 'distributor', 'master_distributor', 'white_label_admin'])
 @login_required
 def recharge_plans_view(request):
     """
     View to display available recharge plans to the retailer, distributor, and master distributor.
     """
-    return render(request, 'recharge_plans.html')
+    return render(
+        request,
+        wl_template_for(request, 'recharge_plans.html', 'white_label_dashboard/recharge_plans.html'),
+    )
 
 

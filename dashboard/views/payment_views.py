@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from ..models import Equipment, EquipmentOrder
+from dashboard.utils import wl_template_for
 from decimal import Decimal
 import qrcode
 import base64
@@ -152,6 +153,14 @@ def initiate_upi_payment(request):
             'upi_link': upi_link
         }
         
-        return render(request, 'dashboard/upi_payment.html', context)
+        return render(
+            request,
+            wl_template_for(
+                request,
+                'dashboard/upi_payment.html',
+                'white_label_dashboard/upi_payment.html',
+            ),
+            context,
+        )
     
     return redirect('recharge_plans') 

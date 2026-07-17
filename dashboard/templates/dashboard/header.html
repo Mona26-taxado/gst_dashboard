@@ -20,7 +20,11 @@
     </ul>
     <ul class="navbar-nav navbar-nav-right">
       <li class="nav-item d-lg-block">
+        {% if user.role == 'white_label_admin' %}
+        <a class="nav-link btn btn-success create-new-button" href="{% url 'white_label_banking' %}">Banking Portal</a>
+        {% else %}
         <a class="nav-link btn btn-success create-new-button" href="{% url 'banking_portal_request' %}">Banking Portal</a>
+        {% endif %}
       </li>
       <li class="nav-item d-lg-block ml-2">
         <button class="nav-link btn btn-outline-primary" id="theme-toggle">
@@ -70,23 +74,23 @@ document.addEventListener("DOMContentLoaded", function () {
   const themeIcon = document.getElementById('theme-icon');
   const themeText = document.getElementById('theme-text');
   
-  // Check for saved theme preference, default to light
-  const currentTheme = localStorage.getItem('theme') || 'light';
-  document.documentElement.setAttribute('data-theme', currentTheme);
-  updateThemeUI(currentTheme);
+  if (themeToggleBtn) {
+    const currentTheme = document.documentElement.getAttribute('data-theme') || localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    localStorage.setItem('theme', currentTheme);
+    updateThemeUI(currentTheme);
 
-  // Theme toggle click handler
-  themeToggleBtn.addEventListener('click', function() {
-    const currentTheme = document.documentElement.getAttribute('data-theme');
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    
-    document.documentElement.setAttribute('data-theme', newTheme);
-    localStorage.setItem('theme', newTheme);
-    updateThemeUI(newTheme);
-  });
+    themeToggleBtn.addEventListener('click', function() {
+      const activeTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+      const newTheme = activeTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      updateThemeUI(newTheme);
+    });
+  }
 
-  // Update theme UI elements
   function updateThemeUI(theme) {
+    if (!themeIcon || !themeText) return;
     if (theme === 'dark') {
       themeIcon.className = 'mdi mdi-weather-sunny';
       themeText.textContent = 'Light Mode';

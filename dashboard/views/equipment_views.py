@@ -6,6 +6,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from ..models import Equipment, EquipmentOrder
+from dashboard.utils import wl_template_for
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods, require_POST
@@ -30,7 +31,15 @@ def equipment_billing(request, equipment_id):
         'total_amount': total_amount,
     }
     
-    return render(request, 'equipment_store/billing_details.html', context)
+    return render(
+        request,
+        wl_template_for(
+            request,
+            'equipment_store/billing_details.html',
+            'white_label_dashboard/equipment_billing.html',
+        ),
+        context,
+    )
 
 @login_required
 def equipment_payment(request):
@@ -89,12 +98,20 @@ def equipment_payment(request):
             qr_image.save(buffer, format="PNG")
             qr_code_base64 = base64.b64encode(buffer.getvalue()).decode()
         
-        return render(request, 'equipment_store/payment.html', {
-            'order_id': order.id,
-            'total_amount': total_amount,
-            'qr_code': qr_code_base64,
-            'upi_id': upi_id,  # Pass UPI ID for UPI link
-        })
+        return render(
+            request,
+            wl_template_for(
+                request,
+                'equipment_store/payment.html',
+                'white_label_dashboard/equipment_payment.html',
+            ),
+            {
+                'order_id': order.id,
+                'total_amount': total_amount,
+                'qr_code': qr_code_base64,
+                'upi_id': upi_id,
+            },
+        )
         
     except Exception:
         return redirect('equipment_store')
@@ -146,9 +163,15 @@ def check_payment_status(request, order_id):
 def payment_success(request, order_id):
     """Display the payment success page."""
     order = get_object_or_404(EquipmentOrder, id=order_id, status='paid')
-    return render(request, 'equipment_store/payment_success.html', {
-        'order': order
-    })
+    return render(
+        request,
+        wl_template_for(
+            request,
+            'equipment_store/payment_success.html',
+            'white_label_dashboard/equipment_payment_success.html',
+        ),
+        {'order': order},
+    )
 
 @login_required
 def admin_equipment_billing(request):

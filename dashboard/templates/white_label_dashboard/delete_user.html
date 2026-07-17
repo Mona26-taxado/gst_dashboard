@@ -1,12 +1,23 @@
-{% extends 'white_label_dashboard/base.html' %}
-{% block page_heading %}Delete User{% endblock %}
+{% extends 'white_label_dashboard/wl_layout.html' %}
+{% block title %}Delete User — {{ tenant.name }}{% endblock %}
 {% block content %}
-<div class="wl-card" style="max-width:480px;">
-    <p>Delete <strong>{{ gsk.full_name }}</strong> ({{ gsk.role }})?</p>
-    <form method="post" style="margin-top:1rem;">
+<div class="wl-saas-page-header">
+    <div>
+        <h1>Delete User</h1>
+        <div class="wl-saas-breadcrumb">
+            <a href="{% url 'white_label_dashboard' %}">Dashboard</a><span>/</span>
+            <a href="{% url 'white_label_view_users' %}">Users</a><span>/</span><span>Delete</span>
+        </div>
+    </div>
+</div>
+<div class="wl-saas-card" style="max-width:520px;">
+    <p style="margin:0 0 20px;color:var(--wl-text-muted);line-height:1.6;">
+        Delete <strong style="color:var(--wl-text);">{{ gsk.full_name }}</strong> ({{ gsk.role }})? This cannot be undone.
+    </p>
+    <form method="post" style="display:flex;gap:10px;">
         {% csrf_token %}
-        <button type="submit" class="btn btn-danger">Confirm delete</button>
-        <a href="{% url 'white_label_view_users' %}" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="wl-saas-btn wl-saas-btn-danger">Confirm delete</button>
+        <a href="{% url 'white_label_view_users' %}" class="wl-saas-btn wl-saas-btn-secondary">Cancel</a>
     </form>
 </div>
 {% endblock %}

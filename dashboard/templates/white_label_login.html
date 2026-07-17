@@ -7,430 +7,15 @@
     <title>Login - {{ tenant.name|default:"Your Company" }}</title>
     {% if tenant.favicon %}
     <link rel="shortcut icon" href="{{ tenant.favicon.url }}" />
-    {% else %}
-    <link rel="shortcut icon" href="{% static 'assets/images/Sahaayata-pay-logo.png' %}" />
     {% endif %}
     <link rel="stylesheet" href="{% static 'assets/vendors/mdi/css/materialdesignicons.min.css' %}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <meta name="theme-color" content="{{ tenant.primary_color|default:'#1e3a8a' }}"/>
+    <link rel="stylesheet" href="{% static 'assets/css/wl-login.css' %}">
+    <meta name="theme-color" content="{{ tenant.primary_color|default:'#2563EB' }}"/>
     <style>
         :root {
-            --wl-primary: {{ tenant.primary_color|default:"#1e3a8a" }};
-            --wl-secondary: {{ tenant.secondary_color|default:"#3b82f6" }};
-            --wl-navy: #0f2744;
-            --wl-muted: #64748b;
-            --wl-bg: #f4f6f9;
-            --wl-card: #ffffff;
-            --wl-border: #e8edf3;
-            --wl-icon-bg: #e8f0fe;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            min-height: 100vh;
-            font-family: 'Inter', sans-serif;
-            background: var(--wl-bg);
-            color: var(--wl-navy);
-        }
-
-        .wl-page {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            width: min(1200px, calc(100% - 32px));
-            margin: 0 auto;
-            padding: 24px 0;
-        }
-
-        .wl-main {
-            flex: 1;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 28px;
-            align-items: start;
-        }
-
-        .wl-left h3 {
-            font-size: clamp(1.45rem, 2.5vw, 1.85rem);
-            font-weight: 800;
-            color: var(--wl-navy);
-            margin-bottom: 6px;
-            letter-spacing: -0.02em;
-        }
-
-        .wl-left .wl-sub {
-            color: var(--wl-muted);
-            font-size: 0.95rem;
-            margin-bottom: 20px;
-        }
-
-        .wl-services {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        .wl-service {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: var(--wl-card);
-            border: 1px solid var(--wl-border);
-            border-radius: 14px;
-            padding: 14px 12px 14px 14px;
-            box-shadow: 0 2px 8px rgba(15, 39, 68, 0.04);
-            text-decoration: none;
-            color: inherit;
-            transition: box-shadow 0.15s ease, transform 0.15s ease;
-            min-height: 72px;
-        }
-
-        .wl-service:hover {
-            box-shadow: 0 6px 18px rgba(15, 39, 68, 0.08);
-            transform: translateY(-1px);
-        }
-
-        .wl-service-icon {
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.15rem;
-            flex-shrink: 0;
-            color: #fff;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .wl-service:hover .wl-service-icon {
-            transform: scale(1.08);
-        }
-
-        .wl-service:nth-child(1) .wl-service-icon {
-            background: linear-gradient(145deg, #3b82f6, #1d4ed8);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2), 0 0 16px rgba(59, 130, 246, 0.55);
-        }
-        .wl-service:nth-child(2) .wl-service-icon {
-            background: linear-gradient(145deg, #f59e0b, #d97706);
-            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2), 0 0 16px rgba(245, 158, 11, 0.55);
-        }
-        .wl-service:nth-child(3) .wl-service-icon {
-            background: linear-gradient(145deg, #8b5cf6, #6d28d9);
-            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2), 0 0 16px rgba(139, 92, 246, 0.55);
-        }
-        .wl-service:nth-child(4) .wl-service-icon {
-            background: linear-gradient(145deg, #10b981, #059669);
-            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2), 0 0 16px rgba(16, 185, 129, 0.55);
-        }
-        .wl-service:nth-child(5) .wl-service-icon {
-            background: linear-gradient(145deg, #ec4899, #db2777);
-            box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.2), 0 0 16px rgba(236, 72, 153, 0.55);
-        }
-        .wl-service:nth-child(6) .wl-service-icon {
-            background: linear-gradient(145deg, #06b6d4, #0891b2);
-            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.2), 0 0 16px rgba(6, 182, 212, 0.55);
-        }
-        .wl-service:nth-child(7) .wl-service-icon {
-            background: linear-gradient(145deg, #f97316, #ea580c);
-            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.2), 0 0 16px rgba(249, 115, 22, 0.55);
-        }
-        .wl-service:nth-child(8) .wl-service-icon {
-            background: linear-gradient(145deg, #14b8a6, #0d9488);
-            box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.2), 0 0 16px rgba(20, 184, 166, 0.55);
-        }
-
-        .wl-service:hover:nth-child(1) .wl-service-icon {
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.28), 0 0 24px rgba(59, 130, 246, 0.75);
-        }
-        .wl-service:hover:nth-child(2) .wl-service-icon {
-            box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.28), 0 0 24px rgba(245, 158, 11, 0.75);
-        }
-        .wl-service:hover:nth-child(3) .wl-service-icon {
-            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.28), 0 0 24px rgba(139, 92, 246, 0.75);
-        }
-        .wl-service:hover:nth-child(4) .wl-service-icon {
-            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.28), 0 0 24px rgba(16, 185, 129, 0.75);
-        }
-        .wl-service:hover:nth-child(5) .wl-service-icon {
-            box-shadow: 0 0 0 4px rgba(236, 72, 153, 0.28), 0 0 24px rgba(236, 72, 153, 0.75);
-        }
-        .wl-service:hover:nth-child(6) .wl-service-icon {
-            box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.28), 0 0 24px rgba(6, 182, 212, 0.75);
-        }
-        .wl-service:hover:nth-child(7) .wl-service-icon {
-            box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.28), 0 0 24px rgba(249, 115, 22, 0.75);
-        }
-        .wl-service:hover:nth-child(8) .wl-service-icon {
-            box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.28), 0 0 24px rgba(20, 184, 166, 0.75);
-        }
-
-        .wl-service-text {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .wl-service-text strong {
-            display: block;
-            font-size: 0.92rem;
-            font-weight: 700;
-            color: var(--wl-navy);
-            margin-bottom: 2px;
-            line-height: 1.25;
-        }
-
-        .wl-service-text span {
-            display: block;
-            font-size: 0.75rem;
-            color: var(--wl-muted);
-            line-height: 1.35;
-        }
-
-        .wl-service-arrow {
-            color: var(--wl-navy);
-            font-size: 1.1rem;
-            opacity: 0.7;
-            flex-shrink: 0;
-        }
-
-        .wl-right {
-            display: flex;
-            align-items: stretch;
-            min-height: 100%;
-        }
-
-        .wl-login-panel {
-            width: 100%;
-            background: var(--wl-card);
-            border-radius: 18px;
-            box-shadow: 0 4px 24px rgba(15, 39, 68, 0.06);
-            border: 1px solid var(--wl-border);
-            padding: 36px 32px 28px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .wl-login-brand {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 22px;
-            text-align: center;
-        }
-
-        .wl-login-brand img {
-            width: 72px;
-            height: 72px;
-            object-fit: contain;
-            border-radius: 50%;
-            background: #fff;
-            border: 1px solid var(--wl-border);
-            padding: 8px;
-            margin-bottom: 14px;
-        }
-
-        .wl-login-brand h2 {
-            font-size: 1.55rem;
-            font-weight: 800;
-            color: var(--wl-navy);
-            margin-bottom: 4px;
-        }
-
-        .wl-login-brand p {
-            color: var(--wl-muted);
-            font-size: 0.92rem;
-        }
-
-        .wl-error {
-            background: #fef2f2;
-            border: 1px solid #fecaca;
-            color: #b91c1c;
-            border-radius: 10px;
-            padding: 10px 12px;
-            margin-bottom: 14px;
-            font-size: 0.88rem;
-        }
-
-        .wl-field {
-            position: relative;
-            margin-bottom: 14px;
-        }
-
-        .wl-field .mdi-left {
-            position: absolute;
-            left: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #94a3b8;
-            font-size: 1.1rem;
-        }
-
-        .wl-field input {
-            width: 100%;
-            height: 48px;
-            border: 1px solid var(--wl-border);
-            border-radius: 10px;
-            background: #fff;
-            font-family: inherit;
-            font-size: 16px;
-            color: var(--wl-navy);
-            padding: 0 42px;
-            transition: border-color 0.15s, box-shadow 0.15s;
-        }
-
-        .wl-field input:focus {
-            outline: none;
-            border-color: var(--wl-secondary);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-        }
-
-        .wl-toggle-pass {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            border: none;
-            background: transparent;
-            color: #94a3b8;
-            font-size: 1.15rem;
-            cursor: pointer;
-            padding: 4px;
-        }
-
-        .wl-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 16px;
-            font-size: 0.88rem;
-        }
-
-        .wl-check {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            color: #475569;
-            cursor: pointer;
-        }
-
-        .wl-check input {
-            accent-color: var(--wl-primary);
-            width: 15px;
-            height: 15px;
-        }
-
-        .wl-link {
-            color: var(--wl-secondary);
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .wl-submit {
-            width: 100%;
-            height: 48px;
-            border: none;
-            border-radius: 10px;
-            background: linear-gradient(90deg, var(--wl-primary), var(--wl-secondary));
-            color: #fff;
-            font-family: inherit;
-            font-weight: 700;
-            font-size: 1rem;
-            cursor: pointer;
-            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.2);
-        }
-
-        .wl-submit:hover {
-            filter: brightness(1.04);
-        }
-
-        .wl-bottom {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
-            margin-top: 28px;
-            padding-top: 8px;
-        }
-
-        .wl-feature {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-        }
-
-        .wl-feature-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--wl-icon-bg);
-            color: var(--wl-navy);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.1rem;
-            flex-shrink: 0;
-        }
-
-        .wl-feature strong {
-            display: block;
-            font-size: 0.88rem;
-            font-weight: 700;
-            color: var(--wl-navy);
-            margin-bottom: 2px;
-        }
-
-        .wl-feature span {
-            display: block;
-            font-size: 0.75rem;
-            color: var(--wl-muted);
-            line-height: 1.4;
-        }
-
-        @media (max-width: 960px) {
-            .wl-main {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-
-            .wl-right {
-                order: -1;
-            }
-
-            .wl-login-panel {
-                padding: 28px 20px 22px;
-            }
-
-            .wl-bottom {
-                grid-template-columns: 1fr 1fr;
-                gap: 14px;
-            }
-        }
-
-        @media (max-width: 560px) {
-            .wl-page {
-                width: calc(100% - 20px);
-                padding: 10px 0 18px;
-            }
-
-            .wl-services {
-                grid-template-columns: 1fr;
-            }
-
-            .wl-bottom {
-                grid-template-columns: 1fr;
-            }
-
-            .wl-meta {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .wl-login-brand h2 {
-                font-size: 1.35rem;
-            }
+            --wl-primary: {{ tenant.primary_color|default:"#2563EB" }};
+            --wl-secondary: {{ tenant.secondary_color|default:"#4F46E5" }};
         }
     </style>
 </head>
@@ -438,7 +23,7 @@
     <div class="wl-page">
         <div class="wl-main">
             <section class="wl-left">
-                <h3>Welcome to Your Digital Service Platform</h3>
+                <h3>Welcome to {{ tenant.name|default:"Your Platform" }}</h3>
                 <p class="wl-sub">Choose a service below to get started</p>
 
                 <div class="wl-services">
@@ -515,9 +100,10 @@
                         {% if tenant.logo %}
                         <img src="{{ tenant.logo.url }}" alt="{{ tenant.name }}">
                         {% else %}
-                        <img src="{% static 'assets/images/Sahaayata-pay-logo.png' %}" alt="{{ tenant.name|default:'Portal' }}">
+                        <div class="wl-brand-mark">{{ tenant.name|default:"P"|slice:":1"|upper }}</div>
                         {% endif %}
-                        <h2>Login to Your Account</h2>
+                        <h2>{{ tenant.name|default:"Partner Portal" }}</h2>
+                        <p>Sign in to your account</p>
                     </div>
 
                     {% if error %}
@@ -581,6 +167,12 @@
                     <span>Trusted by thousands of happy clients</span>
                 </div>
             </div>
+        </footer>
+
+        <footer class="wl-company-footer">
+            <p class="wl-company-name">Zingobuy India Private Limited</p>
+            <a href="mailto:support@zingofin.com" class="wl-company-email">support@zingofin.com</a>
+            <p class="wl-company-copy">&copy; {% now "Y" %} Zingobuy India Private Limited. All rights reserved.</p>
         </footer>
     </div>
 

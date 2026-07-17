@@ -47,7 +47,11 @@ def get_tenant_from_request(request):
     try:
         return WhiteLabelTenant.objects.get(domain__iexact=host, is_active=True)
     except WhiteLabelTenant.DoesNotExist:
-        return None
+        alt_host = host[4:] if host.startswith("www.") else f"www.{host}"
+        try:
+            return WhiteLabelTenant.objects.get(domain__iexact=alt_host, is_active=True)
+        except WhiteLabelTenant.DoesNotExist:
+            return None
 
 
 def tenant_users_qs(tenant):

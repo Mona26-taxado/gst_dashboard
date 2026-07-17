@@ -1,37 +1,48 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
-
 <div class="container mt-10">
-    <div class="d-flex justify-content-between align-items-center">
-        <h2 class="card-titles mb-2">Send Money</h2>
+    <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
+        <h2 class="card-titles mb-2">Send Money (Add / Deduct Wallet)</h2>
         <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
+            <ol class="breadcrumb mb-0">
                 <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
                 <li class="breadcrumb-item active" aria-current="page">Send Money</li>
             </ol>
         </nav>
     </div>
+
     <div class="card-body">
-        
-        <form method="post">
+        <form method="post" id="admin-wallet-form" autocomplete="off">
             {% csrf_token %}
             <div class="form-group">
+                <label for="user_search">Search user</label>
+                <input type="text" id="user_search" class="form-control" placeholder="Type name, email, role or tenant…">
+            </div>
+            <div class="form-group">
                 <label for="retailer_id">Select Customer</label>
-                <select name="retailer_id" id="retailer_id" class="form-control">
+                <select name="retailer_id" id="retailer_id" class="form-control" required size="8">
                     {% for user in users %}
-                        <option value="{{ user.id }}">{{ user.full_name }} ({{ user.role }})</option>
+                    <option
+                        value="{{ user.id }}"
+                        data-search="{{ user.full_name }} {{ user.email }} {{ user.role }} {% if user.tenant %}{{ user.tenant.name }}{% endif %}"
+                        data-balance="{{ user.wallet.balance|default:0 }}"
+                    >
+                        {{ user.full_name }} · {{ user.role }}{% if user.tenant %} · {{ user.tenant.name }}{% endif %} · ₹{{ user.wallet.balance|default:0 }}
+                    </option>
+                    {% empty %}
+                    <option value="" disabled>No users found</option>
                     {% endfor %}
                 </select>
+                <small class="text-muted" id="selected-balance">Select a user to see current wallet balance</small>
             </div>
             <div class="form-group">
                 <label for="amount">Amount</label>
-                <input type="number" step="0.01" name="amount" id="amount" class="form-control" required>
+                <input type="number" step="0.01" min="0.01" name="amount" id="amount" class="form-control" required>
             </div>
             <div class="form-group">
-                <label for="action">Action</label><br>
-                <label>
+                <label>Action</label><br>
+                <label class="mr-3">
                     <input type="radio" name="action" value="add" required> Add Balance
                 </label>
                 <label>
@@ -40,20 +51,50 @@
             </div>
             <div class="form-group">
                 <label for="description">Description</label>
-                <input type="text" name="description" id="description" class="form-control">
+                <input type="text" name="description" id="description" class="form-control" placeholder="Optional note">
             </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
+            <button type="submit" class="btn btn-primary" id="wallet-submit-btn">Submit</button>
+            <a href="{% url 'view_transactions' %}" class="btn btn-secondary">View Transactions</a>
         </form>
-        
-        
     </div>
 </div>
 
 <script>
-    document.querySelector("form").addEventListener("submit", function () {
-        document.querySelector("button[type='submit']").disabled = true;
+(function () {
+    var form = document.getElementById('admin-wallet-form');
+    var select = document.getElementById('retailer_id');
+    var search = document.getElementById('user_search');
+    var balHint = document.getElementById('selected-balance');
+    var btn = document.getElementById('wallet-submit-btn');
+    if (!form || !select) return;
+
+    function updateBalance() {
+        var opt = select.options[select.selectedIndex];
+        if (!opt || !opt.value) {
+            balHint.textContent = 'Select a user to see current wallet balance';
+            return;
+        }
+        balHint.textContent = 'Current wallet balance: ₹' + (opt.getAttribute('data-balance') || '0');
+    }
+
+    select.addEventListener('change', updateBalance);
+    updateBalance();
+
+    if (search) {
+        search.addEventListener('input', function () {
+            var q = (search.value || '').toLowerCase().trim();
+            Array.prototype.forEach.call(select.options, function (opt) {
+                if (!opt.value) return;
+                var hay = (opt.getAttribute('data-search') || opt.textContent || '').toLowerCase();
+                opt.hidden = q && hay.indexOf(q) === -1;
+            });
+        });
+    }
+
+    form.addEventListener('submit', function () {
+        btn.disabled = true;
+        btn.textContent = 'Processing…';
     });
+})();
 </script>
-
 {% endblock %}
-

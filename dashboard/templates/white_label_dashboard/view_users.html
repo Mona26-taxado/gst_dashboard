@@ -1,47 +1,57 @@
-{% extends 'white_label_dashboard/base.html' %}
-{% block page_heading %}Users{% endblock %}
+{% extends 'white_label_dashboard/wl_layout.html' %}
+{% block title %}View Users — {{ tenant.name }}{% endblock %}
 {% block content %}
-<div class="wl-card">
-    <form method="get" style="display:flex;gap:0.5rem;margin-bottom:1rem;">
-        <input type="text" name="search" value="{{ search_query }}" placeholder="Search name, email, branch..." class="form-control" style="margin:0;">
-        <button class="btn" type="submit">Search</button>
-        <a class="btn btn-secondary" href="{% url 'white_label_add_user' %}">Add</a>
-    </form>
-    <table>
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Branch</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for u in page_obj %}
-            <tr>
-                <td>{{ serial_start|add:forloop.counter }}</td>
-                <td>{{ u.full_name }}</td>
-                <td>{{ u.email }}</td>
-                <td>{{ u.role }}</td>
-                <td>{{ u.branch_id }}</td>
-                <td>
-                    <a href="{% url 'white_label_edit_user' u.id %}">Edit</a> ·
-                    <a href="{% url 'white_label_delete_user' u.id %}">Delete</a>
-                </td>
-            </tr>
-            {% empty %}
-            <tr><td colspan="6">No users yet.</td></tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% if page_obj.has_other_pages %}
-    <div style="margin-top:1rem;">
-        {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}&search={{ search_query }}">Prev</a>{% endif %}
-        Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
-        {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}&search={{ search_query }}">Next</a>{% endif %}
+<div class="wl-saas-page-header">
+    <div>
+        <h1>Users</h1>
+        <div class="wl-saas-breadcrumb">
+            <a href="{% url 'white_label_dashboard' %}">Dashboard</a><span>/</span><span>Users</span>
+        </div>
     </div>
-    {% endif %}
+    <a href="{% url 'white_label_add_user' %}" class="wl-saas-btn wl-saas-btn-primary"><i class="mdi mdi-account-plus"></i> Add User</a>
 </div>
+<form method="get" class="wl-saas-toolbar">
+    <input type="text" name="search" value="{{ search_query }}" class="wl-saas-input" placeholder="Search name, email, branch…">
+    <select name="role" class="wl-saas-select">
+        <option value="">All roles</option>
+        <option value="master_distributor" {% if role_filter == 'master_distributor' %}selected{% endif %}>Master Distributor</option>
+        <option value="distributor" {% if role_filter == 'distributor' %}selected{% endif %}>Distributor</option>
+        <option value="retailer" {% if role_filter == 'retailer' %}selected{% endif %}>Retailer</option>
+    </select>
+    <button type="submit" class="wl-saas-btn wl-saas-btn-primary">Search</button>
+</form>
+<div class="wl-saas-card" style="padding:0;overflow:hidden;">
+    <div class="wl-saas-table-wrap" style="border:none;border-radius:0;">
+        <table class="wl-saas-table">
+            <thead>
+                <tr><th>#</th><th>Name</th><th>Email</th><th>Role</th><th>Branch</th><th>Mobile</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                {% for u in page_obj %}
+                <tr>
+                    <td>{{ serial_start|add:forloop.counter }}</td>
+                    <td>{{ u.full_name }}</td>
+                    <td>{{ u.email }}</td>
+                    <td><span class="wl-saas-badge wl-saas-badge-neutral">{{ u.role }}</span></td>
+                    <td>{{ u.branch_id|default:"—" }}</td>
+                    <td>{{ u.mobile_number|default:"—" }}</td>
+                    <td style="white-space:nowrap;">
+                        <a href="{% url 'white_label_edit_user' u.id %}" class="wl-saas-btn wl-saas-btn-warning wl-saas-btn-sm">Edit</a>
+                        <a href="{% url 'white_label_delete_user' u.id %}" class="wl-saas-btn wl-saas-btn-danger wl-saas-btn-sm">Delete</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="wl-saas-empty"><i class="mdi mdi-account-off-outline"></i>No users found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% if page_obj.has_other_pages %}
+<div class="wl-saas-pagination">
+    {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}&search={{ search_query }}&role={{ role_filter }}">← Previous</a>{% endif %}
+    <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}&search={{ search_query }}&role={{ role_filter }}">Next →</a>{% endif %}
+</div>
+{% endif %}
 {% endblock %}

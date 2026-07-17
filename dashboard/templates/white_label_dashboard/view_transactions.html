@@ -1,43 +1,46 @@
-{% extends 'white_label_dashboard/base.html' %}
-{% block page_heading %}Transactions{% endblock %}
+{% extends 'white_label_dashboard/wl_layout.html' %}
+{% block title %}Transactions — {{ tenant.name }}{% endblock %}
 {% block content %}
-<div class="wl-card">
-    <form method="get" style="display:flex;gap:0.5rem;margin-bottom:1rem;">
-        <input type="text" name="search" value="{{ search_query }}" placeholder="Search..." class="form-control" style="margin:0;">
-        <button class="btn" type="submit">Search</button>
-    </form>
-    <table>
-        <thead>
-            <tr>
-                <th>User</th>
-                <th>Type</th>
-                <th>Amount</th>
-                <th>Balance after</th>
-                <th>Description</th>
-                <th>Date</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for t in page_obj %}
-            <tr>
-                <td>{{ t.user.full_name }}</td>
-                <td>{{ t.transaction_type }}</td>
-                <td>₹{{ t.amount }}</td>
-                <td>₹{{ t.balance_after_transaction }}</td>
-                <td>{{ t.description }}</td>
-                <td>{{ t.created_at }}</td>
-            </tr>
-            {% empty %}
-            <tr><td colspan="6">No transactions.</td></tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% if page_obj.has_other_pages %}
-    <div style="margin-top:1rem;">
-        {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}&search={{ search_query }}">Prev</a>{% endif %}
-        Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
-        {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}&search={{ search_query }}">Next</a>{% endif %}
+<div class="wl-saas-page-header">
+    <div>
+        <h1>Transactions</h1>
+        <div class="wl-saas-breadcrumb">
+            <a href="{% url 'white_label_dashboard' %}">Dashboard</a><span>/</span><span>Transactions</span>
+        </div>
     </div>
-    {% endif %}
 </div>
+<form method="get" class="wl-saas-toolbar">
+    <input type="text" name="search" value="{{ search_query }}" class="wl-saas-input" placeholder="Search user or description…">
+    <button type="submit" class="wl-saas-btn wl-saas-btn-primary">Search</button>
+</form>
+<div class="wl-saas-card" style="padding:0;overflow:hidden;">
+    <div class="wl-saas-table-wrap" style="border:none;">
+        <table class="wl-saas-table">
+            <thead>
+                <tr><th>User</th><th>Type</th><th>Amount</th><th>Balance after</th><th>Description</th><th>Date</th></tr>
+            </thead>
+            <tbody>
+                {% for t in page_obj %}
+                <tr>
+                    <td>{{ t.user.full_name }}</td>
+                    <td><span class="wl-saas-badge {% if t.transaction_type == 'Credit' %}wl-saas-badge-success{% else %}wl-saas-badge-danger{% endif %}">{{ t.transaction_type }}</span></td>
+                    <td>₹{{ t.amount }}</td>
+                    <td>₹{{ t.balance_after_transaction }}</td>
+                    <td>{{ t.description|default:"—" }}</td>
+                    <td>{{ t.created_at|date:"d M Y, H:i" }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="wl-saas-empty"><i class="mdi mdi-history"></i>No transactions found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% if page_obj.has_other_pages %}
+<div class="wl-saas-pagination">
+    {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}&search={{ search_query }}">← Previous</a>{% endif %}
+    <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}&search={{ search_query }}">Next →</a>{% endif %}
+</div>
+{% endif %}
 {% endblock %}

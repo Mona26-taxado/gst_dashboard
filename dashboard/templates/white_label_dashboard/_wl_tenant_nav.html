@@ -1,0 +1,97 @@
+{% with url_name=request.resolver_match.url_name %}
+{% if user.role == 'retailer' %}
+<a href="{% url 'retailer_dashboard' %}" class="wl-saas-nav-link {% if url_name == 'retailer_dashboard' %}active{% endif %}">
+    <i class="mdi mdi-view-dashboard-outline"></i><span>Dashboard</span>
+</a>
+<div class="wl-saas-nav-dropdown {% if url_name == 'retailer_add_customer' or url_name == 'retailer_view_customer' or url_name == 'retailer_edit_customer' %}open has-active{% endif %}" data-nav-dropdown>
+    <button type="button" class="wl-saas-nav-toggle" aria-expanded="{% if url_name == 'retailer_add_customer' or url_name == 'retailer_view_customer' or url_name == 'retailer_edit_customer' %}true{% else %}false{% endif %}">
+        <i class="mdi mdi-account-group-outline"></i><span>Customers</span><i class="mdi mdi-chevron-down wl-saas-nav-chevron"></i>
+    </button>
+    <div class="wl-saas-nav-submenu">
+        <a href="{% url 'retailer_add_customer' %}" class="wl-saas-nav-link {% if url_name == 'retailer_add_customer' %}active{% endif %}"><i class="mdi mdi-account-plus-outline"></i><span>Add Customer</span></a>
+        <a href="{% url 'retailer_view_customer' %}" class="wl-saas-nav-link {% if url_name == 'retailer_view_customer' or url_name == 'retailer_edit_customer' %}active{% endif %}"><i class="mdi mdi-account-multiple-outline"></i><span>View Customers</span></a>
+    </div>
+</div>
+<div class="wl-saas-nav-dropdown {% if url_name == 'retailer_add_billing' or url_name == 'retailer_view_billing' or url_name == 'retailer_view_billing_details' or url_name == 'retailer_edit_billing' %}open has-active{% endif %}" data-nav-dropdown>
+    <button type="button" class="wl-saas-nav-toggle" aria-expanded="false">
+        <i class="mdi mdi-receipt"></i><span>Billing</span><i class="mdi mdi-chevron-down wl-saas-nav-chevron"></i>
+    </button>
+    <div class="wl-saas-nav-submenu">
+        <a href="{% url 'retailer_add_billing' %}" class="wl-saas-nav-link {% if url_name == 'retailer_add_billing' %}active{% endif %}"><i class="mdi mdi-plus-circle-outline"></i><span>Add Billing</span></a>
+        <a href="{% url 'retailer_view_billing' %}" class="wl-saas-nav-link {% if url_name == 'retailer_view_billing' or url_name == 'retailer_view_billing_details' or url_name == 'retailer_edit_billing' %}active{% endif %}"><i class="mdi mdi-format-list-bulleted"></i><span>View Billing</span></a>
+    </div>
+</div>
+<div class="wl-saas-nav-dropdown {% if url_name == 'qr_payment' or url_name == 'retailer_view_transactions' or url_name == 'wallet_recharge_page' or url_name == 'recharge_plans' %}open has-active{% endif %}" data-nav-dropdown>
+    <button type="button" class="wl-saas-nav-toggle" aria-expanded="false">
+        <i class="mdi mdi-wallet-outline"></i><span>Wallet</span><i class="mdi mdi-chevron-down wl-saas-nav-chevron"></i>
+    </button>
+    <div class="wl-saas-nav-submenu">
+        <a href="{% url 'qr_payment' user_id=request.user.id %}" class="wl-saas-nav-link {% if url_name == 'qr_payment' or url_name == 'wallet_recharge_page' or url_name == 'recharge_plans' %}active{% endif %}"><i class="mdi mdi-wallet-plus"></i><span>Recharge Wallet</span></a>
+        <a href="{% url 'retailer_view_transactions' %}" class="wl-saas-nav-link {% if url_name == 'retailer_view_transactions' %}active{% endif %}"><i class="mdi mdi-history"></i><span>Transactions</span></a>
+    </div>
+</div>
+<a href="{% url 'banking_portal_request' %}" class="wl-saas-nav-link"><i class="mdi mdi-bank-outline"></i><span>Banking</span></a>
+<a href="{% url 'retailer_view_services' %}" class="wl-saas-nav-link {% if url_name == 'retailer_view_services' or url_name == 'retailer_service_documents' %}active{% endif %}"><i class="mdi mdi-briefcase-outline"></i><span>Services</span></a>
+<a href="{% url 'pin_entry' %}" class="wl-saas-nav-link {% if url_name == 'pin_entry' or url_name == 'additional_services' %}active{% endif %}"><i class="mdi mdi-codepen"></i><span>Additional Services</span></a>
+<a href="{% url 'equipment_store' %}" class="wl-saas-nav-link {% if url_name == 'equipment_store' or url_name == 'equipment_billing' or url_name == 'equipment_payment' or url_name == 'payment_success' %}active{% endif %}"><i class="mdi mdi-monitor"></i><span>Equipment Store</span></a>
+<a href="{% url 'sign_agreement' %}" class="wl-saas-nav-link {% if url_name == 'sign_agreement' %}active{% endif %}"><i class="mdi mdi-file-document-edit-outline"></i><span>Agreement</span></a>
+
+{% elif user.role == 'distributor' %}
+<a href="{% url 'distributor_dashboard' %}" class="wl-saas-nav-link {% if url_name == 'distributor_dashboard' %}active{% endif %}">
+    <i class="mdi mdi-view-dashboard-outline"></i><span>Dashboard</span>
+</a>
+<div class="wl-saas-nav-dropdown {% if url_name == 'distributor_add_gsk' or url_name == 'distributor_view_gsk' or url_name == 'distributor_edit_gsk' %}open has-active{% endif %}" data-nav-dropdown>
+    <button type="button" class="wl-saas-nav-toggle" aria-expanded="false">
+        <i class="mdi mdi-store-outline"></i><span>Retailers</span><i class="mdi mdi-chevron-down wl-saas-nav-chevron"></i>
+    </button>
+    <div class="wl-saas-nav-submenu">
+        <a href="{% url 'distributor_add_gsk' %}" class="wl-saas-nav-link {% if url_name == 'distributor_add_gsk' %}active{% endif %}"><i class="mdi mdi-account-plus-outline"></i><span>Add Retailer</span></a>
+        <a href="{% url 'distributor_view_gsk' %}" class="wl-saas-nav-link {% if url_name == 'distributor_view_gsk' or url_name == 'distributor_edit_gsk' %}active{% endif %}"><i class="mdi mdi-account-multiple-outline"></i><span>View Retailers</span></a>
+    </div>
+</div>
+<div class="wl-saas-nav-dropdown {% if url_name == 'distributor_add_customer' or url_name == 'distributor_view_customer' %}open has-active{% endif %}" data-nav-dropdown>
+    <button type="button" class="wl-saas-nav-toggle" aria-expanded="false">
+        <i class="mdi mdi-account-group-outline"></i><span>Customers</span><i class="mdi mdi-chevron-down wl-saas-nav-chevron"></i>
+    </button>
+    <div class="wl-saas-nav-submenu">
+        <a href="{% url 'distributor_add_customer' %}" class="wl-saas-nav-link"><i class="mdi mdi-account-plus-outline"></i><span>Add Customer</span></a>
+        <a href="{% url 'distributor_view_customer' %}" class="wl-saas-nav-link"><i class="mdi mdi-account-multiple-outline"></i><span>View Customers</span></a>
+    </div>
+</div>
+<div class="wl-saas-nav-dropdown {% if url_name == 'distributor_add_billing' or url_name == 'distributor_view_billing' %}open has-active{% endif %}" data-nav-dropdown>
+    <button type="button" class="wl-saas-nav-toggle" aria-expanded="false">
+        <i class="mdi mdi-receipt"></i><span>Billing</span><i class="mdi mdi-chevron-down wl-saas-nav-chevron"></i>
+    </button>
+    <div class="wl-saas-nav-submenu">
+        <a href="{% url 'distributor_add_billing' %}" class="wl-saas-nav-link"><i class="mdi mdi-plus-circle-outline"></i><span>Add Billing</span></a>
+        <a href="{% url 'distributor_view_billing' %}" class="wl-saas-nav-link"><i class="mdi mdi-format-list-bulleted"></i><span>View Billing</span></a>
+    </div>
+</div>
+<div class="wl-saas-nav-dropdown {% if url_name == 'qr_payment' or url_name == 'distributor_view_transactions' or url_name == 'transfer_money' %}open has-active{% endif %}" data-nav-dropdown>
+    <button type="button" class="wl-saas-nav-toggle" aria-expanded="false">
+        <i class="mdi mdi-wallet-outline"></i><span>Wallet</span><i class="mdi mdi-chevron-down wl-saas-nav-chevron"></i>
+    </button>
+    <div class="wl-saas-nav-submenu">
+        <a href="{% url 'qr_payment' user_id=request.user.id %}" class="wl-saas-nav-link"><i class="mdi mdi-wallet-plus"></i><span>Recharge Wallet</span></a>
+        <a href="{% url 'transfer_money' %}" class="wl-saas-nav-link {% if url_name == 'transfer_money' %}active{% endif %}"><i class="mdi mdi-swap-horizontal"></i><span>Transfer Money</span></a>
+        <a href="{% url 'distributor_view_transactions' %}" class="wl-saas-nav-link {% if url_name == 'distributor_view_transactions' %}active{% endif %}"><i class="mdi mdi-history"></i><span>Transactions</span></a>
+    </div>
+</div>
+<a href="{% url 'banking_portal_request' %}" class="wl-saas-nav-link"><i class="mdi mdi-bank-outline"></i><span>Banking</span></a>
+<a href="{% url 'distributor_view_services' %}" class="wl-saas-nav-link {% if url_name == 'distributor_view_services' or url_name == 'distributor_service_documents' %}active{% endif %}"><i class="mdi mdi-briefcase-outline"></i><span>Services</span></a>
+<a href="{% url 'pin_entry' %}" class="wl-saas-nav-link {% if url_name == 'pin_entry' or url_name == 'additional_services' %}active{% endif %}"><i class="mdi mdi-codepen"></i><span>Additional Services</span></a>
+<a href="{% url 'equipment_store' %}" class="wl-saas-nav-link {% if url_name == 'equipment_store' or url_name == 'equipment_billing' or url_name == 'equipment_payment' or url_name == 'payment_success' %}active{% endif %}"><i class="mdi mdi-monitor"></i><span>Equipment Store</span></a>
+<a href="{% url 'sign_agreement' %}" class="wl-saas-nav-link"><i class="mdi mdi-file-document-edit-outline"></i><span>Agreement</span></a>
+
+{% elif user.role == 'master_distributor' %}
+<a href="{% url 'master_distributor_dashboard' %}" class="wl-saas-nav-link {% if url_name == 'master_distributor_dashboard' %}active{% endif %}">
+    <i class="mdi mdi-view-dashboard-outline"></i><span>Dashboard</span>
+</a>
+<a href="{% url 'retailer_view_services' %}" class="wl-saas-nav-link {% if url_name == 'retailer_view_services' or url_name == 'retailer_service_documents' %}active{% endif %}">
+    <i class="mdi mdi-briefcase-outline"></i><span>Services</span>
+</a>
+<a href="{% url 'sign_agreement' %}" class="wl-saas-nav-link {% if url_name == 'sign_agreement' %}active{% endif %}">
+    <i class="mdi mdi-file-document-edit-outline"></i><span>Agreement</span>
+</a>
+{% endif %}
+{% endwith %}

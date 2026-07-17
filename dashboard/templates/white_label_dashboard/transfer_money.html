@@ -1,13 +1,24 @@
-{% extends 'white_label_dashboard/base.html' %}
-{% block page_heading %}Transfer Wallet{% endblock %}
+{% extends 'white_label_dashboard/wl_layout.html' %}
+{% block title %}Transfer Wallet — {{ tenant.name }}{% endblock %}
 {% block content %}
-<div class="wl-card" style="max-width:520px;">
-    <p style="margin-bottom:1rem;">Available balance: <strong>₹{{ wallet_balance }}</strong></p>
+<div class="wl-saas-page-header">
+    <div>
+        <h1>Transfer Wallet</h1>
+        <div class="wl-saas-breadcrumb">
+            <a href="{% url 'white_label_dashboard' %}">Dashboard</a><span>/</span><span>Transfer</span>
+        </div>
+    </div>
+</div>
+<div class="wl-saas-card">
+    <div class="wl-saas-wallet-pill" style="margin-bottom:20px;display:inline-flex;">
+        <i class="mdi mdi-wallet-outline"></i>
+        <span>Available: <strong>₹{{ wallet_balance }}</strong></span>
+    </div>
     <form method="post">
         {% csrf_token %}
-        <div class="form-group">
-            <label>Recipient</label>
-            <select name="recipient_id" required class="form-control">
+        <div class="wl-saas-form-group">
+            <label class="wl-saas-label">Recipient</label>
+            <select name="recipient_id" required class="wl-saas-select">
                 {% for r in recipients %}
                 <option value="{{ r.id }}">{{ r.full_name }} ({{ r.role }})</option>
                 {% empty %}
@@ -15,11 +26,11 @@
                 {% endfor %}
             </select>
         </div>
-        <div class="form-group">
-            <label>Amount</label>
-            <input type="number" step="0.01" min="0.01" name="amount" required class="form-control">
+        <div class="wl-saas-form-group">
+            <label class="wl-saas-label">Amount (₹)</label>
+            <input type="number" step="0.01" min="0.01" name="amount" required class="wl-saas-input">
         </div>
-        <button type="submit" class="btn">Transfer</button>
+        <button type="submit" class="wl-saas-btn wl-saas-btn-primary">Transfer funds</button>
     </form>
 </div>
 {% endblock %}

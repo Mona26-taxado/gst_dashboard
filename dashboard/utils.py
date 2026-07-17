@@ -24,6 +24,28 @@ def role_required(allowed_roles):
     return decorator
 
 
+def wl_template_for(request, default_template, wl_template):
+    """Pick WL SaaS shell template for white-label tenant users."""
+    if uses_wl_theme(request):
+        return wl_template
+    return default_template
+
+
+def is_wl_tenant_user(user):
+    """True for WL admin and tenant-scoped tree users (retailer/distributor/MD)."""
+    if user is None or not getattr(user, "is_authenticated", False):
+        return False
+    if not getattr(user, "tenant_id", None):
+        return False
+    from dashboard.tenant import WL_TREE_ROLES
+    return getattr(user, "role", None) in WL_TREE_ROLES
+
+
+def uses_wl_theme(request):
+    """Use WL SaaS layout when the logged-in user belongs to a WL tenant."""
+    return is_wl_tenant_user(getattr(request, "user", None))
+
+
 
 
 

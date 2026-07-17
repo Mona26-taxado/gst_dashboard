@@ -664,21 +664,30 @@ def add_or_deduct_money(request):
             messages.error(request, "Invalid amount. Please enter a valid number greater than zero.")
             return redirect("add_or_deduct_money")
 
+        if not retailer_id:
+            messages.error(request, "Please select a customer.")
+            return redirect("add_or_deduct_money")
+
         try:
             from dashboard.wallet_ops import WalletError, credit_debit_wallet
 
-            retailer = User.objects.get(id=retailer_id)
+            retailer = User.objects.select_related("wallet", "tenant").get(id=retailer_id)
+            display_name = retailer.full_name or retailer.email or str(retailer.pk)
             if action == "add":
-                credit_debit_wallet(retailer, amount, "Credit", description)
-                success_message = f"₹{amount} added to {retailer.get_full_name() or retailer.full_name}'s wallet successfully!"
+                wallet = credit_debit_wallet(retailer, amount, "Credit", description)
+                messages.success(
+                    request,
+                    f"₹{amount} added to {display_name}'s wallet. New balance: ₹{wallet.balance}",
+                )
             elif action == "deduct":
-                credit_debit_wallet(retailer, amount, "Debit", description)
-                success_message = f"₹{amount} deducted from {retailer.get_full_name() or retailer.full_name}'s wallet successfully!"
+                wallet = credit_debit_wallet(retailer, amount, "Debit", description)
+                messages.success(
+                    request,
+                    f"₹{amount} deducted from {display_name}'s wallet. New balance: ₹{wallet.balance}",
+                )
             else:
                 messages.error(request, "Invalid action specified.")
                 return redirect("add_or_deduct_money")
-
-            messages.success(request, success_message)
         except User.DoesNotExist:
             messages.error(request, "User not found!")
         except WalletError as e:
@@ -686,15 +695,28 @@ def add_or_deduct_money(request):
         except Exception as e:
             messages.error(request, f"An error occurred: {str(e)}")
 
-        return redirect("view_transactions")
+        # Stay on same page so success/error message is visible
+        return redirect("add_or_deduct_money")
 
     # Platform + White Label Admin wallets (Super Admin loads WL admin wallets here)
-    users = User.objects.filter(
-        role__in=[
-            'retailer', 'distributor', 'master_distributor',
-            'retailer_2', 'distributor_2', 'white_label_admin',
-        ]
-    ).exclude(role='admin').order_by('full_name')
+    users = list(
+        User.objects.filter(
+            role__in=[
+                "retailer",
+                "distributor",
+                "master_distributor",
+                "retailer_2",
+                "distributor_2",
+                "white_label_admin",
+            ]
+        )
+        .exclude(role="admin")
+        .select_related("tenant", "wallet")
+        .order_by("full_name")
+    )
+    for u in users:
+        wallet, _ = Wallet.objects.get_or_create(user=u)
+        u.wallet = wallet
     return render(request, "admin_dashboard/add_money.html", {"users": users})
 
 
@@ -1766,6 +1788,31 @@ from dashboard.forms import WhiteLabelTenantForm, WhiteLabelAdminCreateForm
 @role_required(['admin'])
 def white_label_tenant_list(request):
     tenants = WhiteLabelTenant.objects.all().order_by('name')
+    search_query = request.GET.get('search', '').strip()
+    if search_query:
+        tenants = tenants.filter(
+            Q(name__icontains=search_query)
+            | Q(slug__icontains=search_query)
+            | Q(domain__icontains=search_query)
+        )
+    paginator = Paginator(tenants, 10)
+    page_obj = paginator.get_page(request.GET.get('page'))
+    serial_start = (page_obj.number - 1) * paginator.per_page
+    return render(
+        request,
+        'admin_dashboard/white_label_tenants.html',
+        {
+            'page_obj': page_obj,
+            'tenants': page_obj,
+            'search_query': search_query,
+            'serial_start': serial_start,
+        },
+    )
+
+
+@login_required
+@role_required(['admin'])
+def white_label_admin_list(request):
     wl_admins = (
         CustomUser.objects.filter(role='white_label_admin')
         .select_related('tenant', 'wallet')
@@ -1780,13 +1827,17 @@ def white_label_tenant_list(request):
             | Q(tenant__name__icontains=search_query)
             | Q(tenant__domain__icontains=search_query)
         )
+    paginator = Paginator(wl_admins, 10)
+    page_obj = paginator.get_page(request.GET.get('page'))
+    serial_start = (page_obj.number - 1) * paginator.per_page
     return render(
         request,
-        'admin_dashboard/white_label_tenants.html',
+        'admin_dashboard/white_label_admins.html',
         {
-            'tenants': tenants,
-            'wl_admins': wl_admins,
+            'page_obj': page_obj,
+            'wl_admins': page_obj,
             'search_query': search_query,
+            'serial_start': serial_start,
         },
     )
 
@@ -1840,7 +1891,7 @@ def white_label_admin_create(request):
             user.role = 'white_label_admin'
             user.save()
             messages.success(request, 'White Label Admin created for %s.' % tenant.name)
-            return redirect('white_label_tenant_list')
+            return redirect('white_label_admin_list')
         if not tenant_id:
             messages.error(request, 'Please select a tenant.')
     else:

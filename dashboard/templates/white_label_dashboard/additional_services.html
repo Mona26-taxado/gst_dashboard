@@ -1,0 +1,22 @@
+{% extends 'white_label_dashboard/wl_layout.html' %}
+{% load static %}
+{% block title %}Additional Services — {{ tenant.name }}{% endblock %}
+{% block extra_css %}
+<style>
+.wl-additional-grid h5 { font-size: .9rem; font-weight: 600; margin-top: 10px; color: var(--wl-text); }
+.wl-additional-grid img { border-radius: 10px; background: #fff; padding: 8px; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="wl-saas-page-header">
+    <div>
+        <h1>Additional Services</h1>
+        <div class="wl-saas-breadcrumb">
+            <a href="{% url 'white_label_dashboard' %}">Dashboard</a><span>/</span><span>Additional Services</span>
+        </div>
+    </div>
+</div>
+<div class="wl-saas-card wl-additional-grid">
+    {% include 'partials/additional_services_grid.html' %}
+</div>
+{% endblock %}

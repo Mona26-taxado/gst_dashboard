@@ -1,0 +1,95 @@
+<aside class="wl-saas-sidebar" id="wlSaasSidebar">
+    <div class="wl-saas-brand">
+        <div class="wl-saas-brand-logo">
+            {% if tenant and tenant.logo %}
+            <img src="{{ tenant.logo.url }}" alt="{{ tenant.name }}">
+            {% else %}
+            <div class="wl-saas-brand-mark">{{ tenant.name|default:"P"|slice:":1"|upper }}</div>
+            {% endif %}
+        </div>
+        <div class="wl-saas-brand-text">
+            <strong>{{ tenant.name|default:"Partner Portal" }}</strong>
+            <span class="wl-saas-brand-plan">Enterprise Plan</span>
+        </div>
+    </div>
+
+    <nav class="wl-saas-nav">
+        <div class="wl-saas-nav-label">Main Menu</div>
+        {% with url_name=request.resolver_match.url_name %}
+        {% if user.role == 'white_label_admin' %}
+        <div class="wl-saas-nav-item-row">
+            <a href="{% url 'white_label_dashboard' %}" class="wl-saas-nav-link {% if url_name == 'white_label_dashboard' %}active{% endif %}">
+                <i class="mdi mdi-view-dashboard-outline"></i><span>Dashboard</span>
+            </a>
+            <button type="button" class="wl-saas-collapse-btn" id="wlSidebarCollapse" aria-label="Collapse sidebar" title="Collapse sidebar">
+                <i class="mdi mdi-backburger"></i>
+            </button>
+        </div>
+        <div class="wl-saas-nav-dropdown {% if url_name == 'white_label_view_users' or url_name == 'white_label_add_user' or url_name == 'white_label_edit_user' or url_name == 'white_label_delete_user' %}open has-active{% endif %}" data-nav-dropdown>
+            <button type="button" class="wl-saas-nav-toggle" aria-expanded="{% if url_name == 'white_label_view_users' or url_name == 'white_label_add_user' or url_name == 'white_label_edit_user' or url_name == 'white_label_delete_user' %}true{% else %}false{% endif %}">
+                <i class="mdi mdi-account-group-outline"></i>
+                <span>Users</span>
+                <i class="mdi mdi-chevron-down wl-saas-nav-chevron"></i>
+            </button>
+            <div class="wl-saas-nav-submenu">
+                <a href="{% url 'white_label_add_user' %}" class="wl-saas-nav-link {% if url_name == 'white_label_add_user' %}active{% endif %}">
+                    <i class="mdi mdi-account-plus-outline"></i><span>Add User</span>
+                </a>
+                <a href="{% url 'white_label_view_users' %}" class="wl-saas-nav-link {% if url_name == 'white_label_view_users' or url_name == 'white_label_edit_user' or url_name == 'white_label_delete_user' %}active{% endif %}">
+                    <i class="mdi mdi-account-multiple-outline"></i><span>Manage Users</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="wl-saas-nav-dropdown {% if url_name == 'white_label_add_wallet' or url_name == 'white_label_transfer_money' or url_name == 'white_label_view_transactions' or url_name == 'recharge_plans' or url_name == 'initiate_upi_payment' %}open has-active{% endif %}" data-nav-dropdown>
+            <button type="button" class="wl-saas-nav-toggle" aria-expanded="{% if url_name == 'white_label_add_wallet' or url_name == 'white_label_transfer_money' or url_name == 'white_label_view_transactions' or url_name == 'recharge_plans' or url_name == 'initiate_upi_payment' %}true{% else %}false{% endif %}">
+                <i class="mdi mdi-wallet-outline"></i>
+                <span>Wallet</span>
+                <i class="mdi mdi-chevron-down wl-saas-nav-chevron"></i>
+            </button>
+            <div class="wl-saas-nav-submenu">
+                <a href="{% url 'white_label_add_wallet' %}" class="wl-saas-nav-link {% if url_name == 'white_label_add_wallet' or url_name == 'recharge_plans' or url_name == 'initiate_upi_payment' %}active{% endif %}">
+                    <i class="mdi mdi-wallet-plus"></i><span>Add Wallet</span>
+                </a>
+                <a href="{% url 'white_label_transfer_money' %}" class="wl-saas-nav-link {% if url_name == 'white_label_transfer_money' %}active{% endif %}">
+                    <i class="mdi mdi-swap-horizontal"></i><span>Transfer Money</span>
+                </a>
+                <a href="{% url 'white_label_view_transactions' %}" class="wl-saas-nav-link {% if url_name == 'white_label_view_transactions' %}active{% endif %}">
+                    <i class="mdi mdi-history"></i><span>Transactions</span>
+                </a>
+            </div>
+        </div>
+
+        <a href="{% url 'white_label_banking' %}" class="wl-saas-nav-link {% if url_name == 'white_label_banking' %}active{% endif %}">
+            <i class="mdi mdi-bank-outline"></i><span>Banking</span>
+        </a>
+        <a href="{% url 'white_label_view_services' %}" class="wl-saas-nav-link {% if url_name == 'white_label_view_services' or url_name == 'white_label_service_documents' %}active{% endif %}">
+            <i class="mdi mdi-briefcase-outline"></i><span>Services</span>
+        </a>
+        <a href="{% url 'white_label_view_billing' %}" class="wl-saas-nav-link {% if url_name == 'white_label_view_billing' %}active{% endif %}">
+            <i class="mdi mdi-receipt"></i><span>Billing</span>
+        </a>
+        <a href="{% url 'pin_entry' %}" class="wl-saas-nav-link {% if url_name == 'pin_entry' or url_name == 'additional_services' %}active{% endif %}">
+            <i class="mdi mdi-codepen"></i><span>Additional Services</span>
+        </a>
+        <a href="{% url 'equipment_store' %}" class="wl-saas-nav-link {% if url_name == 'equipment_store' or url_name == 'equipment_billing' or url_name == 'equipment_payment' or url_name == 'payment_success' %}active{% endif %}">
+            <i class="mdi mdi-monitor"></i><span>Equipment Store</span>
+        </a>
+        {% else %}
+        <div class="wl-saas-nav-item-row">
+            <a href="{{ tenant_dashboard_url }}" class="wl-saas-nav-link {% if url_name == 'retailer_dashboard' or url_name == 'distributor_dashboard' or url_name == 'master_distributor_dashboard' %}active{% endif %}">
+                <i class="mdi mdi-view-dashboard-outline"></i><span>Dashboard</span>
+            </a>
+            <button type="button" class="wl-saas-collapse-btn" id="wlSidebarCollapse" aria-label="Collapse sidebar" title="Collapse sidebar">
+                <i class="mdi mdi-backburger"></i>
+            </button>
+        </div>
+        {% include 'white_label_dashboard/_wl_tenant_nav.html' %}
+        {% endif %}
+        {% endwith %}
+    </nav>
+
+    <div class="wl-saas-sidebar-foot">
+        <span class="wl-saas-sidebar-badge"><i class="mdi mdi-shield-check-outline"></i> Subscription Active</span>
+    </div>
+</aside>

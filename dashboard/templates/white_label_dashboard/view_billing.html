@@ -1,0 +1,47 @@
+{% extends 'white_label_dashboard/wl_layout.html' %}
+{% block title %}Network Billing — {{ tenant.name }}{% endblock %}
+{% block content %}
+<div class="wl-saas-page-header">
+    <div>
+        <h1>Network Billing</h1>
+        <div class="wl-saas-breadcrumb">
+            <a href="{% url 'white_label_dashboard' %}">Dashboard</a><span>/</span><span>Billing</span>
+        </div>
+    </div>
+</div>
+<form method="get" class="wl-saas-toolbar">
+    <input type="text" name="search" value="{{ search_query }}" class="wl-saas-input" placeholder="Search ref, customer, user…">
+    <button type="submit" class="wl-saas-btn wl-saas-btn-primary">Search</button>
+</form>
+<div class="wl-saas-card" style="padding:0;overflow:hidden;">
+    <div class="wl-saas-table-wrap" style="border:none;">
+        <table class="wl-saas-table">
+            <thead>
+                <tr><th>Ref</th><th>Customer</th><th>Service</th><th>Created by</th><th>Amount</th><th>Payment</th><th>Status</th><th>Date</th></tr>
+            </thead>
+            <tbody>
+                {% for b in page_obj %}
+                <tr>
+                    <td>{{ b.ref_no }}</td>
+                    <td>{{ b.customer.full_name }}</td>
+                    <td>{{ b.service.service_name }}</td>
+                    <td>{{ b.user.full_name }}</td>
+                    <td>₹{{ b.amount }}</td>
+                    <td>{{ b.payment_mode }}</td>
+                    <td><span class="wl-saas-badge wl-saas-badge-neutral">{{ b.payment_status }}</span></td>
+                    <td>{{ b.billing_date|date:"d M Y" }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="8" class="wl-saas-empty"><i class="mdi mdi-receipt"></i>No billing records in your network.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% if page_obj.has_other_pages %}
+<div class="wl-saas-pagination">
+    {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}&search={{ search_query }}">← Previous</a>{% endif %}
+    {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}&search={{ search_query }}">Next →</a>{% endif %}
+</div>
+{% endif %}
+{% endblock %}

@@ -1,26 +1,39 @@
-{% extends 'white_label_dashboard/base.html' %}
-{% block page_heading %}Edit User{% endblock %}
+{% extends 'white_label_dashboard/wl_layout.html' %}
+{% block title %}Edit User — {{ tenant.name }}{% endblock %}
 {% block content %}
-<div class="wl-card" style="max-width:640px;">
+<div class="wl-saas-page-header">
+    <div>
+        <h1>Edit User</h1>
+        <div class="wl-saas-breadcrumb">
+            <a href="{% url 'white_label_dashboard' %}">Dashboard</a><span>/</span>
+            <a href="{% url 'white_label_view_users' %}">Users</a><span>/</span><span>Edit</span>
+        </div>
+    </div>
+</div>
+<div class="wl-saas-card" style="max-width:900px;">
     <form method="post">
         {% csrf_token %}
-        {% for field in form %}
-        <div class="form-group">
-            <label>{{ field.label }}</label>
-            {{ field }}
-            {% if field.errors %}<div style="color:#fca5a5;">{{ field.errors }}</div>{% endif %}
+        <div class="wl-saas-form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+            {% for field in form %}
+            <div class="wl-saas-form-group">
+                <label class="wl-saas-label">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}<div class="text-danger">{{ field.errors }}</div>{% endif %}
+            </div>
+            {% endfor %}
+            <div class="wl-saas-form-group">
+                <label class="wl-saas-label">Referred by</label>
+                <select name="referred_by" class="wl-saas-select">
+                    {% for p in parents %}
+                    <option value="{{ p.id }}" {% if gsk.referred_by_id == p.id %}selected{% endif %}>{{ p.full_name }} ({{ p.role }})</option>
+                    {% endfor %}
+                </select>
+            </div>
         </div>
-        {% endfor %}
-        <div class="form-group">
-            <label>Referred by</label>
-            <select name="referred_by" class="form-control">
-                {% for p in parents %}
-                <option value="{{ p.id }}" {% if gsk.referred_by_id == p.id %}selected{% endif %}>{{ p.full_name }} ({{ p.role }})</option>
-                {% endfor %}
-            </select>
+        <div style="display:flex;gap:10px;margin-top:8px;">
+            <button type="submit" class="wl-saas-btn wl-saas-btn-primary">Save changes</button>
+            <a href="{% url 'white_label_view_users' %}" class="wl-saas-btn wl-saas-btn-secondary">Cancel</a>
         </div>
-        <button type="submit" class="btn">Save</button>
-        <a href="{% url 'white_label_view_users' %}" class="btn btn-secondary">Cancel</a>
     </form>
 </div>
 {% endblock %}

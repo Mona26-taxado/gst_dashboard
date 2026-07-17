@@ -1,0 +1,15 @@
+{% extends 'white_label_dashboard/wl_layout.html' %}
+{% block title %}Payment Success — {{ tenant.name|default:"Partner Portal" }}{% endblock %}
+{% block content %}
+<div class="wl-saas-card" style="max-width:520px;margin:40px auto;text-align:center;">
+    <i class="mdi mdi-check-circle" style="font-size:4rem;color:var(--wl-success);"></i>
+    <h1 style="margin:16px 0 8px;">Payment Successful</h1>
+    <p style="color:var(--wl-text-muted);margin:0 0 24px;">Order #{{ order.id }} has been confirmed.</p>
+    <div style="text-align:left;background:rgba(148,163,184,.06);border-radius:12px;padding:16px;margin-bottom:24px;">
+        <p style="margin:0 0 8px;"><strong>Equipment:</strong> {{ order.equipment.name }}</p>
+        <p style="margin:0 0 8px;"><strong>Quantity:</strong> {{ order.quantity }}</p>
+        <p style="margin:0;"><strong>Amount Paid:</strong> ₹{{ order.total_amount }}</p>
+    </div>
+    <a href="{% url 'equipment_store' %}" class="wl-saas-btn wl-saas-btn-primary">Continue Shopping</a>
+</div>
+{% endblock %}

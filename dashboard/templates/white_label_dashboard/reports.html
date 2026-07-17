@@ -1,0 +1,53 @@
+{% extends 'white_label_dashboard/wl_layout.html' %}
+{% block title %}Reports — {{ tenant.name }}{% endblock %}
+{% block content %}
+<div class="wl-saas-page-header">
+    <div>
+        <h1>Reports</h1>
+        <div class="wl-saas-breadcrumb">
+            <a href="{% url 'white_label_dashboard' %}">Dashboard</a><span>/</span><span>Reports</span>
+        </div>
+    </div>
+</div>
+<div class="wl-saas-grid-4" style="margin-bottom:24px;">
+    <div class="wl-saas-stat"><div class="wl-saas-stat-icon"><i class="mdi mdi-account-group-outline"></i></div><h3>{{ total_users }}</h3><p>Total users</p></div>
+    <div class="wl-saas-stat"><div class="wl-saas-stat-icon"><i class="mdi mdi-receipt"></i></div><h3>{{ billing_summary.total_count|default:0 }}</h3><p>Total billings</p></div>
+    <div class="wl-saas-stat"><div class="wl-saas-stat-icon"><i class="mdi mdi-currency-inr"></i></div><h3>₹{{ billing_summary.total_amount|default:0 }}</h3><p>Billing amount</p></div>
+    <div class="wl-saas-stat"><div class="wl-saas-stat-icon"><i class="mdi mdi-arrow-up-bold"></i></div><h3>₹{{ credit_total }}</h3><p>Total credits</p></div>
+    <div class="wl-saas-stat"><div class="wl-saas-stat-icon"><i class="mdi mdi-arrow-down-bold"></i></div><h3>₹{{ debit_total }}</h3><p>Total debits</p></div>
+    <div class="wl-saas-stat"><div class="wl-saas-stat-icon"><i class="mdi mdi-check-circle-outline"></i></div><h3>{{ paid_count }} / {{ unpaid_count }}</h3><p>Paid / Unpaid</p></div>
+</div>
+<div class="wl-saas-grid-2">
+    <div class="wl-saas-card">
+        <div class="wl-saas-card-header"><h2>Users by role</h2></div>
+        <div class="wl-saas-table-wrap">
+            <table class="wl-saas-table">
+                <thead><tr><th>Role</th><th>Count</th></tr></thead>
+                <tbody>
+                    {% for row in role_breakdown %}
+                    <tr><td>{{ row.role }}</td><td><strong>{{ row.total }}</strong></td></tr>
+                    {% empty %}<tr><td colspan="2" class="wl-saas-empty">No data.</td></tr>{% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="wl-saas-card">
+        <div class="wl-saas-card-header"><h2>Top billers</h2></div>
+        <div class="wl-saas-table-wrap">
+            <table class="wl-saas-table">
+                <thead><tr><th>User</th><th>Role</th><th>Amount</th><th>#</th></tr></thead>
+                <tbody>
+                    {% for row in top_billers %}
+                    <tr>
+                        <td>{{ row.user__full_name }}</td>
+                        <td><span class="wl-saas-badge wl-saas-badge-neutral">{{ row.user__role }}</span></td>
+                        <td>₹{{ row.total }}</td>
+                        <td>{{ row.count }}</td>
+                    </tr>
+                    {% empty %}<tr><td colspan="4" class="wl-saas-empty">No data.</td></tr>{% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

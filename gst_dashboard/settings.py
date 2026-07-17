@@ -245,6 +245,8 @@ CSRF_TRUSTED_ORIGINS = [
     'https://www.crm.grahaksahaayatakendra.com',
     'https://clasclass.com',
     'https://www.clasclass.com',
+    'https://zingofin.com',
+    'https://www.zingofin.com',
     'http://localhost:8000',
     'http://127.0.0.1:8000',
     'http://localhost',

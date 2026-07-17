@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Master Distributor — {{ tenant.name|default:"Partner Portal" }}{% endblock %}
+{% block content %}
+<div class="wl-saas-page-header">
+    <div>
+        <h1>Master Distributor Dashboard</h1>
+        <div class="wl-saas-breadcrumb">
+            <span>Dashboard</span>
+        </div>
+    </div>
+</div>
+<div class="wl-saas-grid-2">
+    <div class="wl-saas-card">
+        <div class="wl-saas-card-header"><h2>Welcome, {{ request.user.full_name }}</h2></div>
+        <p style="color:var(--wl-text-muted);margin:0;">Manage your network, services, and agreements from this portal.</p>
+    </div>
+    <div class="wl-saas-card">
+        <div class="wl-saas-card-header"><h2>Wallet Balance</h2></div>
+        <p style="font-size:1.5rem;font-weight:800;margin:0;color:var(--wl-primary);">₹{{ wl_wallet_balance|default:"0" }}</p>
+    </div>
+</div>
+<div class="wl-saas-card" style="margin-top:16px;">
+    <div class="wl-saas-card-header"><h2>Quick Links</h2></div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;">
+        <a href="{% url 'retailer_view_services' %}" class="wl-saas-btn wl-saas-btn-primary">View Services</a>
+        <a href="{% url 'sign_agreement' %}" class="wl-saas-btn wl-saas-btn-secondary">Sign Agreement</a>
+    </div>
+</div>
+{% endblock %}

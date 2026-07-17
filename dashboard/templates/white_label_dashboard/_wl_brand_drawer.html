@@ -1,0 +1,58 @@
+<div class="wl-saas-drawer-overlay" id="wlBrandOverlay"></div>
+<aside class="wl-saas-drawer" id="wlBrandDrawer" aria-label="Brand settings">
+    <div class="wl-saas-drawer-head">
+        <h2 style="margin:0;font-size:1rem;font-weight:700;">Brand &amp; Theme</h2>
+        <button type="button" class="wl-saas-icon-btn" id="wlBrandClose" aria-label="Close"><i class="mdi mdi-close"></i></button>
+    </div>
+    <div class="wl-saas-drawer-body">
+        <div class="wl-saas-card" style="margin-bottom:16px;padding:16px;">
+            <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+                {% if tenant and tenant.logo %}
+                <img src="{{ tenant.logo.url }}" alt="" style="width:56px;height:56px;border-radius:12px;object-fit:contain;background:#fff;padding:6px;">
+                {% else %}
+                <div class="wl-saas-brand-mark" style="width:56px;height:56px;font-size:1.25rem;">{{ tenant.name|default:"P"|slice:":1"|upper }}</div>
+                {% endif %}
+                <div>
+                    <strong style="display:block;font-size:1rem;">{{ tenant.name|default:"Your Brand" }}</strong>
+                    <small style="color:var(--wl-text-muted);">{% if tenant.domain %}{{ tenant.domain }}{% else %}Custom domain not set{% endif %}</small>
+                </div>
+            </div>
+            <div style="font-size:.8rem;color:var(--wl-text-muted);line-height:1.6;">
+                <p style="margin:0 0 8px;"><strong style="color:var(--wl-text);">Primary:</strong> {{ tenant.primary_color|default:"#2563EB" }}</p>
+                <p style="margin:0 0 8px;"><strong style="color:var(--wl-text);">Secondary:</strong> {{ tenant.secondary_color|default:"#4F46E5" }}</p>
+            </div>
+        </div>
+
+        <p class="wl-saas-label">Theme presets <span style="font-weight:400;">(saved on this device)</span></p>
+        <div class="wl-saas-theme-grid">
+            <button type="button" class="wl-saas-theme-opt" data-wl-theme="classic-blue">
+                <div class="wl-saas-theme-swatch" style="background:linear-gradient(90deg,#2563EB,#4F46E5);"></div>
+                Classic Blue
+            </button>
+            <button type="button" class="wl-saas-theme-opt" data-wl-theme="dark-pro">
+                <div class="wl-saas-theme-swatch" style="background:linear-gradient(90deg,#3B82F6,#18181B);"></div>
+                Dark Pro
+            </button>
+            <button type="button" class="wl-saas-theme-opt" data-wl-theme="emerald">
+                <div class="wl-saas-theme-swatch" style="background:linear-gradient(90deg,#10B981,#1A2E23);"></div>
+                Emerald
+            </button>
+            <button type="button" class="wl-saas-theme-opt" data-wl-theme="purple">
+                <div class="wl-saas-theme-swatch" style="background:linear-gradient(90deg,#8B5CF6,#1E1B2E);"></div>
+                Purple
+            </button>
+            <button type="button" class="wl-saas-theme-opt" data-wl-theme="orange">
+                <div class="wl-saas-theme-swatch" style="background:linear-gradient(90deg,#F97316,#2A2118);"></div>
+                Orange
+            </button>
+            <button type="button" class="wl-saas-theme-opt" data-wl-theme="black-enterprise">
+                <div class="wl-saas-theme-swatch" style="background:linear-gradient(90deg,#E5E5E5,#171717);"></div>
+                Black Enterprise
+            </button>
+        </div>
+
+        <p style="font-size:.75rem;color:var(--wl-text-muted);margin-top:20px;line-height:1.5;">
+            Logo, domain, SMTP, and invoice branding are managed by your platform administrator. Theme presets apply instantly for your session.
+        </p>
+    </div>
+</aside>
