@@ -113,7 +113,7 @@ html[data-wl-mode="light"] .wl-saas-select {
   border-color: rgba(15, 23, 42, 0.12);
   color: #1E293B;
 }
-html[data-wl-mode="light"] .wl-saas-brand img { background: #fff; }
+html[data-wl-mode="light"] .wl-saas-brand img { background: transparent; }
 html[data-wl-mode="light"] .wl-saas-sidebar { border-right-color: rgba(15, 23, 42, 0.08); }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -161,7 +161,7 @@ body.wl-sidebar-collapsed .wl-saas-main { margin-left: var(--wl-sidebar-collapse
 }
 .wl-saas-brand img {
   width: 40px; height: 40px; border-radius: 10px;
-  object-fit: contain; background: #fff; padding: 4px; flex-shrink: 0;
+  object-fit: contain; background: transparent; padding: 0; flex-shrink: 0;
 }
 .wl-saas-brand-mark {
   width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0;
@@ -758,13 +758,62 @@ html[data-wl-mode="light"] .wl-saas-feature-card:hover { background: #F1F5F9; }
 /* ── Mobile ── */
 .wl-saas-mobile-toggle { display: none; }
 @media (max-width: 900px) {
-  .wl-saas-sidebar { transform: translateX(-100%); width: var(--wl-sidebar-w) !important; }
+  .wl-saas-sidebar {
+    transform: translateX(-100%);
+    width: min(84vw, var(--wl-sidebar-w)) !important;
+    z-index: 210;
+    box-shadow: 8px 0 32px rgba(0, 0, 0, .45);
+  }
   .wl-saas-sidebar.mobile-open { transform: translateX(0); }
   .wl-saas-main { margin-left: 0 !important; }
   .wl-saas-mobile-toggle { display: grid; }
   .wl-saas-search { display: none; }
   .wl-saas-greeting p { display: none; }
+
+  /* Collapse is a desktop-only concept — never leak it into the mobile drawer */
+  .wl-saas-collapse-btn { display: none !important; }
+  body.wl-sidebar-collapsed .wl-saas-sidebar { width: min(84vw, var(--wl-sidebar-w)) !important; }
+  body.wl-sidebar-collapsed .wl-saas-brand-text,
+  body.wl-sidebar-collapsed .wl-saas-nav-label,
+  body.wl-sidebar-collapsed .wl-saas-nav-link span,
+  body.wl-sidebar-collapsed .wl-saas-nav-toggle span,
+  body.wl-sidebar-collapsed .wl-saas-nav-chevron,
+  body.wl-sidebar-collapsed .wl-saas-nav-item-row .wl-saas-nav-link span,
+  body.wl-sidebar-collapsed .wl-saas-sidebar-meta,
+  body.wl-sidebar-collapsed .wl-saas-sidebar-foot {
+    opacity: 1; width: auto; height: auto; overflow: visible; padding: revert; display: revert;
+  }
+  body.wl-sidebar-collapsed .wl-saas-nav-link,
+  body.wl-sidebar-collapsed .wl-saas-nav-toggle,
+  body.wl-sidebar-collapsed .wl-saas-nav-item-row .wl-saas-nav-link {
+    justify-content: flex-start; padding: 10px 12px;
+  }
+  body.wl-sidebar-collapsed .wl-saas-nav-item-row { flex-direction: row; align-items: center; }
+  body.wl-sidebar-collapsed .wl-saas-nav-dropdown.open > .wl-saas-nav-submenu { max-height: 500px; }
+
+  .wl-saas-topbar { padding: 0 14px; gap: 8px; }
+  .wl-saas-content { padding: 16px 14px 20px; }
 }
+
+/* Lock background scroll while the mobile drawer is open */
+body.wl-mobile-nav-open { overflow: hidden; }
+
+/* ── Google Translate integration (EN/HI) ── */
+.wl-gtranslate-hidden { position: absolute; left: -9999px; height: 0; width: 0; overflow: hidden; }
+/* Prevent Google's injected banner from shoving the page down */
+body { top: 0 !important; position: static !important; }
+.goog-te-banner-frame,
+.goog-te-banner-frame.skiptranslate,
+iframe.goog-te-banner-frame,
+body > .skiptranslate,
+.goog-te-gadget-icon,
+#goog-gt-tt, .goog-te-balloon-frame {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+}
+.goog-te-gadget { height: 0; overflow: hidden; font-size: 0 !important; }
+.goog-text-highlight { background: none !important; box-shadow: none !important; }
 
 /* Django form widgets inside WL portal */
 .wl-saas-content .form-control,

@@ -120,18 +120,38 @@
       });
     }
 
+    function openMobileNav() {
+      sidebar.classList.add('mobile-open');
+      if (overlay) overlay.classList.add('open');
+      document.body.classList.add('wl-mobile-nav-open');
+    }
+    function closeMobileNav() {
+      sidebar.classList.remove('mobile-open');
+      if (overlay) overlay.classList.remove('open');
+      document.body.classList.remove('wl-mobile-nav-open');
+    }
+
     if (mobileBtn && sidebar) {
       mobileBtn.addEventListener('click', function () {
-        sidebar.classList.toggle('mobile-open');
-        if (overlay) overlay.classList.toggle('open');
+        if (sidebar.classList.contains('mobile-open')) closeMobileNav();
+        else openMobileNav();
       });
     }
     if (overlay) {
-      overlay.addEventListener('click', function () {
-        sidebar.classList.remove('mobile-open');
-        overlay.classList.remove('open');
+      overlay.addEventListener('click', closeMobileNav);
+    }
+    if (sidebar) {
+      // Close the drawer after tapping a real navigation link on mobile
+      sidebar.querySelectorAll('.wl-saas-nav-link[href]').forEach(function (link) {
+        link.addEventListener('click', function () {
+          if (window.matchMedia('(max-width: 900px)').matches) closeMobileNav();
+        });
       });
     }
+    // Reset the drawer state when resizing back to desktop
+    window.addEventListener('resize', function () {
+      if (!window.matchMedia('(max-width: 900px)').matches) closeMobileNav();
+    });
   }
 
   function initSupportWidget() {
@@ -201,6 +221,78 @@
     });
   }
 
+  function getGoogTransLang() {
+    var m = document.cookie.match(/googtrans=\/[a-z]+\/([a-z]+)/);
+    return m ? m[1] : 'en';
+  }
+
+  function setGoogTransLang(lang) {
+    var host = location.hostname;
+    var expired = ';expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    // Clear any existing cookie across possible scopes
+    ['', ';domain=' + host, ';domain=.' + host].forEach(function (scope) {
+      document.cookie = 'googtrans=;path=/' + scope + expired;
+    });
+    if (lang && lang !== 'en') {
+      var val = '/en/' + lang;
+      ['', ';domain=' + host, ';domain=.' + host].forEach(function (scope) {
+        document.cookie = 'googtrans=' + val + ';path=/' + scope;
+      });
+    }
+    window.location.reload();
+  }
+
+  function hideGoogleBanner() {
+    // Google injects an inline top offset on <body> and a banner iframe — kill both
+    if (document.body && document.body.style.top && document.body.style.top !== '0px') {
+      document.body.style.top = '0px';
+    }
+    var frames = document.querySelectorAll(
+      'iframe.goog-te-banner-frame, .goog-te-banner-frame, .skiptranslate iframe'
+    );
+    frames.forEach(function (f) {
+      f.style.display = 'none';
+      f.style.visibility = 'hidden';
+    });
+    var tt = document.getElementById('goog-gt-tt');
+    if (tt) tt.style.display = 'none';
+  }
+
+  function initGoogleBannerGuard() {
+    hideGoogleBanner();
+    // Google renders asynchronously, so keep enforcing for a short window
+    var tries = 0;
+    var timer = setInterval(function () {
+      hideGoogleBanner();
+      if (++tries > 40) clearInterval(timer);
+    }, 250);
+    // And react to any later DOM mutations (e.g. hover tooltips)
+    if (window.MutationObserver) {
+      new MutationObserver(hideGoogleBanner).observe(document.documentElement, {
+        childList: true,
+        subtree: true,
+      });
+    }
+  }
+
+  function initLangSwitcher() {
+    var buttons = document.querySelectorAll('button[data-wl-lang]');
+    if (!buttons.length) return;
+    var current = getGoogTransLang();
+    var label = document.getElementById('wlLangLabel');
+    if (label) label.textContent = current.toUpperCase();
+
+    buttons.forEach(function (btn) {
+      var lang = btn.getAttribute('data-wl-lang');
+      btn.classList.toggle('active', lang === current);
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (lang === current) return;
+        setGoogTransLang(lang);
+      });
+    });
+  }
+
   function initKeyboardSearch() {
     document.addEventListener('keydown', function (e) {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
@@ -220,5 +312,7 @@
     initQuickFab();
     initCounters();
     initKeyboardSearch();
+    initLangSwitcher();
+    initGoogleBannerGuard();
   });
 })();

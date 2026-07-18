@@ -7,6 +7,7 @@ from datetime import timedelta
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.db import IntegrityError
 from django.db.models import Count, Q, Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -159,23 +160,36 @@ def white_label_add_user(request):
     if request.method == "POST":
         form = AddGSKForm(request.POST, allowed_roles=allowed)
         if form.is_valid():
-            user = form.save(commit=False)
-            user.tenant = request.user.tenant
-            referred_by_id = request.POST.get("referred_by")
-            if referred_by_id:
-                parent = get_object_or_404(
-                    CustomUser,
-                    id=referred_by_id,
-                    tenant_id=request.user.tenant_id,
+            try:
+                user = form.save(commit=False)
+                user.tenant = request.user.tenant
+                referred_by_id = request.POST.get("referred_by")
+                if referred_by_id:
+                    parent = get_object_or_404(
+                        CustomUser,
+                        id=referred_by_id,
+                        tenant_id=request.user.tenant_id,
+                    )
+                    user.referred_by = parent
+                else:
+                    user.referred_by = request.user
+                user.save()
+                messages.success(request, f"User {user.full_name} created.")
+                return redirect("white_label_view_users")
+            except IntegrityError:
+                messages.error(
+                    request,
+                    "Could not create user. Email or Branch ID already exists.",
                 )
-                user.referred_by = parent
-            else:
-                user.referred_by = request.user
-            user.save()
-            messages.success(request, f"User {user.full_name} created.")
-            return redirect("white_label_view_users")
+            except Exception as exc:
+                messages.error(request, f"An error occurred: {exc}")
+        else:
+            messages.error(request, "Please fix the errors highlighted below.")
     else:
-        form = AddGSKForm(allowed_roles=allowed)
+        form = AddGSKForm(
+            allowed_roles=allowed,
+            initial={"start_date": timezone.now().date()},
+        )
 
     return render(
         request,

@@ -19,6 +19,16 @@ class AddGSKForm(forms.ModelForm):
     class Meta:
         model = CustomUser
         fields = ['full_name', 'email', 'role', 'branch_id', 'mobile_number', 'dob', 'address', 'state', 'city', 'start_date', 'plain_password']
+        widgets = {
+            'dob': forms.DateInput(
+                format='%Y-%m-%d',
+                attrs={'type': 'date', 'class': 'wl-saas-input'},
+            ),
+            'start_date': forms.DateInput(
+                format='%Y-%m-%d',
+                attrs={'type': 'date', 'class': 'wl-saas-input'},
+            ),
+        }
 
     def __init__(self, *args, **kwargs):
         self.allowed_roles = kwargs.pop(
@@ -26,6 +36,10 @@ class AddGSKForm(forms.ModelForm):
             ['retailer', 'distributor', 'master_distributor', 'retailer_2', 'distributor_2'],
         )
         super().__init__(*args, **kwargs)
+        # Ensure HTML5 date inputs accept the YYYY-MM-DD value
+        for date_field in ('dob', 'start_date'):
+            if date_field in self.fields:
+                self.fields[date_field].input_formats = ['%Y-%m-%d']
         if self.instance and self.instance.pk:
             self.fields['plain_password'].initial = self.instance.plain_password
         if 'role' in self.fields:
