@@ -49,13 +49,14 @@
 
         <div class="wl-saas-dropdown wl-saas-topbar-pill--hide-sm" data-wl-dropdown>
             <button type="button" class="wl-saas-topbar-text-btn wl-saas-dropdown-trigger" aria-expanded="false">
-                <i class="mdi mdi-web"></i><span>EN</span><i class="mdi mdi-chevron-down"></i>
+                <i class="mdi mdi-web"></i><span id="wlLangLabel">EN</span><i class="mdi mdi-chevron-down"></i>
             </button>
             <div class="wl-saas-dropdown-menu">
-                <button type="button" class="active">English</button>
-                <button type="button">हिन्दी</button>
+                <button type="button" data-wl-lang="en" class="active">English</button>
+                <button type="button" data-wl-lang="hi">हिन्दी</button>
             </div>
         </div>
+        <div id="google_translate_element" class="wl-gtranslate-hidden" aria-hidden="true"></div>
 
         <div class="wl-saas-dropdown" data-wl-dropdown>
             <button type="button" class="wl-saas-profile wl-saas-dropdown-trigger" id="wlProfileToggle" aria-expanded="false">
@@ -78,3 +79,13 @@
         </div>
     </div>
 </header>
+
+<script>
+function googleTranslateElementInit() {
+    new google.translate.TranslateElement(
+        { pageLanguage: 'en', includedLanguages: 'en,hi', autoDisplay: false },
+        'google_translate_element'
+    );
+}
+</script>
+<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>

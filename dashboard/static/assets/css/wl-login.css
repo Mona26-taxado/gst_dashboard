@@ -81,8 +81,8 @@ body {
 
 .wl-login-brand img {
   width: 72px; height: 72px; object-fit: contain;
-  border-radius: 12px; background: #fff; border: 1px solid var(--wl-border);
-  padding: 8px; margin-bottom: 16px;
+  border-radius: 12px; background: transparent;
+  padding: 0; margin-bottom: 16px;
 }
 
 .wl-brand-mark {
