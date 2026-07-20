@@ -9,15 +9,15 @@
         </div>
     </div>
 </div>
-<div class="wl-saas-card">
-    <p style="margin:0 0 20px;color:var(--wl-text-muted);line-height:1.6;">
+<div class="wl-saas-card wl-pin-entry-card">
+    <p class="wl-pin-entry-desc">
         This section is PIN-protected. Enter your 4-digit security PIN to continue.
     </p>
-    <form method="post" style="max-width:320px;">
+    <form method="post" class="wl-pin-entry-form">
         {% csrf_token %}
         <div class="wl-saas-form-group">
             <label class="wl-saas-label" for="pin">4-Digit PIN</label>
-            <input type="password" name="pin" id="pin" class="wl-saas-input" maxlength="4" placeholder="Enter your PIN" required autocomplete="off">
+            <input type="password" name="pin" id="pin" class="wl-saas-input" maxlength="4" inputmode="numeric" pattern="[0-9]{4}" placeholder="Enter your PIN" required autocomplete="off">
         </div>
         <button type="submit" class="wl-saas-btn wl-saas-btn-primary">Verify &amp; continue</button>
     </form>
