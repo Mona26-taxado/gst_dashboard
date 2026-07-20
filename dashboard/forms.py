@@ -69,6 +69,45 @@ class AddGSKForm(forms.ModelForm):
         return role
 
 
+class WhiteLabelUserForm(AddGSKForm):
+    """WL admin creates/edits tenant users and sets their Additional Services PIN."""
+
+    class Meta(AddGSKForm.Meta):
+        fields = AddGSKForm.Meta.fields + ['pin']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        pin_field = self.fields['pin']
+        pin_field.label = 'Additional Services PIN'
+        pin_field.widget = forms.TextInput(
+            attrs={
+                'class': 'wl-saas-input',
+                'placeholder': '4-digit PIN',
+                'maxlength': '4',
+                'inputmode': 'numeric',
+                'pattern': '[0-9]{4}',
+                'autocomplete': 'off',
+            }
+        )
+        if self.instance and self.instance.pk:
+            pin_field.required = False
+            pin_field.help_text = 'Leave blank to keep the current PIN.'
+            if self.instance.pin:
+                pin_field.initial = self.instance.pin
+        else:
+            pin_field.required = True
+            pin_field.help_text = 'This PIN unlocks Additional Services for this user.'
+
+    def clean_pin(self):
+        pin = (self.cleaned_data.get('pin') or '').strip()
+        editing = bool(self.instance and self.instance.pk)
+        if editing and not pin:
+            return self.instance.pin
+        if len(pin) != 4 or not pin.isdigit():
+            raise forms.ValidationError('Enter a valid 4-digit PIN (numbers only).')
+        return pin
+
+
 class WhiteLabelTenantForm(forms.ModelForm):
     class Meta:
         model = WhiteLabelTenant

@@ -54,19 +54,20 @@
             <div class="wl-saas-dropdown-menu">
                 <button type="button" data-wl-lang="en" class="active">English</button>
                 <button type="button" data-wl-lang="hi">हिन्दी</button>
+                <button type="button" data-wl-lang="bn">বাংলা</button>
             </div>
         </div>
         <div id="google_translate_element" class="wl-gtranslate-hidden" aria-hidden="true"></div>
 
         <div class="wl-saas-dropdown" data-wl-dropdown>
             <button type="button" class="wl-saas-profile wl-saas-dropdown-trigger" id="wlProfileToggle" aria-expanded="false">
-                <div class="wl-saas-avatar">{{ request.user.full_name|slice:":1"|upper }}</div>
+                <div class="wl-saas-avatar"><i class="mdi mdi-account-circle"></i></div>
                 <span class="wl-saas-profile-name">{{ request.user.full_name|truncatewords:1 }}</span>
                 <i class="mdi mdi-chevron-down"></i>
             </button>
             <div class="wl-saas-dropdown-menu wl-saas-dropdown-menu--profile" id="wlProfileMenu">
                 <div class="wl-saas-profile-card">
-                    <div class="wl-saas-avatar wl-saas-avatar--lg">{{ request.user.full_name|slice:":1"|upper }}</div>
+                    <div class="wl-saas-avatar wl-saas-avatar--lg"><i class="mdi mdi-account-circle"></i></div>
                     <div>
                         <strong>{{ request.user.full_name }}</strong>
                         <span>{{ request.user.email }}</span>
@@ -83,7 +84,7 @@
 <script>
 function googleTranslateElementInit() {
     new google.translate.TranslateElement(
-        { pageLanguage: 'en', includedLanguages: 'en,hi', autoDisplay: false },
+        { pageLanguage: 'en', includedLanguages: 'en,hi,bn', autoDisplay: false },
         'google_translate_element'
     );
 }

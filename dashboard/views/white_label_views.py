@@ -12,7 +12,7 @@ from django.db.models import Count, Q, Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
-from dashboard.forms import AddGSKForm
+from dashboard.forms import WhiteLabelUserForm
 from dashboard.models import (
     BankingPortalAccessRequest,
     BillingDetails,
@@ -158,7 +158,7 @@ def white_label_add_user(request):
     ).order_by("full_name")
 
     if request.method == "POST":
-        form = AddGSKForm(request.POST, allowed_roles=allowed)
+        form = WhiteLabelUserForm(request.POST, allowed_roles=allowed)
         if form.is_valid():
             try:
                 user = form.save(commit=False)
@@ -186,7 +186,7 @@ def white_label_add_user(request):
         else:
             messages.error(request, "Please fix the errors highlighted below.")
     else:
-        form = AddGSKForm(
+        form = WhiteLabelUserForm(
             allowed_roles=allowed,
             initial={"start_date": timezone.now().date()},
         )
@@ -254,7 +254,7 @@ def white_label_edit_user(request, user_id):
     ).exclude(pk=user.pk).order_by("full_name")
 
     if request.method == "POST":
-        form = AddGSKForm(request.POST, instance=user, allowed_roles=allowed)
+        form = WhiteLabelUserForm(request.POST, instance=user, allowed_roles=allowed)
         if form.is_valid():
             updated = form.save(commit=False)
             updated.tenant = request.user.tenant
@@ -267,7 +267,7 @@ def white_label_edit_user(request, user_id):
             messages.success(request, "User updated.")
             return redirect("white_label_view_users")
     else:
-        form = AddGSKForm(instance=user, allowed_roles=allowed)
+        form = WhiteLabelUserForm(instance=user, allowed_roles=allowed)
 
     return render(
         request,
@@ -310,28 +310,25 @@ def white_label_add_wallet(request):
     if not _require_tenant(request.user):
         return redirect("logout")
 
-    import base64
-    from io import BytesIO
-
-    from PIL import Image as PILImage
-
-    from dashboard.models import QRCodeSettings
-    from dashboard.utils import generate_qr
-
+    tenant = request.user.tenant
     wallet, _ = Wallet.objects.get_or_create(user=request.user)
-    user_name = request.user.full_name
 
-    qr_settings = QRCodeSettings.objects.first()
-    if qr_settings and qr_settings.qr_code_image:
-        qr_image = PILImage.open(qr_settings.qr_code_image)
-        buffer = BytesIO()
-        qr_image.save(buffer, format="PNG")
-        qr_code_b64 = base64.b64encode(buffer.getvalue()).decode()
-        qr_code_src = f"data:image/png;base64,{qr_code_b64}"
-    else:
-        qr_code_path = generate_qr(user_name)
-        qr_code_src = f"/static/{qr_code_path}"
+    if request.method == "POST":
+        upi_id = (request.POST.get("wallet_upi_id") or "").strip()
+        if upi_id:
+            tenant.wallet_upi_id = upi_id
+        if "wallet_qr_code" in request.FILES:
+            tenant.wallet_qr_code = request.FILES["wallet_qr_code"]
+        tenant.save()
+        messages.success(
+            request,
+            "Wallet QR updated. Your network users will now recharge on this UPI/QR.",
+        )
+        return redirect("white_label_add_wallet")
 
+    from dashboard.utils import build_wallet_qr_display
+
+    qr_display = build_wallet_qr_display(request.user)
     show_wallet_disclaimer = not request.session.get("wallet_disclaimer_dismissed", False)
 
     return render(
@@ -339,8 +336,11 @@ def white_label_add_wallet(request):
         "white_label_dashboard/add_wallet.html",
         _wl_context(
             request,
-            user_name=user_name,
-            qr_code_src=qr_code_src,
+            user_name=request.user.full_name,
+            qr_code_src=qr_display["qr_code_src"],
+            wallet_upi_id=tenant.wallet_upi_id,
+            has_wallet_qr=bool(tenant.wallet_qr_code),
+            qr_scope=qr_display["scope"],
             show_wallet_disclaimer=show_wallet_disclaimer,
         ),
     )

@@ -12,7 +12,7 @@ from django.shortcuts import redirect, render
 from django.utils import timezone
 
 from dashboard.agreement_content import (
-    AGREEMENT_VERSION,
+    get_agreement_version,
     fill_agreement_placeholders,
     get_terms_plain_text,
 )
@@ -92,9 +92,10 @@ def _cleanup_old_acceptances(user, keep_id: int):
 
 @role_required(ALLOWED_ROLES)
 def sign_agreement_view(request):
-    terms_raw = get_terms_plain_text()
+    agreement_version = get_agreement_version(request.user)
+    terms_raw = get_terms_plain_text(request.user)
     existing = AgreementAcceptance.objects.filter(
-        user=request.user, agreement_version=AGREEMENT_VERSION
+        user=request.user, agreement_version=agreement_version
     ).first()
 
     typed_name_input = ""
@@ -147,7 +148,7 @@ def sign_agreement_view(request):
                 _sign_context(
                     request,
                     terms=terms_display,
-                    agreement_version=AGREEMENT_VERSION,
+                    agreement_version=agreement_version,
                     existing=None,
                     typed_name_default=typed_name,
                 ),
@@ -162,7 +163,7 @@ def sign_agreement_view(request):
             with transaction.atomic():
                 acc = AgreementAcceptance(
                     user=request.user,
-                    agreement_version=AGREEMENT_VERSION,
+                    agreement_version=agreement_version,
                     ip_address=ip or "unknown",
                     user_agent=ua[:2000],
                     typed_name=typed_name,
@@ -182,7 +183,7 @@ def sign_agreement_view(request):
 
                 pdf_bytes = build_signed_agreement_pdf(
                     terms_text=terms_for_pdf,
-                    agreement_version=AGREEMENT_VERSION,
+                    agreement_version=agreement_version,
                     signer_name=request.user.full_name or request.user.email,
                     typed_name=typed_name,
                     signature_image_path=acc.signature_image.path,
@@ -223,7 +224,7 @@ def sign_agreement_view(request):
                 _sign_context(
                     request,
                     terms=terms_display,
-                    agreement_version=AGREEMENT_VERSION,
+                    agreement_version=agreement_version,
                     existing=None,
                     typed_name_default=typed_name,
                 ),
@@ -235,7 +236,7 @@ def sign_agreement_view(request):
         _sign_context(
             request,
             terms=terms_display,
-            agreement_version=AGREEMENT_VERSION,
+            agreement_version=agreement_version,
             existing=existing,
             typed_name_default=request.user.full_name or "",
         ),

@@ -6,6 +6,7 @@
   function applyTheme(theme) {
     if (THEMES.indexOf(theme) === -1) theme = 'dark';
     document.documentElement.setAttribute('data-wl-theme', theme);
+    document.documentElement.setAttribute('data-wl-mode', theme === 'light' ? 'light' : 'dark');
     localStorage.setItem('wl-theme', theme);
     document.querySelectorAll('button[data-wl-theme]').forEach(function (btn) {
       btn.classList.toggle('active', btn.getAttribute('data-wl-theme') === theme);
@@ -275,12 +276,14 @@
     }
   }
 
+  var WL_LANG_LABELS = { en: 'EN', hi: 'HI', bn: 'BN' };
+
   function initLangSwitcher() {
     var buttons = document.querySelectorAll('button[data-wl-lang]');
     if (!buttons.length) return;
     var current = getGoogTransLang();
     var label = document.getElementById('wlLangLabel');
-    if (label) label.textContent = current.toUpperCase();
+    if (label) label.textContent = WL_LANG_LABELS[current] || current.toUpperCase();
 
     buttons.forEach(function (btn) {
       var lang = btn.getAttribute('data-wl-lang');

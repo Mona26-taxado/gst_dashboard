@@ -53,11 +53,93 @@ import qrcode
 import os
 import random
 import string
+import urllib.parse
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
 import base64
 from django.core.cache import cache
 from django.conf import settings
+
+DEFAULT_WALLET_UPI = "9336323478@okbizaxis"
+
+
+def get_wallet_payment_config(user):
+    """Platform admin QR for GSK users; tenant QR for white-label network users."""
+    from dashboard.models import QRCodeSettings, WhiteLabelTenant
+
+    if getattr(user, "tenant_id", None):
+        tenant = WhiteLabelTenant.objects.filter(pk=user.tenant_id).first()
+        if tenant:
+            upi_id = (tenant.wallet_upi_id or "").strip() or DEFAULT_WALLET_UPI
+            return {
+                "scope": "white_label",
+                "upi_id": upi_id,
+                "merchant_name": tenant.name,
+                "qr_image_field": tenant.wallet_qr_code,
+                "tenant": tenant,
+            }
+
+    qr_settings = QRCodeSettings.objects.first()
+    upi_id = DEFAULT_WALLET_UPI
+    qr_image = None
+    if qr_settings:
+        upi_id = (qr_settings.upi_id or "").strip() or DEFAULT_WALLET_UPI
+        qr_image = qr_settings.qr_code_image
+    return {
+        "scope": "platform",
+        "upi_id": upi_id,
+        "merchant_name": "Grahak Sahaayata Kendra",
+        "qr_image_field": qr_image,
+        "qr_settings": qr_settings,
+    }
+
+
+def build_upi_link(upi_id, merchant_name, amount=None, transaction_note=None):
+    params = {"pa": upi_id, "pn": merchant_name, "cu": "INR"}
+    if amount is not None:
+        params["am"] = f"{float(amount):.2f}"
+    if transaction_note:
+        params["tn"] = transaction_note
+    return "upi://pay?" + urllib.parse.urlencode(params)
+
+
+def qr_image_field_to_base64(image_field):
+    if not image_field:
+        return None
+    qr_image = Image.open(image_field)
+    buffer = BytesIO()
+    qr_image.save(buffer, format="PNG")
+    return base64.b64encode(buffer.getvalue()).decode()
+
+
+def build_wallet_qr_display(user, amount=None, plan_id=None):
+    """Shared wallet QR/UPI payload for platform and white-label users."""
+    config = get_wallet_payment_config(user)
+    note = f"Recharge Plan {plan_id}" if plan_id else None
+    upi_link = build_upi_link(
+        config["upi_id"],
+        config["merchant_name"],
+        amount=amount,
+        transaction_note=note,
+    )
+
+    qr_code_base64 = qr_image_field_to_base64(config.get("qr_image_field"))
+    if not qr_code_base64:
+        qr = qrcode.QRCode(version=1, box_size=10, border=5)
+        qr.add_data(upi_link)
+        qr.make(fit=True)
+        qr_image = qr.make_image(fill_color="black", back_color="white")
+        buffer = BytesIO()
+        qr_image.save(buffer, format="PNG")
+        qr_code_base64 = base64.b64encode(buffer.getvalue()).decode()
+
+    return {
+        **config,
+        "upi_link": upi_link,
+        "qr_code_src": f"data:image/png;base64,{qr_code_base64}",
+        "qr_code": qr_code_base64,
+    }
+
 
 def generate_qr(user_name, upi_id=None):
     """

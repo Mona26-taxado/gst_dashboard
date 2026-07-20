@@ -556,40 +556,31 @@ def upgrade_to_pro(request):
     })
 
 
-@role_required(['retailer', 'distributor'])
+@role_required(['retailer', 'distributor', 'master_distributor'])
 def generate_qr_for_recharge(request, user_id):
     try:
-        import base64
-        from io import BytesIO
-        from PIL import Image as PILImage
+        from dashboard.utils import build_wallet_qr_display, wl_template_for
 
-        distributor = CustomUser.objects.get(id=user_id)
-        user_name = distributor.full_name
+        user = CustomUser.objects.get(id=user_id)
+        if user.id != request.user.id and request.user.role not in ('admin', 'white_label_admin'):
+            return redirect('not_authorized')
 
-        # Check if admin has uploaded a custom QR code
-        from dashboard.models import QRCodeSettings
-        qr_settings = QRCodeSettings.objects.first()
-
-        if qr_settings and qr_settings.qr_code_image:
-            # Use admin's uploaded QR - embed as base64 so it works without /media/ on production
-            qr_image = PILImage.open(qr_settings.qr_code_image)
-            buffer = BytesIO()
-            qr_image.save(buffer, format="PNG")
-            qr_code_b64 = base64.b64encode(buffer.getvalue()).decode()
-            qr_code_src = f"data:image/png;base64,{qr_code_b64}"
-        else:
-            # Generate the QR code dynamically (static file path)
-            qr_code_path = generate_qr(user_name)
-            qr_code_src = f"/static/{qr_code_path}"
-
-        # Show disclaimer unless user closed it this session; after next login it will show again.
+        qr_display = build_wallet_qr_display(user)
         show_wallet_disclaimer = not request.session.get('wallet_disclaimer_dismissed', False)
 
-        return render(request, 'recharge_wallet.html', {
-            'user_name': user_name,
-            'qr_code_src': qr_code_src,
+        template_name = wl_template_for(
+            request,
+            'recharge_wallet.html',
+            'white_label_dashboard/add_wallet.html',
+        )
+        return render(request, template_name, {
+            'user_name': user.full_name,
+            'qr_code_src': qr_display['qr_code_src'],
             'user_id': user_id,
+            'wallet_upi_id': qr_display.get('upi_id'),
+            'qr_scope': qr_display.get('scope'),
             'show_wallet_disclaimer': show_wallet_disclaimer,
+            'show_qr_settings': False,
         })
     except Exception as e:
         return HttpResponse(f"An error occurred: {str(e)}")
