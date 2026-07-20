@@ -369,7 +369,7 @@ def view_notifications(request):
 @login_required
 @role_required(['admin'])
 def update_pin(request, user_id=None):
-    pin_roles = ['retailer', 'distributor', 'master_distributor']
+    pin_roles = ['retailer', 'distributor', 'master_distributor', 'white_label_admin']
     scope = (request.GET.get('scope') or 'all').strip().lower()
     tenant_filter = request.GET.get('tenant', '').strip()
     search_query = (request.GET.get('search') or '').strip()
@@ -396,17 +396,15 @@ def update_pin(request, user_id=None):
             | Q(tenant__name__icontains=search_query)
         )
 
-    pin_user_qs = CustomUser.objects.filter(role__in=pin_roles, is_active=True)
-    wl_user_count = pin_user_qs.filter(tenant_id__isnull=False).count()
-    platform_user_count = pin_user_qs.filter(tenant_id__isnull=True).count()
-    all_user_count = pin_user_qs.count()
-
     wl_tenants = (
-        pin_user_qs.filter(tenant_id__isnull=False)
+        CustomUser.objects.filter(tenant_id__isnull=False, role__in=pin_roles, is_active=True)
         .values_list('tenant_id', 'tenant__name')
         .distinct()
         .order_by('tenant__name')
     )
+    wl_user_count = CustomUser.objects.filter(
+        tenant_id__isnull=False, role__in=pin_roles, is_active=True
+    ).count()
 
     selected_user = None
     if user_id:
@@ -450,8 +448,6 @@ def update_pin(request, user_id=None):
         'search_query': search_query,
         'wl_tenants': wl_tenants,
         'wl_user_count': wl_user_count,
-        'platform_user_count': platform_user_count,
-        'all_user_count': all_user_count,
     })
 
 
