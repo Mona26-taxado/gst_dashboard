@@ -125,9 +125,10 @@
             border-radius: 50%;
             background: linear-gradient(135deg, var(--wl-primary), var(--wl-secondary));
             display: grid; place-items: center;
-            font-weight: 700; font-size: 0.95rem;
             flex-shrink: 0;
+            color: #fff;
         }
+        .wl-user-avatar i { font-size: 1.45rem; line-height: 1; }
         .wl-user-name { font-size: 0.88rem; font-weight: 600; color: #f1f5f9; }
         .wl-user-role { font-size: 0.72rem; color: #64748b; margin-top: 1px; }
 
@@ -431,7 +432,7 @@
             </nav>
 
             <div class="wl-user-card">
-                <div class="wl-user-avatar">{{ request.user.full_name|slice:":1"|upper }}</div>
+                <div class="wl-user-avatar"><i class="mdi mdi-account-circle"></i></div>
                 <div>
                     <div class="wl-user-name">{{ request.user.full_name }}</div>
                     <div class="wl-user-role">White Label Admin</div>

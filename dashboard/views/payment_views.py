@@ -99,60 +99,23 @@ def initiate_upi_payment(request):
     if request.method == 'POST':
         amount = request.POST.get('amount')
         plan_id = request.POST.get('plan_id')
-        
-        # Get UPI ID from QRCodeSettings
-        from dashboard.models import QRCodeSettings
-        qr_settings = QRCodeSettings.objects.first()
-        
-        if qr_settings and qr_settings.upi_id:
-            upi_id = qr_settings.upi_id
-        else:
-            upi_id = "9336323478@okbizaxis"  # Default fallback
-        
-        merchant_name = "Grahak Sahaayata Kendra"
-        transaction_note = f"Recharge Plan {plan_id}"
-        
-        # Format amount to have 2 decimal places
-        formatted_amount = f"{float(amount):.2f}"
-        
-        # Create UPI link with proper encoding
-        upi_link = (
-            f"upi://pay?pa={upi_id}"
-            f"&pn={merchant_name}"
-            f"&am={formatted_amount}"
-            f"&tn={transaction_note}"
-            f"&cu=INR"
+
+        from dashboard.utils import build_wallet_qr_display
+
+        qr_display = build_wallet_qr_display(
+            request.user,
+            amount=amount,
+            plan_id=plan_id,
         )
-        
-        # Check if admin has uploaded a custom QR code
-        if qr_settings and qr_settings.qr_code_image:
-            # Use admin's uploaded QR code - convert to base64
-            from PIL import Image
-            
-            # Read the uploaded QR image
-            qr_image = Image.open(qr_settings.qr_code_image)
-            buffer = BytesIO()
-            qr_image.save(buffer, format="PNG")
-            qr_code_base64 = base64.b64encode(buffer.getvalue()).decode()
-        else:
-            # Generate QR code dynamically with updated UPI ID
-            qr = qrcode.QRCode(version=1, box_size=10, border=5)
-            qr.add_data(upi_link)
-            qr.make(fit=True)
-            qr_image = qr.make_image(fill_color="black", back_color="white")
-            
-            # Convert QR code to base64 string
-            buffer = BytesIO()
-            qr_image.save(buffer, format="PNG")
-            qr_code_base64 = base64.b64encode(buffer.getvalue()).decode()
-        
+
         context = {
             'amount': amount,
             'plan_id': plan_id,
-            'qr_code': qr_code_base64,
-            'upi_link': upi_link
+            'qr_code': qr_display['qr_code'],
+            'upi_link': qr_display['upi_link'],
+            'qr_scope': qr_display.get('scope'),
         }
-        
+
         return render(
             request,
             wl_template_for(
@@ -162,5 +125,5 @@ def initiate_upi_payment(request):
             ),
             context,
         )
-    
+
     return redirect('recharge_plans') 

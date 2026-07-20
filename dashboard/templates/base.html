@@ -28,6 +28,7 @@
         var root = document.documentElement;
         var theme = localStorage.getItem('wl-theme') || 'dark';
         root.setAttribute('data-wl-theme', theme);
+        root.setAttribute('data-wl-mode', theme === 'light' ? 'light' : 'dark');
         var primary = root.getAttribute('data-wl-primary');
         var secondary = root.getAttribute('data-wl-secondary');
         if (primary) root.style.setProperty('--wl-primary', primary);

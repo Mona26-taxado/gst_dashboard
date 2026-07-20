@@ -17,16 +17,20 @@ AGREEMENT_REQUIRED_ROLES = frozenset(
 
 
 def user_has_signed_current_agreement(user):
-    from dashboard.agreement_content import AGREEMENT_VERSION
+    from dashboard.agreement_content import get_agreement_version, is_wl_agreement_user
     from dashboard.models import AgreementAcceptance
 
+    version = get_agreement_version(user)
     if AgreementAcceptance.objects.filter(
-        user=user, agreement_version=AGREEMENT_VERSION
+        user=user, agreement_version=version
     ).exists():
         return True
 
-    # Grandfather logic: if enabled, users who signed any previous agreement
-    # version are exempt from re-signing the latest version.
+    # WL tenant users must sign the WL agreement track — platform signatures do not count.
+    if is_wl_agreement_user(user):
+        return False
+
+    # Platform users: grandfather prior signatures when enabled.
     if getattr(settings, "AGREEMENT_GRANDFATHER_SIGNED_USERS", True):
         return AgreementAcceptance.objects.filter(user=user).exists()
 

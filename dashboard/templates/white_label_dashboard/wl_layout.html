@@ -17,6 +17,7 @@
     (function () {
         var theme = localStorage.getItem('wl-theme') || 'dark';
         document.documentElement.setAttribute('data-wl-theme', theme);
+        document.documentElement.setAttribute('data-wl-mode', theme === 'light' ? 'light' : 'dark');
     })();
     </script>
     {% if tenant and tenant.primary_color or tenant and tenant.secondary_color %}

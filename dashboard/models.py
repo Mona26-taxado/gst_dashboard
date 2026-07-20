@@ -38,6 +38,18 @@ class WhiteLabelTenant(models.Model):
     favicon = models.ImageField(upload_to="white_label/favicons/", null=True, blank=True)
     primary_color = models.CharField(max_length=20, default="#0d9488")
     secondary_color = models.CharField(max_length=20, default="#0ea5e9")
+    wallet_upi_id = models.CharField(
+        max_length=100,
+        blank=True,
+        default="",
+        help_text="UPI ID for wallet recharge of this white-label network",
+    )
+    wallet_qr_code = models.ImageField(
+        upload_to="white_label/wallet_qr/",
+        null=True,
+        blank=True,
+        help_text="QR code image for wallet recharge of this white-label network",
+    )
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

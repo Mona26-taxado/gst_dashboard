@@ -30,9 +30,36 @@
         <span>Current balance: <strong>₹{{ wallet_balance }}</strong></span>
     </div>
 
+    {% if user.role == 'white_label_admin' %}
+    <div class="wl-saas-card" style="margin-bottom:20px;background:rgba(148,163,184,.06);">
+        <h2 style="font-size:1rem;margin:0 0 8px;">Network Wallet QR Settings</h2>
+        <p style="margin:0 0 16px;color:var(--wl-text-muted);font-size:.88rem;line-height:1.5;">
+            Set your UPI ID and QR here. All users created under your white label will recharge wallet on this QR — not the platform admin QR.
+        </p>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="wl-saas-form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                <div class="wl-saas-form-group">
+                    <label class="wl-saas-label" for="wallet_upi_id">UPI ID</label>
+                    <input type="text" class="wl-saas-input" id="wallet_upi_id" name="wallet_upi_id" value="{{ wallet_upi_id|default:'' }}" placeholder="example@upi">
+                </div>
+                <div class="wl-saas-form-group">
+                    <label class="wl-saas-label" for="wallet_qr_code">Wallet QR Image</label>
+                    <input type="file" class="wl-saas-input" id="wallet_qr_code" name="wallet_qr_code" accept="image/*">
+                    {% if has_wallet_qr %}<small style="color:var(--wl-success);">Custom QR uploaded</small>{% endif %}
+                </div>
+            </div>
+            <button type="submit" class="wl-saas-btn wl-saas-btn-primary">Save Wallet QR</button>
+        </form>
+    </div>
+    {% endif %}
+
     <div class="wl-qr-recharge">
         <h2>{{ user_name }}</h2>
-        <p class="wl-qr-hint">Scan the QR code below to recharge your wallet via UPI</p>
+        <p class="wl-qr-hint">
+            Scan the QR code below to recharge your wallet via UPI
+            {% if qr_scope == 'white_label' %}<br><small>(White Label network QR)</small>{% endif %}
+        </p>
         <div class="wl-qr-image">
             <img src="{{ qr_code_src }}" alt="Wallet recharge QR code">
         </div>
