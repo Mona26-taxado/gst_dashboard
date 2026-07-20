@@ -4,12 +4,10 @@
 {% block content %}
 
 <style>
-    
     .breadcrumb-item a {
         color: #63b3ed;
         text-decoration: none;
     }
-    
     .breadcrumb-item.active {
         color: #a0aec0;
     }
@@ -17,12 +15,56 @@
         display: flex;
         justify-content: space-between;
     }
-    
     .mt-10, .my-5 {
         margin-top: 5rem !important;
     }
-    
-    </style>
+    .additional-services-grid .additional-service-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        height: 100%;
+        padding: 12px 8px;
+        text-decoration: none;
+        color: inherit;
+    }
+    .additional-services-grid .additional-service-card:hover {
+        text-decoration: none;
+        color: inherit;
+    }
+    .additional-services-grid .additional-service-logo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        min-height: 88px;
+        margin-bottom: 8px;
+        padding: 8px;
+        border-radius: 10px;
+        background: #fff;
+    }
+    .additional-services-grid .additional-service-logo img {
+        max-width: 100%;
+        max-height: 72px;
+        object-fit: contain;
+    }
+    .additional-services-grid .additional-service-card h5 {
+        font-size: .9rem;
+        font-weight: 600;
+        margin: 0;
+        text-align: center;
+    }
+    @media (max-width: 576px) {
+        .additional-services-grid .additional-service-logo {
+            min-height: 72px;
+        }
+        .additional-services-grid .additional-service-logo img {
+            max-height: 56px;
+        }
+        .additional-services-grid .additional-service-card h5 {
+            font-size: .8rem;
+        }
+    }
+</style>
 
 <div class="container mt-10">
     <div class="d-flex justify-content-between align-items-center">
