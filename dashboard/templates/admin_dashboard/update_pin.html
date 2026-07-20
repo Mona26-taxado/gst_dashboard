@@ -83,11 +83,16 @@
     </div>
 
     <div class="card-body">
+        <div class="alert alert-info py-2 mb-3">
+            Platform Admin yahan se <strong>White Label (WL)</strong> aur <strong>Platform (GSK)</strong> dono users ka
+            <strong>Additional Services PIN</strong> update kar sakta hai — wahi PIN jo WL dashboard par Additional Services kholne ke liye use hota hai.
+        </div>
+
         <div class="pin-filter-bar">
             <span style="font-size:.85rem;opacity:.85;">Show:</span>
-            <a href="{% url 'update_pin' %}?scope=all{% if search_query %}&search={{ search_query|urlencode }}{% endif %}{% if tenant_filter %}&tenant={{ tenant_filter }}{% endif %}" class="{% if scope == 'all' %}active{% endif %}">All users</a>
-            <a href="{% url 'update_pin' %}?scope=platform{% if search_query %}&search={{ search_query|urlencode }}{% endif %}" class="{% if scope == 'platform' %}active{% endif %}">Platform (GSK)</a>
-            <a href="{% url 'update_pin' %}?scope=wl{% if search_query %}&search={{ search_query|urlencode }}{% endif %}{% if tenant_filter %}&tenant={{ tenant_filter }}{% endif %}" class="{% if scope == 'wl' %}active{% endif %}">White Label only</a>
+            <a href="{% url 'update_pin' %}?scope=all{% if search_query %}&search={{ search_query|urlencode }}{% endif %}{% if tenant_filter %}&tenant={{ tenant_filter }}{% endif %}" class="{% if scope == 'all' %}active{% endif %}">All users ({{ all_user_count }})</a>
+            <a href="{% url 'update_pin' %}?scope=platform{% if search_query %}&search={{ search_query|urlencode }}{% endif %}" class="{% if scope == 'platform' %}active{% endif %}">Platform / GSK ({{ platform_user_count }})</a>
+            <a href="{% url 'update_pin' %}?scope=wl{% if search_query %}&search={{ search_query|urlencode }}{% endif %}{% if tenant_filter %}&tenant={{ tenant_filter }}{% endif %}" class="{% if scope == 'wl' %}active{% endif %}">White Label only ({{ wl_user_count }})</a>
         </div>
 
         <form method="get" class="pin-search-box">

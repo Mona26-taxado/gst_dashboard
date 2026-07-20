@@ -396,8 +396,13 @@ def update_pin(request, user_id=None):
             | Q(tenant__name__icontains=search_query)
         )
 
+    pin_user_qs = CustomUser.objects.filter(role__in=pin_roles, is_active=True)
+    wl_user_count = pin_user_qs.filter(tenant_id__isnull=False).count()
+    platform_user_count = pin_user_qs.filter(tenant_id__isnull=True).count()
+    all_user_count = pin_user_qs.count()
+
     wl_tenants = (
-        CustomUser.objects.filter(tenant_id__isnull=False, role__in=pin_roles, is_active=True)
+        pin_user_qs.filter(tenant_id__isnull=False)
         .values_list('tenant_id', 'tenant__name')
         .distinct()
         .order_by('tenant__name')
@@ -444,6 +449,9 @@ def update_pin(request, user_id=None):
         'tenant_filter': tenant_filter,
         'search_query': search_query,
         'wl_tenants': wl_tenants,
+        'wl_user_count': wl_user_count,
+        'platform_user_count': platform_user_count,
+        'all_user_count': all_user_count,
     })
 
 
