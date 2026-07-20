@@ -80,13 +80,17 @@ body {
 }
 
 .wl-login-brand img {
-  width: 72px; height: 72px; object-fit: contain;
+  width: auto;
+  height: auto;
+  max-width: 180px;
+  max-height: 96px;
+  object-fit: contain;
   border-radius: 12px; background: transparent;
   padding: 0; margin-bottom: 16px;
 }
 
 .wl-brand-mark {
-  width: 72px; height: 72px; border-radius: 12px;
+  width: 88px; height: 88px; border-radius: 12px;
   background: var(--wl-primary); color: #fff;
   display: grid; place-items: center; font-size: 1.75rem; font-weight: 700;
   margin-bottom: 16px;
