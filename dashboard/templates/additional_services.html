@@ -18,14 +18,27 @@
     .mt-10, .my-5 {
         margin-top: 5rem !important;
     }
+    .additional-services-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+    @media (min-width: 640px) {
+        .additional-services-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    @media (min-width: 1024px) {
+        .additional-services-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    }
     .additional-services-grid .additional-service-card {
         display: flex;
         flex-direction: column;
         align-items: center;
-        height: 100%;
         padding: 12px 8px;
+        border-radius: 12px;
+        border: 1px solid rgba(148, 163, 184, 0.2);
         text-decoration: none;
         color: inherit;
+        background: rgba(255, 255, 255, 0.04);
     }
     .additional-services-grid .additional-service-card:hover {
         text-decoration: none;
@@ -36,7 +49,7 @@
         align-items: center;
         justify-content: center;
         width: 100%;
-        min-height: 88px;
+        min-height: 80px;
         margin-bottom: 8px;
         padding: 8px;
         border-radius: 10px;
@@ -44,25 +57,14 @@
     }
     .additional-services-grid .additional-service-logo img {
         max-width: 100%;
-        max-height: 72px;
+        max-height: 64px;
         object-fit: contain;
     }
     .additional-services-grid .additional-service-card h5 {
-        font-size: .9rem;
+        font-size: .85rem;
         font-weight: 600;
         margin: 0;
         text-align: center;
-    }
-    @media (max-width: 576px) {
-        .additional-services-grid .additional-service-logo {
-            min-height: 72px;
-        }
-        .additional-services-grid .additional-service-logo img {
-            max-height: 56px;
-        }
-        .additional-services-grid .additional-service-card h5 {
-            font-size: .8rem;
-        }
     }
 </style>
 

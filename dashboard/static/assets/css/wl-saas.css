@@ -1784,39 +1784,49 @@ html[data-wl-theme="black"] .wl-legacy-content .btn-success {
   color: #fff !important;
 }
 
-/* Additional Services — responsive grid */
+/* Additional Services — responsive grid (no Bootstrap dependency) */
 .wl-additional-grid {
   padding: 20px;
   overflow: hidden;
 }
 
-.wl-additional-grid .additional-services-grid {
+.wl-additional-grid .additional-services-grid,
+.additional-services-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
   width: 100%;
 }
 
-.wl-additional-grid .additional-services-row {
-  margin-left: -8px;
-  margin-right: -8px;
+@media (min-width: 640px) {
+  .wl-additional-grid .additional-services-grid,
+  .additional-services-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+  }
 }
 
-.wl-additional-grid .additional-service-item {
-  padding: 8px;
-  margin-bottom: 4px;
+@media (min-width: 1024px) {
+  .wl-additional-grid .additional-services-grid,
+  .additional-services-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+  }
 }
 
-.wl-additional-grid .additional-service-card {
+.wl-additional-grid .additional-service-card,
+.additional-services-grid .additional-service-card {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  height: 100%;
   min-height: 148px;
   padding: 14px 10px;
   border-radius: 14px;
-  border: 1px solid var(--wl-border);
+  border: 1px solid var(--wl-border, rgba(148, 163, 184, 0.2));
   background: rgba(15, 23, 42, 0.25);
   text-decoration: none;
-  color: var(--wl-text);
+  color: var(--wl-text, inherit);
   transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
 }
 
@@ -1825,37 +1835,41 @@ html[data-wl-mode="light"] .wl-additional-grid .additional-service-card {
   background: #fff;
 }
 
-.wl-additional-grid .additional-service-card:hover {
+.wl-additional-grid .additional-service-card:hover,
+.additional-services-grid .additional-service-card:hover {
   transform: translateY(-2px);
   border-color: rgba(37, 99, 235, 0.35);
-  background: var(--wl-card-hover);
-  box-shadow: var(--wl-shadow);
+  background: var(--wl-card-hover, rgba(255, 255, 255, 0.06));
+  box-shadow: var(--wl-shadow, 0 4px 16px rgba(0, 0, 0, 0.12));
   text-decoration: none;
-  color: var(--wl-text);
+  color: var(--wl-text, inherit);
 }
 
-.wl-additional-grid .additional-service-logo {
+.wl-additional-grid .additional-service-logo,
+.additional-services-grid .additional-service-logo {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
-  min-height: 88px;
+  min-height: 80px;
   margin-bottom: 10px;
   padding: 8px;
   border-radius: 12px;
   background: #fff;
 }
 
-.wl-additional-grid .additional-service-logo img {
+.wl-additional-grid .additional-service-logo img,
+.additional-services-grid .additional-service-logo img {
   display: block;
   width: auto;
   max-width: 100%;
   height: auto;
-  max-height: 72px;
+  max-height: 64px;
   object-fit: contain;
 }
 
-.wl-additional-grid .additional-service-card h5 {
+.wl-additional-grid .additional-service-card h5,
+.additional-services-grid .additional-service-card h5 {
   margin: 0;
   font-size: 0.82rem;
   font-weight: 600;
@@ -1888,27 +1902,17 @@ html[data-wl-mode="light"] .wl-additional-grid .additional-service-card {
     padding: 14px 10px;
   }
 
-  .wl-additional-grid .additional-services-row {
-    margin-left: -6px;
-    margin-right: -6px;
-  }
-
-  .wl-additional-grid .additional-service-item {
-    padding: 6px;
-  }
-
   .wl-additional-grid .additional-service-card {
-    min-height: 132px;
+    min-height: 128px;
     padding: 12px 8px;
   }
 
   .wl-additional-grid .additional-service-logo {
-    min-height: 72px;
-    padding: 6px;
+    min-height: 68px;
   }
 
   .wl-additional-grid .additional-service-logo img {
-    max-height: 58px;
+    max-height: 52px;
   }
 
   .wl-additional-grid .additional-service-card h5 {
@@ -1925,16 +1929,20 @@ html[data-wl-mode="light"] .wl-additional-grid .additional-service-card {
 }
 
 @media (max-width: 420px) {
+  .wl-additional-grid .additional-services-grid {
+    gap: 10px;
+  }
+
   .wl-additional-grid .additional-service-card {
     min-height: 118px;
   }
 
   .wl-additional-grid .additional-service-logo {
-    min-height: 64px;
+    min-height: 60px;
   }
 
   .wl-additional-grid .additional-service-logo img {
-    max-height: 50px;
+    max-height: 46px;
   }
 }
 
