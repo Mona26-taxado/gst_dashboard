@@ -108,7 +108,8 @@ urlpatterns = [
 
     
 
-    path('dashboard/update-pin/<int:user_id>/', update_pin, name='update_pin'),
+    path('dashboard/update-pin/', update_pin, name='update_pin'),
+    path('dashboard/update-pin/<int:user_id>/', update_pin, name='update_pin_user'),
 
 
 

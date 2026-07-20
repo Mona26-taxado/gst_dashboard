@@ -2,84 +2,186 @@
 
 {% block content %}
 
-
-
 <style>
-    
     .breadcrumb-item a {
         color: #63b3ed;
         text-decoration: none;
     }
-    
     .breadcrumb-item.active {
         color: #a0aec0;
     }
-    .card-header.text-white {
-        display: flex;
-        justify-content: space-between;
-    }
-    
     .mt-10, .my-5 {
         margin-top: 5rem !important;
     }
-    
-    </style>
+    .pin-filter-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 18px;
+        align-items: center;
+    }
+    .pin-filter-bar a {
+        padding: 6px 14px;
+        border-radius: 999px;
+        border: 1px solid rgba(148,163,184,.35);
+        text-decoration: none;
+        font-size: .85rem;
+    }
+    .pin-filter-bar a.active {
+        background: #2563eb;
+        border-color: #2563eb;
+        color: #fff;
+    }
+    .pin-tenant-badge {
+        display: inline-block;
+        font-size: .72rem;
+        padding: 2px 8px;
+        border-radius: 999px;
+        background: rgba(37,99,235,.15);
+        color: #93c5fd;
+        margin-left: 6px;
+    }
+    .pin-tenant-badge.platform {
+        background: rgba(148,163,184,.15);
+        color: #cbd5e1;
+    }
+    .pin-search-box {
+        background: rgba(15,23,42,.35);
+        border: 1px solid rgba(148,163,184,.25);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 18px;
+    }
+    .pin-search-box .form-control {
+        min-width: 220px;
+    }
+    .pin-search-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: flex-end;
+    }
+    .pin-search-field label {
+        font-size: .85rem;
+        margin-bottom: 4px;
+        display: block;
+    }
+    .pin-search-field.flex-grow {
+        flex: 1 1 260px;
+    }
+</style>
 
 <div class="container mt-10">
-    <div class="d-flex justify-content-between align-items-center">
-        <h2 class="card-titles mb-2">Update User PIN</h2>
+    <div class="d-flex justify-content-between align-items-center flex-wrap">
+        <h2 class="card-titles mb-2">Update User PIN (Additional Services)</h2>
         <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
+            <ol class="breadcrumb mb-0">
                 <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
                 <li class="breadcrumb-item active" aria-current="page">Update Pin</li>
             </ol>
         </nav>
     </div>
+
     <div class="card-body">
+        <div class="pin-filter-bar">
+            <span style="font-size:.85rem;opacity:.85;">Show:</span>
+            <a href="{% url 'update_pin' %}?scope=all{% if search_query %}&search={{ search_query|urlencode }}{% endif %}{% if tenant_filter %}&tenant={{ tenant_filter }}{% endif %}" class="{% if scope == 'all' %}active{% endif %}">All users</a>
+            <a href="{% url 'update_pin' %}?scope=platform{% if search_query %}&search={{ search_query|urlencode }}{% endif %}" class="{% if scope == 'platform' %}active{% endif %}">Platform (GSK)</a>
+            <a href="{% url 'update_pin' %}?scope=wl{% if search_query %}&search={{ search_query|urlencode }}{% endif %}{% if tenant_filter %}&tenant={{ tenant_filter }}{% endif %}" class="{% if scope == 'wl' %}active{% endif %}">White Label only</a>
+        </div>
 
-     <!-- Error Message -->
-     {% if error %}
-     <div class="alert alert-danger">{{ error }}</div>
-   {% endif %}
+        <form method="get" class="pin-search-box">
+            <input type="hidden" name="scope" value="{{ scope }}">
+            <div class="pin-search-row">
+                <div class="pin-search-field flex-grow">
+                    <label for="search">Search by name or email</label>
+                    <input
+                        type="search"
+                        name="search"
+                        id="search"
+                        class="form-control"
+                        value="{{ search_query }}"
+                        placeholder="Type name, email, mobile, or WL tenant..."
+                        autocomplete="off"
+                    >
+                </div>
+                {% if wl_tenants %}
+                <div class="pin-search-field">
+                    <label for="tenant">WL tenant</label>
+                    <select name="tenant" id="tenant" class="form-control">
+                        <option value="">All WL tenants</option>
+                        {% for tid, tname in wl_tenants %}
+                        <option value="{{ tid }}" {% if tenant_filter == tid|stringformat:'s' %}selected{% endif %}>{{ tname }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+                <div class="pin-search-field">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                    {% if search_query or tenant_filter %}
+                    <a href="{% url 'update_pin' %}?scope={{ scope }}" class="btn btn-outline-secondary ml-1">Clear</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% if search_query %}
+            <small class="text-muted d-block mt-2">Showing results for: <strong>{{ search_query }}</strong></small>
+            {% endif %}
+        </form>
 
-   <!-- Update PIN Form -->
-   <form method="POST">
-    {% csrf_token %}
-    <div class="form-group">
-        <label for="user_id">Select User</label>
-        <select name="user_id" class="form-control" onchange="location = this.value;">
-            <option value="">-- Select User --</option>
-            {% for user in users %}
-            <option value="{% url 'update_pin' user.id %}" {% if selected_user and user.id == selected_user.id %}selected{% endif %}>
-                {{ user.full_name }} ({{ user.email }})
-            </option>
-            {% endfor %}
-        </select>
-    </div>
-    {% if selected_user %}
-    <div class="form-group">
-        <label for="pin">Enter 4-digit PIN</label>
-        <input type="text" name="pin" class="form-control" minlength="4" maxlength="4" required>
-    </div>
-    <button type="submit" class="btn btn-primary">Update PIN</button>
-    {% endif %}
-</form>
+        <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="scope" value="{{ scope }}">
+            <input type="hidden" name="tenant" value="{{ tenant_filter }}">
+            <input type="hidden" name="search" value="{{ search_query }}">
+            <div class="form-group">
+                <label for="user_id">Select user</label>
+                <select name="user_id" id="user_id" class="form-control" onchange="if (this.value) location = this.value;">
+                    <option value="">— Select user —</option>
+                    {% for u in users %}
+                    <option value="{% url 'update_pin_user' u.id %}?scope={{ scope }}&tenant={{ tenant_filter }}&search={{ search_query|urlencode }}" {% if selected_user and u.id == selected_user.id %}selected{% endif %}>
+                        {{ u.full_name }} ({{ u.role }}) — {{ u.email }}{% if u.tenant %} [WL: {{ u.tenant.name }}]{% else %} [Platform]{% endif %}
+                    </option>
+                    {% empty %}
+                    <option value="" disabled>No users found for this search</option>
+                    {% endfor %}
+                </select>
+                <small class="text-muted d-block mt-2">{{ users|length }} user(s) in list</small>
+            </div>
 
+            {% if selected_user %}
+            <div class="alert alert-info py-2">
+                Updating PIN for <strong>{{ selected_user.full_name }}</strong>
+                {% if selected_user.tenant %}
+                <span class="pin-tenant-badge">WL: {{ selected_user.tenant.name }}</span>
+                {% else %}
+                <span class="pin-tenant-badge platform">Platform</span>
+                {% endif %}
+                {% if selected_user.pin %}
+                <span class="d-block small mt-1">Current PIN is set (hidden). Enter a new 4-digit PIN below to replace it.</span>
+                {% else %}
+                <span class="d-block small mt-1">No PIN set yet for this user.</span>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                <label for="pin">Enter 4-digit PIN</label>
+                <input type="text" name="pin" id="pin" class="form-control" minlength="4" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" placeholder="e.g. 1234" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Update PIN</button>
+            {% endif %}
+        </form>
     </div>
 </div>
 
-<!-- Include Select2 CSS and JS -->
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/js/select2.min.js"></script>
-
 <script>
   $(document).ready(function() {
     $('#user_id').select2({
-      placeholder: "Select a User",
-      allowClear: true
+      placeholder: "Search in list by name, email, or tenant",
+      allowClear: true,
+      width: '100%'
     });
   });
 </script>
 
 {% endblock %}
-

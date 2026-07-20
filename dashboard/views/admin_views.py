@@ -1,4 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.urls import reverse
+from urllib.parse import urlencode
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http import HttpResponseForbidden
@@ -365,33 +367,83 @@ def view_notifications(request):
 
 
 @login_required
+@role_required(['admin'])
 def update_pin(request, user_id=None):
-    # Restrict to admin users
-    if not request.user.is_superuser:
-        messages.error(request, "You are not authorized to access this page.")
-        return redirect('admin_dashboard')
+    pin_roles = ['retailer', 'distributor', 'master_distributor']
+    scope = (request.GET.get('scope') or 'all').strip().lower()
+    tenant_filter = request.GET.get('tenant', '').strip()
+    search_query = (request.GET.get('search') or '').strip()
 
-    # Fetch only users applicable for the PIN update
-    users = CustomUser.objects.filter(role__in=['retailer', 'distributor', 'master_distributor'])
+    users = (
+        CustomUser.objects.filter(role__in=pin_roles, is_active=True)
+        .select_related('tenant')
+        .order_by('tenant__name', 'full_name')
+    )
+
+    if scope == 'wl':
+        users = users.filter(tenant_id__isnull=False)
+    elif scope == 'platform':
+        users = users.filter(tenant_id__isnull=True)
+
+    if tenant_filter.isdigit():
+        users = users.filter(tenant_id=int(tenant_filter))
+
+    if search_query:
+        users = users.filter(
+            Q(full_name__icontains=search_query)
+            | Q(email__icontains=search_query)
+            | Q(mobile_number__icontains=search_query)
+            | Q(tenant__name__icontains=search_query)
+        )
+
+    wl_tenants = (
+        CustomUser.objects.filter(tenant_id__isnull=False, role__in=pin_roles, is_active=True)
+        .values_list('tenant_id', 'tenant__name')
+        .distinct()
+        .order_by('tenant__name')
+    )
+
     selected_user = None
-
     if user_id:
-        selected_user = get_object_or_404(CustomUser, id=user_id)
+        selected_user = get_object_or_404(
+            CustomUser.objects.select_related('tenant'),
+            id=user_id,
+            role__in=pin_roles,
+        )
 
-    # Handle POST request to update PIN
     if request.method == 'POST' and selected_user:
-        new_pin = request.POST.get('pin')
-        if new_pin and len(new_pin) == 4:  # Validate that PIN is a 4-digit number
+        new_pin = (request.POST.get('pin') or '').strip()
+        if new_pin and len(new_pin) == 4 and new_pin.isdigit():
             selected_user.pin = new_pin
-            selected_user.save()
-            messages.success(request, f'PIN updated successfully for {selected_user.full_name}.')
-            return redirect('admin_dashboard')  # Redirect back to admin dashboard
-        else:
-            messages.error(request, 'Invalid PIN. Please enter a 4-digit PIN.')
+            selected_user.save(update_fields=['pin'])
+            tenant_label = selected_user.tenant.name if selected_user.tenant_id else 'Platform'
+            messages.success(
+                request,
+                f'PIN updated for {selected_user.full_name} ({tenant_label}).',
+            )
+            redirect_url = reverse('update_pin_user', kwargs={'user_id': selected_user.id})
+            params = {}
+            post_scope = (request.POST.get('scope') or scope).strip()
+            post_tenant = (request.POST.get('tenant') or tenant_filter).strip()
+            post_search = (request.POST.get('search') or search_query).strip()
+            if post_scope and post_scope != 'all':
+                params['scope'] = post_scope
+            if post_tenant:
+                params['tenant'] = post_tenant
+            if post_search:
+                params['search'] = post_search
+            if params:
+                redirect_url = f'{redirect_url}?{urlencode(params)}'
+            return redirect(redirect_url)
+        messages.error(request, 'Invalid PIN. Please enter a 4-digit numeric PIN.')
 
     return render(request, 'admin_dashboard/update_pin.html', {
         'users': users,
         'selected_user': selected_user,
+        'scope': scope,
+        'tenant_filter': tenant_filter,
+        'search_query': search_query,
+        'wl_tenants': wl_tenants,
     })
 
 
